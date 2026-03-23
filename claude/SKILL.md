@@ -340,14 +340,74 @@ When creating tickets from Invicti or other security scan reports:
 
 | Role | Name / Email | Notes |
 |------|-------------|-------|
-| Senior Technical PM | — | Owns this Claude project; manages ICDC and CTDC |
-| Dev Lead | ambar.rana@nih.gov | Primary engineering contact for ICDC |
-| Engineering Team | — | React + Spring Boot developers building CRDC UIs |
+| Senior Technical PM | gina.kuffel@nih.gov | Primary contact for ICDC and CTDC. Reporter on most epics. |
+| Dev Lead | ambar.rana@nih.gov | Primary engineering contact for ICDC. Epic owner. |
+| QA Engineer / SDET | valentina.epishina@nih.gov | Software Developer in Test — handles QA validation, not feature development |
 | Stakeholders | — | NCI leadership, data submitters, COP research community |
 
 ---
 
-## 10. Maintenance Notes
+## 10. Claude Knowledge Base — Reference Library
+
+> ⚠️ **Fetch-on-demand only. Do NOT auto-fetch these files at the start of every session.**
+>
+> Loading all files upfront consumes context window space before any real work begins.
+> Instead, fetch the relevant file(s) only when a task genuinely requires that context.
+> See the fetch strategy guide below.
+
+The `claude/` folder in this repo is a structured knowledge base that complements live Jira data. It stores things Jira cannot: decisions, rationale, team conventions, and epic-level briefings optimized for Claude to read quickly.
+
+### Folder Structure
+
+```
+claude/
+  SKILL.md                          ← This file. SOPs, JQL, Jira quirks, doc standards.
+  epics/
+    ICDC-XXXX.md                    ← One file per epic. Claude-optimized briefing.
+  decisions/
+    sprint-43-scope.md              ← Rationale for Sprint 43 security sprint scope.
+    *.md                            ← Other scope, architecture, and process decisions.
+  conventions/
+    workflow.md                     ← Team conventions Claude applies automatically.
+```
+
+### Current Files
+
+| File | When to Fetch |
+|------|--------------|
+| `claude/epics/ICDC-4120.md` | Starting work on the Invicti security remediation epic |
+| `claude/decisions/sprint-43-scope.md` | Questions arise about why CSP/SRI were deferred, or Sprint 43 scope |
+| `claude/conventions/workflow.md` | Onboarding a new session, or when a workflow question comes up (e.g., PR strategy, SDL, role clarification) |
+
+### Fetch Strategy by Session Type
+
+| Session Type | Fetch These Files |
+|---|---|
+| Epic-specific work (tickets, updates, doc generation) | `claude/epics/ICDC-XXXX.md` for that epic |
+| Sprint planning or retrospective | `claude/conventions/workflow.md` |
+| New session after a long gap | `claude/conventions/workflow.md` |
+| Scope or deferral question | `claude/decisions/` — the relevant decision file |
+| Quick one-off ticket work | No fetch needed — pull live from Jira |
+
+### How to Add New Files
+
+- **New epic created?** Generate `claude/epics/ICDC-XXXX.md` alongside the Jira tickets.
+- **Scope or process decision made?** Add a `claude/decisions/YYYY-MM-topic.md` entry.
+- **Team convention changes?** Update `claude/conventions/workflow.md`.
+- **New file added?** Add a row to the "Current Files" table above so it stays discoverable.
+
+### Document Storage Convention
+
+| Artifact Type | Storage Location |
+|---|---|
+| Leadership-facing documents (`.docx`) | ICDC SharePoint |
+| Claude knowledge base (`.md` briefings, decisions, conventions) | This repo under `claude/` |
+
+Both stores are maintained in parallel. SharePoint is for stakeholder access; GitHub is for Claude context and team reference.
+
+---
+
+## 11. Maintenance Notes
 
 - This file lives at `CBIIT/icdc-documentation/claude/SKILL.md`
 - Update JQL recipes when Jira workflow statuses change
@@ -355,3 +415,4 @@ When creating tickets from Invicti or other security scan reports:
 - Update domain context when new repos or major architectural changes occur
 - Review stakeholder doc standards before each major release cycle
 - New SOPs or workflow patterns discovered in Claude conversations should be added here via PR
+- When new files are added to `claude/`, update Section 10 (Knowledge Base) so they remain discoverable
