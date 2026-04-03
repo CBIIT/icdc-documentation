@@ -240,7 +240,7 @@ Session expiry is controlled by `SESSION_TIMEOUT` (default: 30 minutes). The MyS
 
 ### 5.3 NIH / Gen3 Fence OAuth2 Flow
 
-This is the production login path for ICDC users.
+This is the production login path for ICDC users. The exact implementation lives in `services/nih-auth.js`.
 
 ```
 1.  User clicks "Login with NIH"
@@ -248,13 +248,19 @@ This is the production login path for ICDC users.
 3.  User authenticates at NIH (eRA Commons, Login.gov, etc.)
 4.  NIH redirects back to bento-auth callback with authorization code
 5.  bento-auth calls getNIHToken(code, redirectURL)
-        → POST to NIH token endpoint
-        → Returns: { access_token, refresh_token, id_token }
-6.  bento-auth calls nihUserInfo(token)
-        → GET to NIH userinfo endpoint
+        → POST to config.nih.TOKEN_URL
+        → Body (form-urlencoded): code, redirect_uri, grant_type=authorization_code,
+          client_id, client_secret, scope="openid email profile"
+        → ⚠️ Only the access_token is retained from the response.
+          refresh_token and id_token are returned by NIH but discarded here.
+6.  bento-auth calls nihUserInfo(accessToken)
+        → GET to config.nih.USERINFO_URL
+        → Authorization: Bearer <access_token>
         → Returns: { email, first_name, last_name, preferred_username, ... }
-7.  getIDP(preferred_username) determines sub-IDP
-        → e.g., "NIH" vs "LOGIN_GOV" based on username format
+7.  getIDP(email) determines sub-IDP by email domain regex:
+        → email matches /@login\.gov$/i  → LOGIN_GOV
+        → email matches /@nih\.gov$/i    → NIH
+        → neither match                  → throws "Invalid IDP Exception" (hard login failure)
 8.  bento-auth looks up or creates user in Bento backend (GraphQL/Neo4j)
         → Retrieves user's acl array (list of approved data access arms)
 9.  userInfo written to MySQL-backed session:
@@ -263,15 +269,29 @@ This is the production login path for ICDC users.
 11. Subsequent requests to bento-files carry this cookie automatically
 ```
 
+> **⚠️ Known constraint — IDP detection:** `getIDP()` uses email domain regex to classify the sub-IDP. Any user whose NIH-linked profile email does not end in `@nih.gov` or `@login.gov` will trigger a hard exception and be unable to log in. This is a known limitation of the current implementation.
+
+> **⚠️ Token retention:** `getNIHToken()` returns only the `access_token` from the NIH token response. The `refresh_token` and `id_token` are present in the NIH response but are not stored. This means there is no token refresh path — if the access token expires during an active session, re-authentication is required.
+
 ### 5.4 Token Validation on Subsequent Requests
 
-`bento-auth` exposes an `authenticated()` method per IDP that re-validates the stored access token by calling the IDP's userinfo endpoint. If the token has expired, the call fails and the session is considered invalid. For NIH, this calls `nihUserInfo(tokens)` — a live check against the NIH Fence userinfo endpoint.
+`bento-auth` exposes an `authenticated()` method per IDP that re-validates the stored access token by calling the IDP's userinfo endpoint. If the token has expired, the call fails and the session is considered invalid. For NIH, this calls `nihUserInfo(accessToken)` — a live GET against `config.nih.USERINFO_URL` with a Bearer token header.
 
 `bento-files` does not call this directly. It trusts the session established at login time. Token re-validation would occur if `bento-auth` is called again (e.g., on a page refresh that triggers the `AUTH_URL` endpoint).
 
 ### 5.5 Logout
 
-For NIH and Login.gov IDPs, logout calls `nihLogout(tokens)` which revokes the token at the NIH Fence endpoint. Google handles its own logout flow. The MySQL session record is also destroyed.
+`nihLogout(tokens)` revokes the token at the NIH Fence endpoint via:
+
+```
+POST config.nih.LOGOUT_URL
+Authorization: Basic <base64(client_id:client_secret)>
+Body (form-urlencoded): id_token=<tokens>
+```
+
+> **⚠️ Credential mechanism:** Logout uses **HTTP Basic Auth** (client ID + secret encoded as Base64), not a Bearer token. The parameter sent in the body is specifically the `id_token` string — not the full token object. This is standard OAuth2 token revocation via client authentication.
+
+The MySQL session record is also destroyed on logout.
 
 ---
 
@@ -279,14 +299,16 @@ For NIH and Login.gov IDPs, logout calls `nihLogout(tokens)` which revokes the t
 
 | Stage | What Is Exchanged | Where |
 |---|---|---|
-| Login | OAuth2 authorization code → NIH access + refresh tokens | `bento-auth ↔ NIH Fence` |
+| Login | OAuth2 authorization code → NIH access token (only) | `bento-auth ↔ NIH Fence` |
 | User profile fetch | Access token → user profile (name, email, IDP) | `bento-auth → NIH userinfo endpoint` |
+| IDP detection | Email domain regex → `NIH` or `LOGIN_GOV` constant | `bento-auth` internal (`services/nih-auth.js`) |
 | ACL fetch | Authenticated session → user's approved ACL array | `bento-auth → ICDC GraphQL/Neo4j` |
 | Session establishment | userInfo + ACLs → session cookie | `bento-auth → MySQL → browser` |
 | Download request | Session cookie → `userInfo` lookup | `browser → bento-files → MySQL` |
 | File location | Session cookie (forwarded) → `s3://` URI | `bento-files → ICDC GraphQL/Neo4j` |
 | Pre-signed URL | Server IAM role credentials → time-limited signed URL | `bento-files → AWS S3/CloudFront` |
 | File transfer | Pre-signed URL → file bytes | `browser → S3 directly` |
+| Logout | `id_token` + Basic Auth credentials → token revocation | `bento-auth → NIH Fence LOGOUT_URL` |
 
 **Key point:** Fence is only in the critical path at **login time**. Every subsequent download decision is made using the cached session in MySQL. The AWS pre-signed URL is what actually gates the file transfer, and it is generated using the server's IAM role — not user credentials.
 
@@ -315,9 +337,10 @@ For NIH and Login.gov IDPs, logout calls `nihLogout(tokens)` which revokes the t
 | Variable | Purpose |
 |---|---|
 | `AUTH_URL` | NIH/Fence OAuth2 authorization endpoint |
-| `TOKEN_URL` | NIH/Fence token endpoint |
-| `USERINFO_URL` | NIH/Fence userinfo endpoint |
-| `CLIENT_ID` / `CLIENT_SECRET` | OAuth2 client credentials registered with NIH |
+| `TOKEN_URL` | NIH/Fence token endpoint (used in `getNIHToken`) |
+| `USERINFO_URL` | NIH/Fence userinfo endpoint (used in `nihUserInfo`) |
+| `LOGOUT_URL` | NIH/Fence token revocation endpoint (used in `nihLogout`) |
+| `CLIENT_ID` / `CLIENT_SECRET` | OAuth2 client credentials registered with NIH; used in token exchange (body) and logout (Basic Auth) |
 | `SESSION_SECRET` | Cookie signing secret |
 
 ---
@@ -345,7 +368,10 @@ All projects share the same auth middleware, connector, and audit logging infras
 |---|---|
 | **ICDC-1759** (Open) | User story for in-app BAM/VCF file *viewer* — the other half of the original ICDC-1700 vision. Never implemented. |
 | **ICDC-1820** (Open) | QA test ticket for direct file download. Formally untested in Jira despite feature being live since ICDC 3.2.0. |
+| **Token retention** | `getNIHToken()` retains only the `access_token`. The `refresh_token` and `id_token` returned by NIH are discarded. There is no token refresh path — expired tokens require full re-authentication. |
+| **IDP detection hard failure** | `getIDP()` throws an unhandled exception if the user's email does not match `@nih.gov` or `@login.gov`. Users with other email domains linked to their NIH account will receive a hard login failure with no graceful error message. |
 | **Token re-validation timing** | `bento-files` trusts the session at rest; it does not re-validate the NIH access token on every download request. If a token expires between login and download, the session may still appear valid until MySQL TTL expires. |
+| **Logout credential mechanism** | `nihLogout` uses HTTP Basic Auth with `client_id:client_secret` — not a Bearer token. The body parameter is specifically `id_token`, not `access_token`. Confirm the NIH Fence LOGOUT_URL endpoint accepts this format in the current production configuration. |
 | **`URL_EXPIRES_IN_SECONDS` value** | Default is 24 hours. The actual production value for ICDC should be verified — too short risks URL expiry during slow downloads of large files at the 12MB boundary; too long is a security concern. |
 | **`ICDC-1445`** (On Hold) | User story for manifest download from within the Files Cart — still on hold as of last check. |
 
@@ -371,6 +397,7 @@ All projects share the same auth middleware, connector, and audit logging infras
 | `app.js` | `bento-files` | Express app bootstrap; middleware registration order |
 | `idps/index.js` | `bento-auth` | IDP router (NIH, Google, Test) |
 | `idps/nih.js` | `bento-auth` | NIH/Login.gov OAuth2 client; calls `nih-auth` service |
+| `services/nih-auth.js` | `bento-auth` | Core NIH OAuth2 functions: `getNIHToken`, `nihUserInfo`, `nihLogout`, `getIDP` |
 | `config.js` | `bento-auth` | Auth service environment variable mappings |
 
-*Commit reviewed: `CBIIT/bento-files@6b4b40a` — April 2026*
+*Commits reviewed: `CBIIT/bento-files@6b4b40a`, `CBIIT/bento-auth@master` — April 2026*
