@@ -9,7 +9,7 @@ description: "Operational knowledge base for the ICDC Sprint Command Center Clau
 > **Ecosystem:** Cancer Research Data Commons (CRDC)  
 > **Team:** React web application engineers  
 > **Claude Project:** Sprint Command Center  
-> **Last Updated:** 2026-03-23
+> **Last Updated:** 2026-04-06
 
 ---
 
@@ -224,6 +224,47 @@ When asked to produce an epic summary `.docx` for leadership, follow this struct
 
 ---
 
+### 🏛️ Architecture Leadership Documents (`.docx`)
+
+A second category of leadership document exists alongside epic summaries: **architecture leadership overviews**. These are distilled, non-technical `.docx` files that translate technical architecture documents into stakeholder-readable summaries.
+
+**The pattern:**
+- The **source of truth** is a `.md` architecture reference file in `claude/architecture/` in this repo (e.g., `claude/architecture/file-download-and-auth-stack.md`)
+- The **leadership deliverable** is a `.docx` distilled from it, stored in the **ICDC Architecture** folder in SharePoint
+- The two are maintained in parallel — the `.md` evolves with engineering details; the `.docx` is updated when the leadership-facing content materially changes
+- The `.docx` version is **independent** from the `.md` version — start at `v1.0` for the first published `.docx` regardless of what version the source `.md` is at
+
+**Document structure for architecture leadership overviews** (7 sections, in this order):
+
+1. **Purpose** — what this document covers and who it's for
+2. **Background** — what types of data/files exist and how they're accessed (use a table)
+3. **Integration Points** — what NCI/CRDC services are involved and why (explain in plain English; no service internals)
+4. **How It Works** — numbered plain-English step-by-step flow of the end-to-end process
+5. **Access Model** — table summarizing authentication and access control rules
+6. **Audit & Compliance** — what gets recorded per download/event, and any known gaps
+7. **Key Notes for Leadership** — bullet summary of the most important facts for a program officer or CIO
+
+**Naming convention:** `[PROJECT]_[Topic]_LeadershipOverview_v{MAJOR}_{MINOR}.docx`
+- Example: `ICDC_FileDownload_LeadershipOverview_v1_0.docx`
+
+**Versioning:**
+
+| Version Bump | When to Use |
+|---|---|
+| `v1.0` | First published `.docx` for this topic |
+| `vX.(Y+1)` | Minor update — wording, corrections, clarifications |
+| `v(X+1).0` | Major revision — significant new content, structural change, or underlying architecture changed |
+
+> **Never overwrite an existing file.** Always create a new versioned file.
+
+**Storage:** SharePoint → **ICDC Architecture** folder
+
+**Source `.md` location:** `CBIIT/icdc-documentation/claude/architecture/`
+
+**When to update the `.docx`:** When the source `.md` changes in a way that affects leadership-relevant content (e.g., a compliance gap is resolved, an access model changes, a new integration point is added). Purely technical corrections to the `.md` that don't change the leadership narrative do not require a new `.docx`.
+
+---
+
 ## 7. Sprint Reporting Templates
 
 ### Daily Standup Prep Checklist
@@ -362,6 +403,8 @@ The `claude/` folder in this repo is a structured knowledge base that complement
 ```
 claude/
   SKILL.md                          ← This file. SOPs, JQL, Jira quirks, doc standards.
+  architecture/
+    file-download-and-auth-stack.md ← Technical architecture reference (source of truth for leadership .docx)
   epics/
     ICDC-XXXX.md                    ← One file per epic. Claude-optimized briefing.
   decisions/
@@ -375,6 +418,7 @@ claude/
 
 | File | When to Fetch |
 |------|--------------|
+| `claude/architecture/file-download-and-auth-stack.md` | Working on file download architecture, generating or updating the ICDC Architecture leadership `.docx`, or answering technical questions about the download/auth stack |
 | `claude/epics/ICDC-4120.md` | Starting work on the Invicti security remediation epic |
 | `claude/decisions/sprint-43-scope.md` | Questions arise about why CSP/SRI were deferred, or Sprint 43 scope |
 | `claude/conventions/workflow.md` | Onboarding a new session, or when a workflow question comes up (e.g., PR strategy, SDL, role clarification) |
@@ -384,6 +428,7 @@ claude/
 | Session Type | Fetch These Files |
 |---|---|
 | Epic-specific work (tickets, updates, doc generation) | `claude/epics/ICDC-XXXX.md` for that epic |
+| Architecture leadership doc generation or update | `claude/architecture/file-download-and-auth-stack.md` |
 | Sprint planning or retrospective | `claude/conventions/workflow.md` |
 | New session after a long gap | `claude/conventions/workflow.md` |
 | Scope or deferral question | `claude/decisions/` — the relevant decision file |
@@ -394,16 +439,18 @@ claude/
 - **New epic created?** Generate `claude/epics/ICDC-XXXX.md` alongside the Jira tickets.
 - **Scope or process decision made?** Add a `claude/decisions/YYYY-MM-topic.md` entry.
 - **Team convention changes?** Update `claude/conventions/workflow.md`.
+- **New architecture doc added?** Add it under `claude/architecture/` and add a row to the "Current Files" table above.
 - **New file added?** Add a row to the "Current Files" table above so it stays discoverable.
 
 ### Document Storage Convention
 
 | Artifact Type | Storage Location |
 |---|---|
-| Leadership-facing documents (`.docx`) | ICDC SharePoint |
-| Claude knowledge base (`.md` briefings, decisions, conventions) | This repo under `claude/` |
+| Leadership-facing architecture overviews (`.docx`) | SharePoint → **ICDC Architecture** folder |
+| Leadership-facing epic summaries (`.docx`) | SharePoint (ICDC SharePoint) |
+| Claude knowledge base (`.md` briefings, decisions, conventions, architecture) | This repo under `claude/` |
 
-Both stores are maintained in parallel. SharePoint is for stakeholder access; GitHub is for Claude context and team reference.
+All stores are maintained in parallel. SharePoint is for stakeholder access; GitHub is for Claude context and team reference.
 
 ---
 
@@ -416,3 +463,4 @@ Both stores are maintained in parallel. SharePoint is for stakeholder access; Gi
 - Review stakeholder doc standards before each major release cycle
 - New SOPs or workflow patterns discovered in Claude conversations should be added here via PR
 - When new files are added to `claude/`, update Section 10 (Knowledge Base) so they remain discoverable
+- When a new architecture leadership `.docx` is published, update the Document Storage Convention table in Section 10 if applicable
