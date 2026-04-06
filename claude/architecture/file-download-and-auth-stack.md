@@ -14,6 +14,8 @@ This document captures the complete technical architecture governing how ICDC en
 
 The key insight: **ICDC is not a direct client of Gen3 Fence.** It is a client of `bento-auth`, which itself is the Fence OAuth2 client. Fence is not in the hot path of file downloads — it is only involved at login time.
 
+> **Terminology note:** Fence and IndexD are NCI CRDC infrastructure services — they are part of the same Cancer Research Data Commons platform that ICDC belongs to, maintained by NCI/CBIIT. They are not external third-party services.
+
 ---
 
 ## 2. Feature History — When File Download Was Enabled
@@ -98,8 +100,8 @@ React Frontend
     │  OAuth2 Authorization Code Flow
     ▼
 ┌─────────────────────────────────────────────────┐
-│      NIH IAM / Gen3 Fence / Login.gov           │
-│      External Identity Provider                 │
+│      NCI CRDC Fence / NIH IAM / Login.gov       │
+│      CRDC Identity Infrastructure               │
 │      (not in the hot path for downloads)        │
 └─────────────────────────────────────────────────┘
 
@@ -139,7 +141,7 @@ A two-segment variant (`/:prefix/:fileId`) handles files whose storage paths inc
 |---|---|---|
 | `SIGNED_S3` | `S3Connector.js` | AWS SDK v3 pre-signed S3 URLs |
 | `CLOUD_FRONT` | `cloudFrontConnector.js` | AWS CloudFront signed URLs |
-| `INDEXD` | `indexdConnector.js` | Gen3 IndexD service |
+| `INDEXD` | `indexdConnector.js` | NCI CRDC IndexD service |
 | `LOCAL` | `localConnector.js` | Local filesystem (dev) |
 | `PUBLIC_S3` | `publicS3Connector.js` | Public S3 (no signing) |
 | `DUMMY` | `dummyConnector.js` | Returns file location as-is (dev default) |
@@ -224,21 +226,21 @@ Session expiry is controlled by `SESSION_TIMEOUT` (default: 30 minutes). The MyS
 
 ---
 
-## 5. bento-auth Deep Dive — The Gen3 / NIH Integration
+## 5. bento-auth Deep Dive — The CRDC / NIH Integration
 
 ### 5.1 What bento-auth Does
 
-`bento-auth` is a standalone Node.js/Express microservice that handles all user authentication for the Bento platform ecosystem. It is the **only service that communicates directly with external Identity Providers** (NIH/Fence, Google). `bento-files` never calls Fence — it trusts the session that `bento-auth` already established.
+`bento-auth` is a standalone Node.js/Express microservice that handles all user authentication for the Bento platform ecosystem. It is the **only service that communicates directly with Identity Providers** (NCI CRDC Fence/NIH, Google). `bento-files` never calls Fence — it trusts the session that `bento-auth` already established.
 
 ### 5.2 Supported Identity Providers
 
 | IDP | File | How It Works |
 |---|---|---|
-| **NIH / Login.gov** | `idps/nih.js` | OAuth2 via NIH IAM / Gen3 Fence; `preferred_username` determines sub-IDP |
+| **NIH / Login.gov** | `idps/nih.js` | OAuth2 via NCI CRDC Fence / NIH IAM; `preferred_username` determines sub-IDP |
 | **Google** | `idps/google.js` | OAuth2 via Google Cloud Identity |
 | **Test IDP** | `idps/testIDP.js` | Development only (`NODE_ENV=development`) |
 
-### 5.3 NIH / Gen3 Fence OAuth2 Flow
+### 5.3 NIH / CRDC Fence OAuth2 Flow
 
 This is the production login path for ICDC users. The exact implementation lives in `services/nih-auth.js`.
 
@@ -281,7 +283,7 @@ This is the production login path for ICDC users. The exact implementation lives
 
 ### 5.5 Logout
 
-`nihLogout(tokens)` revokes the token at the NIH Fence endpoint via:
+`nihLogout(tokens)` revokes the token at the NCI CRDC Fence endpoint via:
 
 ```
 POST config.nih.LOGOUT_URL
@@ -299,7 +301,7 @@ The MySQL session record is also destroyed on logout.
 
 | Stage | What Is Exchanged | Where |
 |---|---|---|
-| Login | OAuth2 authorization code → NIH access token (only) | `bento-auth ↔ NIH Fence` |
+| Login | OAuth2 authorization code → NIH access token (only) | `bento-auth ↔ NCI CRDC Fence` |
 | User profile fetch | Access token → user profile (name, email, IDP) | `bento-auth → NIH userinfo endpoint` |
 | IDP detection | Email domain regex → `NIH` or `LOGIN_GOV` constant | `bento-auth` internal (`services/nih-auth.js`) |
 | ACL fetch | Authenticated session → user's approved ACL array | `bento-auth → ICDC GraphQL/Neo4j` |
@@ -308,9 +310,9 @@ The MySQL session record is also destroyed on logout.
 | File location | Session cookie (forwarded) → `s3://` URI | `bento-files → ICDC GraphQL/Neo4j` |
 | Pre-signed URL | Server IAM role credentials → time-limited signed URL | `bento-files → AWS S3/CloudFront` |
 | File transfer | Pre-signed URL → file bytes | `browser → S3 directly` |
-| Logout | `id_token` + Basic Auth credentials → token revocation | `bento-auth → NIH Fence LOGOUT_URL` |
+| Logout | `id_token` + Basic Auth credentials → token revocation | `bento-auth → NCI CRDC Fence LOGOUT_URL` |
 
-**Key point:** Fence is only in the critical path at **login time**. Every subsequent download decision is made using the cached session in MySQL. The AWS pre-signed URL is what actually gates the file transfer, and it is generated using the server's IAM role — not user credentials.
+**Key point:** CRDC Fence is only in the critical path at **login time**. Every subsequent download decision is made using the cached session in MySQL. The AWS pre-signed URL is what actually gates the file transfer, and it is generated using the server's IAM role — not user credentials.
 
 ---
 
@@ -336,10 +338,10 @@ The MySQL session record is also destroyed on logout.
 
 | Variable | Purpose |
 |---|---|
-| `AUTH_URL` | NIH/Fence OAuth2 authorization endpoint |
-| `TOKEN_URL` | NIH/Fence token endpoint (used in `getNIHToken`) |
-| `USERINFO_URL` | NIH/Fence userinfo endpoint (used in `nihUserInfo`) |
-| `LOGOUT_URL` | NIH/Fence token revocation endpoint (used in `nihLogout`) |
+| `AUTH_URL` | NCI CRDC Fence OAuth2 authorization endpoint |
+| `TOKEN_URL` | NCI CRDC Fence token endpoint (used in `getNIHToken`) |
+| `USERINFO_URL` | NCI CRDC Fence userinfo endpoint (used in `nihUserInfo`) |
+| `LOGOUT_URL` | NCI CRDC Fence token revocation endpoint (used in `nihLogout`) |
 | `CLIENT_ID` / `CLIENT_SECRET` | OAuth2 client credentials registered with NIH; used in token exchange (body) and logout (Basic Auth) |
 | `SESSION_SECRET` | Cookie signing secret |
 
@@ -371,7 +373,7 @@ All projects share the same auth middleware, connector, and audit logging infras
 | **Token retention** | `getNIHToken()` retains only the `access_token`. The `refresh_token` and `id_token` returned by NIH are discarded. There is no token refresh path — expired tokens require full re-authentication. |
 | **IDP detection hard failure** | `getIDP()` throws an unhandled exception if the user's email does not match `@nih.gov` or `@login.gov`. Users with other email domains linked to their NIH account will receive a hard login failure with no graceful error message. |
 | **Token re-validation timing** | `bento-files` trusts the session at rest; it does not re-validate the NIH access token on every download request. If a token expires between login and download, the session may still appear valid until MySQL TTL expires. |
-| **Logout credential mechanism** | `nihLogout` uses HTTP Basic Auth with `client_id:client_secret` — not a Bearer token. The body parameter is specifically `id_token`, not `access_token`. Confirm the NIH Fence LOGOUT_URL endpoint accepts this format in the current production configuration. |
+| **Logout credential mechanism** | `nihLogout` uses HTTP Basic Auth with `client_id:client_secret` — not a Bearer token. The body parameter is specifically `id_token`, not `access_token`. Confirm the NCI CRDC Fence LOGOUT_URL endpoint accepts this format in the current production configuration. |
 | **`URL_EXPIRES_IN_SECONDS` value** | Default is 24 hours. The actual production value for ICDC should be verified — too short risks URL expiry during slow downloads of large files at the 12MB boundary; too long is a security concern. |
 | **`ICDC-1445`** (On Hold) | User story for manifest download from within the Files Cart — still on hold as of last check. |
 
@@ -386,7 +388,7 @@ All projects share the same auth middleware, connector, and audit logging infras
 | `connectors/index.js` | `bento-files` | Storage backend selector |
 | `connectors/S3Connector.js` | `bento-files` | AWS SDK v3 pre-signed S3 URL generation |
 | `connectors/cloudFrontConnector.js` | `bento-files` | CloudFront signed URL generation |
-| `connectors/indexdConnector.js` | `bento-files` | Gen3 IndexD integration (alternative backend) |
+| `connectors/indexdConnector.js` | `bento-files` | NCI CRDC IndexD integration (alternative backend) |
 | `model/index.js` | `bento-files` | Project-aware GraphQL query dispatcher |
 | `model/icdc.js` | `bento-files` | ICDC-specific GraphQL query for `file_location` |
 | `services/file-auth.js` | `bento-files` | ACL comparison logic; `OPEN` special case |
