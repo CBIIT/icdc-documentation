@@ -9,7 +9,7 @@ description: "Operational knowledge base for the ICDC Sprint Command Center Clau
 > **Ecosystem:** Cancer Research Data Commons (CRDC)  
 > **Team:** React web application engineers  
 > **Claude Project:** Sprint Command Center  
-> **Last Updated:** 2026-04-06
+> **Last Updated:** 2026-04-22
 
 ---
 
@@ -85,11 +85,27 @@ The ICDC Jira instance uses a **non-standard custom field** for epic linking. Th
 
 **Never assume epic linking worked without verifying** — always confirm with a follow-up `jira_get_issue` check if there's any doubt.
 
+### Developer Field — Issue-Type Dependent
+
+The ICDC Jira instance uses **different custom fields for the Developer value depending on issue type**. Always populate both Assignee AND Developer when assigning tickets — the Developer field is the source of truth for who actually implemented the work (Assignee is typically QA closing the ticket).
+
+| Issue Type | Developer Field | Format | Example |
+|---|---|---|---|
+| Task | `customfield_23650` (multi-user picker) | Array of usernames | `{"customfield_23650": ["ranaab"]}` |
+| Story | `customfield_18250` ("Developer Legacy", single user) | String username | `{"customfield_18250": "ranaab"}` |
+| Bug | `customfield_23650` (same as Task) | Array of usernames | `{"customfield_23650": ["udosent2"]}` |
+
+- `customfield_18250` is **absent from Task-type screen schemes** (always null on Tasks). Confirmed via live inspection of ICDC-4121.
+- When generating demo schedules, release reports, or ownership analyses, **always read the Developer field — not Assignee** — to determine who did the work.
+- Tickets closed with no code change (e.g., "works as designed," duplicates) correctly have an empty Developer field.
+
 ### Other Custom Fields
 | Field | Custom Field ID | Notes |
 |-------|----------------|-------|
 | Epic Link (child → epic) | `customfield_12350` | Set via update after creation |
 | Epic Name | `customfield_12351` | Set on the epic issue itself |
+| Developer (Task, Bug) | `customfield_23650` | Multi-user, array format |
+| Developer Legacy (Story) | `customfield_18250` | Single user, string format |
 
 ### Issue Types
 - **Confirmed working:** `Epic`, `Task`
@@ -375,16 +391,42 @@ When creating tickets from Invicti or other security scan reports:
 
 ---
 
-## 9. Key Contacts & Roles
+## 9. Team Roster & Contacts
 
 > Update this section as team membership changes.
+>
+> **Slack handles** are the exact strings that appear when typing `@` and the person's name in the `#icdc` channel. Use these verbatim in any Slack drafts — do not substitute usernames, email prefixes, or display name variations.
 
-| Role | Name / Email | Notes |
-|------|-------------|-------|
-| Senior Technical PM | gina.kuffel@nih.gov | Primary contact for ICDC and CTDC. Reporter on most epics. |
-| Dev Lead | ambar.rana@nih.gov | Primary engineering contact for ICDC. Epic owner. |
-| QA Engineer / SDET | valentina.epishina@nih.gov | Software Developer in Test — handles QA validation, not feature development |
-| Stakeholders | — | NCI leadership, data submitters, COP research community |
+### Active Team Members
+
+| Role | Name | Email | Jira Username | Slack Handle |
+|------|------|-------|---------------|--------------|
+| Senior Technical PM | Gina Kuffel | gina.kuffel@nih.gov | `kuffelgr` | `@Gina Kuffel` |
+| Tech Lead / Full-Stack | Ambar Rana | ambar.rana@nih.gov | `ranaab` | `@ambar rana` |
+| Backend Engineer | Eric Miller | eric.miller4@nih.gov | `millerer` | `@Eric Miller` |
+| Frontend Engineer | Toyo Udosen | toyo.udosen@nih.gov | `udosent2` | `@Toyo Udosen` |
+| DevOps | Charles Ngu | charles.ngu@nih.gov | `nguca` | `@Charles Ngu` |
+| QA / SDET | Valentina Epishina | valentina.epishina@nih.gov | `epishinavv` | `@Valentina Epishina` |
+| Design / UX | Hannah Stogsdill | — | `stogsdillhh` | `@Hannah Stogsdill` |
+| UI / UX | Peter Scrufari | — | `scrufaripp` | `@Peter Scrufari` |
+| Business Analyst (NIH/NCI) | Philip Musk | — | `muskp2` | `@Philip Musk` |
+| Infrastructure Contributor | Michael Fleming | michael.fleming@nih.gov | `flemingme` | *(not yet confirmed)* |
+
+### Guidance for Slack Communications
+
+- When drafting Slack announcements, demo schedules, or sprint comms, **use the exact Slack handle string** from the table above (including the `@` prefix).
+- Slack handles here are display names, **not** usernames — do not strip spaces or change capitalization.
+- Gina's handle `@Gina Kuffel` is included so sign-offs and tags can be applied consistently.
+- If a team member is not yet in the table (e.g., new hires, rotating contractors), ask before drafting — do not guess.
+
+### NCI / CBIIT Stakeholders
+
+| Role | Name | Notes |
+|------|------|-------|
+| NCI/CBIIT Stakeholders | — | NCI leadership, data submitters, COP research community |
+| Data Model Author | Mark Jensen | NIH/NCI — author of `icdc-model-tool` |
+| DataHub Adoption Driver | Todd Pihl | NCI/CBIIT — drove DMN adoption in CRDC DataHub |
+| COP PI | Dr. Amy K. LeBlanc | NCI Comparative Oncology Program — PI for COTC021/COTC022 |
 
 ---
 
@@ -459,6 +501,7 @@ All stores are maintained in parallel. SharePoint is for stakeholder access; Git
 - This file lives at `CBIIT/icdc-documentation/claude/SKILL.md`
 - Update JQL recipes when Jira workflow statuses change
 - Update the Jira Quirks section immediately if new custom field behaviors are discovered
+- Update the Team Roster (Section 9) when team members are added, removed, or roles change
 - Update domain context when new repos or major architectural changes occur
 - Review stakeholder doc standards before each major release cycle
 - New SOPs or workflow patterns discovered in Claude conversations should be added here via PR
