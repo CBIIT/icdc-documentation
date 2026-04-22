@@ -51,6 +51,35 @@ The **Integrated Canine Data Commons (ICDC)** is part of the NCI's Cancer Resear
 
 The team works with multiomics data — this means datasets that combine multiple biological measurement types (genomics, proteomics, transcriptomics, etc.). When writing tickets or summaries for stakeholders, explain multiomics concepts simply: *"data that measures many different biological signals from the same samples, like reading both the DNA instructions and the proteins those instructions produce — but here applied to canine cancer studies."*
 
+### ⚠️ Vocabulary Discipline — Data Model vs. Data Model Navigator
+
+> **This is a precision issue that matters. Misuse confuses stakeholders and misrepresents what shipped.**
+
+The **Data Model** and the **Data Model Navigator (DMN)** are two distinct things and must never be conflated:
+
+| Term | What it is | Where it lives | How it versions |
+|---|---|---|---|
+| **ICDC Data Model** | The authoritative schema definition — nodes, relationships, properties, controlled vocabularies — expressed in YAML files (`icdc-model.yml`, `icdc-model-props.yml`) | `icdc-model-tool` GitHub repo | Semantic versioning of the schema content (e.g., **Data Model v2.0**) |
+| **Data Model Navigator (DMN)** | The React-based web tool that *renders* the Data Model as an interactive graph + table with search, faceted filtering, download hub, etc. | `bento-icdc-frontend` (deployed at caninecommons.cancer.gov) | Ships as part of ICDC frontend releases (e.g., 4.3.0.528) — **not** independently versioned |
+
+#### Correct framing
+
+- ✅ **"ICDC Data Model v2.0"** — a milestone in the schema definition; surfaced in the DMN automatically on release
+- ✅ **"The Data Model Navigator now displays ICDC Data Model v2.0"** — the tool showing the new content
+- ✅ **"New CDE Info column added to the DMN Table View"** — a DMN feature improvement
+- ❌ **"Data Model Navigator v2.0"** — WRONG. The DMN itself is not versioned this way.
+- ❌ **"DMN v2.0"** — WRONG, same reason.
+- ❌ **"Version 2 of the Data Model Navigator"** — WRONG, same reason.
+
+#### The mental model
+
+- The **Data Model** is the *content*.
+- The **Data Model Navigator** is the *tool that shows the content*.
+- When the Data Model changes, the DMN automatically reflects it at runtime — no DMN deployment is required. That's the whole point.
+- When we say "v2.0", we almost always mean the Data Model. If we're talking about a DMN change, describe the specific feature (CDE Info column, version history surface, Reactflow migration, etc.) — not a version number.
+
+**Applies to all artifacts:** Slack posts, prep sheets, release notes, leadership docs, Jira ticket summaries, sprint reviews. If you catch yourself writing "DMN v2.0" or "Data Model Navigator v2.0," stop and reframe.
+
 ### Comparative Oncology Context — ICDC-Specific
 
 > ⚠️ **This context is unique to ICDC.** Do not apply comparative oncology framing to CTDC work.
