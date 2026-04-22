@@ -51,44 +51,79 @@ The **Integrated Canine Data Commons (ICDC)** is part of the NCI's Cancer Resear
 
 The team works with multiomics data — this means datasets that combine multiple biological measurement types (genomics, proteomics, transcriptomics, etc.). When writing tickets or summaries for stakeholders, explain multiomics concepts simply: *"data that measures many different biological signals from the same samples, like reading both the DNA instructions and the proteins those instructions produce — but here applied to canine cancer studies."*
 
-### ⚠️ Data Loading Reality — NOT a Mid-Demo Action
+### ⚠️ How ICDC Moves Data — The Three Pathways
 
-> **Never suggest that TSV files, source data files, or any data ingestion can happen "during" a demo or on the fly.** This misrepresents how ICDC handles data.
+> **This is the canonical reference for how data flows into, within, and out of ICDC. Misrepresenting any of these pathways is a significant factual error.**
 
-Data loading in ICDC is a **formal, multi-stage pipeline process** run outside the application team's direct control:
+ICDC has three distinct data-movement pathways. Each is owned and scoped differently.
 
-- **Ownership:** Data ingestion is managed by dedicated pipelines (the `icdc-dataloader` component, Data Retriever microservice, DataLoader.py, etc.) — not by developers hot-reloading a TSV during a demo.
-- **Stages:** Every data load goes through the full SDL promotion path: **DEV → QA → Stage → Production**. Each promotion is its own Jira ticket (e.g., COTC021 v.2 Stage was ICDC-4053, Prod was ICDC-4061).
-- **Cadence:** Data loads are scheduled, validated, and QA'd ahead of release. They never happen spontaneously.
-- **Demo implications:** When advising presenters about demos, do NOT suggest anything like "refresh the TSV" or "reload the data file" as a troubleshooting or setup step. The data visible in a demo environment is what was promoted to that environment through the pipeline; there's no in-app way to swap it.
+#### 1. Study data ingestion — **Jenkins jobs** (inbound, batch)
 
-**If a demo depends on specific data being present, the setup happens days in advance through the promotion pipeline, not minutes before the meeting.**
+- **What it does:** Loads all study data (samples, cases, diagnoses, files, clinical trial data, etc.) into ICDC from approved source files.
+- **Mechanism:** Scheduled and triggered **Jenkins jobs** — NOT API calls, NOT on-the-fly loads.
+- **Pipeline stages:** Full SDL promotion path — **DEV → QA → Stage → Production**. Each promotion is its own Jira ticket (e.g., COTC021 v.2 Stage was ICDC-4053, Prod was ICDC-4061).
+- **Ownership:** Managed by dedicated pipelines outside the application team's direct control.
+- **Cadence:** Scheduled, validated, QA'd ahead of release. Never spontaneous.
+- **Demo implications:** When advising presenters, do NOT suggest anything like "refresh the TSV," "reload the data file," or "rerun the load" as a mid-demo action. There is no in-app way to swap or refresh data loaded via Jenkins. The data visible in a demo environment is what Jenkins promoted to that environment.
+
+#### 2. External API retrieval — **Data Retriever microservice** (inbound, real-time)
+
+- **What it does:** Fetches data from external APIs at runtime to enrich what ICDC displays.
+- **Scope as of Release 4.3.0.528:** Used ONLY on the **Study** and **Study Details** pages. Not used anywhere else in the app.
+- **Mechanism:** New backend microservice (built by Eric Miller). The frontend calls the ICDC backend, which fronts the Data Retriever.
+- **Key property:** Handles external dependency failures gracefully so user-facing pages keep rendering even when an upstream external API is unavailable.
+- **See the dedicated subsection below** for narrative framing and ticket ownership.
+
+#### 3. Data export to Cancer Genomics Cloud — **InterOp** (outbound)
+
+- **What it does:** Exports ICDC study data **out to the Cancer Genomics Cloud (CGC / Seven Bridges)** for researcher analysis.
+- **Direction:** ICDC → CGC. Outbound only.
+- **Historical note:** As of Release 4.3.0.528, **InterOp's sole responsibility is this outbound CGC export.** Any earlier role InterOp may have had elsewhere in ICDC has been replaced.
+- **Related ticket this release:** ICDC-4093 (Export to CGC functional again) sits in this pathway — that's the "CGC export" story in the demo.
+
+#### ⚠️ Common misframings to avoid
+
+- ❌ "InterOp feeds study data into ICDC." — WRONG. InterOp exports data OUT to CGC.
+- ❌ "InterOp outages crash study pages." — WRONG. InterOp is not an inbound dependency; its outage affects CGC export, not page rendering.
+- ❌ "The Data Retriever replaced direct InterOp calls from the frontend." — WRONG. The Data Retriever replaced direct frontend calls to OTHER external APIs (the ones that enrich Study / Study Details pages). InterOp was not the replaced dependency.
+- ❌ "All ICDC data is loaded via Jenkins OR via API." — MISLEADING. Study data is loaded via Jenkins (inbound batch). External enrichment data is pulled via the Data Retriever (inbound real-time). CGC export data flows through InterOp (outbound). Three distinct pathways.
+- ✅ "ICDC uses Jenkins jobs to ingest study data, the Data Retriever microservice for external API calls on Study and Study Details pages, and InterOp for exporting data to the Cancer Genomics Cloud."
 
 ### 📡 Data Retriever Architecture — A Backend Engineering Story
 
 > **When framing Data Retriever work for stakeholders, the headline is the backend microservice — not the frontend call change.**
 
-The Data Retriever is a **backend microservice** Eric Miller built to centralize how ICDC retrieves external data (e.g., interoperability data previously pulled directly from the InterOp API by the frontend). The architectural model is:
+The Data Retriever is a **backend microservice** Eric Miller built to centralize how ICDC fetches data from external APIs at runtime. The architectural model is:
 
-1. **Backend API + Data Retriever microservice** — the hard engineering work. New Spring Boot endpoints, graceful degradation logic for external dependencies, containerized image, deployment pipeline (Dev + QA reconfigured this sprint, upper tiers to follow).
-2. **Frontend call change** — a *downstream consequence* of step 1. The FE no longer calls InterOp directly; it calls the BE, which fronts the Data Retriever. This change is small and mechanical compared to the microservice itself.
+1. **Backend API + Data Retriever microservice** — the hard engineering work. New Spring Boot endpoints, graceful-degradation logic for external dependencies, containerized image, deployment pipeline (Dev + QA reconfigured this sprint, upper tiers to follow).
+2. **Frontend call change** — a *downstream consequence* of step 1. The frontend no longer calls the external API directly for Study / Study Details pages; it calls the ICDC backend, which fronts the Data Retriever. This change is small and mechanical compared to the microservice itself.
 
-**Correct narrative framing:**
+#### Current scope
 
-- ✅ "Eric built the Data Retriever — a new backend microservice and API that centralizes external data retrieval, with built-in graceful degradation when external services like InterOp are unavailable. The frontend was updated to call it."
-- ✅ "Eric's Data Retriever microservice is the major backend achievement of this release. Toyo's FE change to consume it is the visible tip of a much larger engineering effort."
-- ❌ "Toyo built InterOp resilience by changing the FE to call BE instead of InterOp directly." — WRONG framing. Misattributes the work and hides the microservice.
-- ❌ "The FE→BE handoff is the InterOp resilience feature." — WRONG. The microservice *is* the feature; the FE call change is how that feature is consumed.
+The Data Retriever is **only** used on the **Study** and **Study Details** pages as of Release 4.3.0.528. It is a purpose-built service with a clear expansion path — future external integrations (CDA API, CCDI Hub, etc.) can plug into the same pattern — but today its runtime footprint is narrow. Do not imply it touches pages it doesn't.
 
-**Jira mapping for this release (4.3.0.528):**
+#### What the Data Retriever does NOT do
+
+- ❌ It does **not** ingest study data — that's Jenkins.
+- ❌ It does **not** handle CGC export — that's InterOp (outbound).
+- ❌ It is **not** used on the Explore Dashboard, Case Details, My Files, DMN, or other pages — Study and Study Details only.
+
+#### Correct narrative framing
+
+- ✅ "Eric built the Data Retriever — a new backend microservice that fetches data from external APIs for Study and Study Details pages, with built-in graceful degradation when external dependencies are unavailable. The frontend was updated to call it."
+- ✅ "Eric's Data Retriever microservice is the major backend achievement of this release. Toyo's frontend change to consume it is the visible tip of a much larger engineering effort."
+- ❌ "Toyo built InterOp resilience." — WRONG on two counts: InterOp isn't inbound, and the resilience belongs to Eric's microservice.
+- ❌ "The Data Retriever handles all external data." — WRONG. Study and Study Details pages only, as of this release.
+
+#### Jira mapping for Release 4.3.0.528
 
 | Ticket | Developer | What it is |
 |---|---|---|
-| ICDC-4022 | Toyo | FE change to call BE instead of InterOp directly (the consumer) |
+| ICDC-4022 | Toyo | FE change on Study / Study Details to call BE (Data Retriever) instead of the external API directly |
 | ICDC-4102 | Charles | Reconfigure Data Retriever pipeline for Dev |
 | ICDC-4108 | Charles | Deploy Data Retriever image to QA |
 | ICDC-3556 | Charles | Env vars for newly deployed Data Retriever code/service |
-| ICDC-4032 | Eric | DataLoader.py programmatic study-update investigation (ongoing) |
+| ICDC-4032 | Eric | DataLoader.py programmatic study-update investigation (ongoing, not part of the Data Retriever itself) |
 
 Eric's Data Retriever microservice itself — the backend API and graceful-degradation logic — is the foundational piece these tickets build on and consume. When producing sprint review materials, demo schedules, or leadership summaries, the Data Retriever demo should be **led by Eric** with framing that foregrounds the backend engineering, not the FE call change.
 
