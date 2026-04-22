@@ -51,6 +51,47 @@ The **Integrated Canine Data Commons (ICDC)** is part of the NCI's Cancer Resear
 
 The team works with multiomics data — this means datasets that combine multiple biological measurement types (genomics, proteomics, transcriptomics, etc.). When writing tickets or summaries for stakeholders, explain multiomics concepts simply: *"data that measures many different biological signals from the same samples, like reading both the DNA instructions and the proteins those instructions produce — but here applied to canine cancer studies."*
 
+### ⚠️ Data Loading Reality — NOT a Mid-Demo Action
+
+> **Never suggest that TSV files, source data files, or any data ingestion can happen "during" a demo or on the fly.** This misrepresents how ICDC handles data.
+
+Data loading in ICDC is a **formal, multi-stage pipeline process** run outside the application team's direct control:
+
+- **Ownership:** Data ingestion is managed by dedicated pipelines (the `icdc-dataloader` component, Data Retriever microservice, DataLoader.py, etc.) — not by developers hot-reloading a TSV during a demo.
+- **Stages:** Every data load goes through the full SDL promotion path: **DEV → QA → Stage → Production**. Each promotion is its own Jira ticket (e.g., COTC021 v.2 Stage was ICDC-4053, Prod was ICDC-4061).
+- **Cadence:** Data loads are scheduled, validated, and QA'd ahead of release. They never happen spontaneously.
+- **Demo implications:** When advising presenters about demos, do NOT suggest anything like "refresh the TSV" or "reload the data file" as a troubleshooting or setup step. The data visible in a demo environment is what was promoted to that environment through the pipeline; there's no in-app way to swap it.
+
+**If a demo depends on specific data being present, the setup happens days in advance through the promotion pipeline, not minutes before the meeting.**
+
+### 📡 Data Retriever Architecture — A Backend Engineering Story
+
+> **When framing Data Retriever work for stakeholders, the headline is the backend microservice — not the frontend call change.**
+
+The Data Retriever is a **backend microservice** Eric Miller built to centralize how ICDC retrieves external data (e.g., interoperability data previously pulled directly from the InterOp API by the frontend). The architectural model is:
+
+1. **Backend API + Data Retriever microservice** — the hard engineering work. New Spring Boot endpoints, graceful degradation logic for external dependencies, containerized image, deployment pipeline (Dev + QA reconfigured this sprint, upper tiers to follow).
+2. **Frontend call change** — a *downstream consequence* of step 1. The FE no longer calls InterOp directly; it calls the BE, which fronts the Data Retriever. This change is small and mechanical compared to the microservice itself.
+
+**Correct narrative framing:**
+
+- ✅ "Eric built the Data Retriever — a new backend microservice and API that centralizes external data retrieval, with built-in graceful degradation when external services like InterOp are unavailable. The frontend was updated to call it."
+- ✅ "Eric's Data Retriever microservice is the major backend achievement of this release. Toyo's FE change to consume it is the visible tip of a much larger engineering effort."
+- ❌ "Toyo built InterOp resilience by changing the FE to call BE instead of InterOp directly." — WRONG framing. Misattributes the work and hides the microservice.
+- ❌ "The FE→BE handoff is the InterOp resilience feature." — WRONG. The microservice *is* the feature; the FE call change is how that feature is consumed.
+
+**Jira mapping for this release (4.3.0.528):**
+
+| Ticket | Developer | What it is |
+|---|---|---|
+| ICDC-4022 | Toyo | FE change to call BE instead of InterOp directly (the consumer) |
+| ICDC-4102 | Charles | Reconfigure Data Retriever pipeline for Dev |
+| ICDC-4108 | Charles | Deploy Data Retriever image to QA |
+| ICDC-3556 | Charles | Env vars for newly deployed Data Retriever code/service |
+| ICDC-4032 | Eric | DataLoader.py programmatic study-update investigation (ongoing) |
+
+Eric's Data Retriever microservice itself — the backend API and graceful-degradation logic — is the foundational piece these tickets build on and consume. When producing sprint review materials, demo schedules, or leadership summaries, the Data Retriever demo should be **led by Eric** with framing that foregrounds the backend engineering, not the FE call change.
+
 ### ⚠️ Vocabulary Discipline — Data Model vs. Data Model Navigator
 
 > **This is a precision issue that matters. Misuse confuses stakeholders and misrepresents what shipped.**
