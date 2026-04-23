@@ -9,7 +9,7 @@ description: "Operational knowledge base for the ICDC Sprint Command Center Clau
 > **Ecosystem:** Cancer Research Data Commons (CRDC)  
 > **Team:** React web application engineers  
 > **Claude Project:** Sprint Command Center  
-> **Last Updated:** 2026-04-22
+> **Last Updated:** 2026-04-23
 
 ---
 
@@ -39,8 +39,10 @@ The **Integrated Canine Data Commons (ICDC)** is part of the NCI's Cancer Resear
 - **GitHub org:** CBIIT
 - **Key repos:**
   - `bento-icdc-frontend` — React frontend
-  - `bento-icdc-backend` — Spring Boot backend
-  - `icdc-dataloader` — Data ingestion pipeline
+  - `bento-icdc-backend` — Spring Boot backend (GraphQL; reads/writes OpenSearch indices)
+  - `crdc-icdc-data-retriever` — **Python ETL** that fetches external-node data (IDC, TCIA) and writes to OpenSearch's `external_data` index. Runs on a **Jenkins schedule**, not in response to runtime requests.
+  - `bento-icdc-interoperation` — Node.js service. **As of Release 4.3.0.528, its active role is the outbound CGC export** (`storeManifest` GraphQL mutation → S3 upload → CloudFront pre-signed URL → Seven Bridges). The legacy `studiesByProgram` / `studyLinks` queries in this repo are now dead code after the FE cutover in ICDC-4022.
+  - `icdc-dataloader` — Data ingestion pipeline. Home of `DataLoader.py`, the Python job that runs via Jenkins to load ICDC study data from approved source files.
   - `icdc-model-tool` — Data model representations and build tools
   - `icdc-deployments` — Deployment configurations
   - `icdc-devops` — DevOps infrastructure
@@ -51,81 +53,107 @@ The **Integrated Canine Data Commons (ICDC)** is part of the NCI's Cancer Resear
 
 The team works with multiomics data — this means datasets that combine multiple biological measurement types (genomics, proteomics, transcriptomics, etc.). When writing tickets or summaries for stakeholders, explain multiomics concepts simply: *"data that measures many different biological signals from the same samples, like reading both the DNA instructions and the proteins those instructions produce — but here applied to canine cancer studies."*
 
+### 🧭 Verify Before You Write — Architecture Claims Discipline
+
+> **This rule exists because architecture claims compound: one wrong framing in a prep sheet becomes a wrong framing in a Slack post, a release note, a leadership doc. Get the source of truth before writing anything stakeholder-facing.**
+
+Before writing any stakeholder-facing description of an ICDC service, integration, or data flow, **read the primary sources** in this order:
+
+1. **Repo README and top-level code** — `main.py` / `app.js` / `routes/` for the service in question. The README describes intent; the code describes current reality, and the two often diverge after major redesigns.
+2. **GraphQL schema (`graphql/schema.graphql`) or API route files** — these reveal what endpoints/queries actually exist today and what's been removed or deprecated.
+3. **Config files** (e.g., `config/icdc.yaml`) — these show which external systems the service actually talks to and which indices/topics/buckets it writes to.
+4. **Related Jira tickets** — search by the service name. Review the ticket arc (original creation → redesigns → most recent work) to understand the narrative. Pay special attention to tickets labeled "redesign," "rewrite," or "migration."
+5. **Release notes** — for how the user-visible change is being communicated externally.
+
+**Do not rely on prior session memory, prior artifacts, or analogy to other services.** ICDC services have been redesigned multiple times; a description that was accurate a year ago may be completely wrong today. Example: the Data Retriever was originally a Node.js real-time microservice; it's now a Python batch ETL. Interop was originally an IDC/TCIA proxy; it's now a CGC export mechanism. Infer from code + Jira + config, not from memory.
+
+**If any of these sources are inaccessible (MCP down, repo not loaded), stop and surface that, rather than guessing.**
+
 ### ⚠️ How ICDC Moves Data — The Three Pathways
 
 > **This is the canonical reference for how data flows into, within, and out of ICDC. Misrepresenting any of these pathways is a significant factual error.**
 
-ICDC has three distinct data-movement pathways. Each is owned and scoped differently.
+ICDC has three distinct data-movement pathways. Each is owned, scheduled, and scoped differently.
 
-#### 1. Study data ingestion — **Jenkins jobs** (inbound, batch)
+#### 1. Study data ingestion — **Jenkins jobs running `DataLoader.py`** (inbound, batch)
 
-- **What it does:** Loads all study data (samples, cases, diagnoses, files, clinical trial data, etc.) into ICDC from approved source files.
-- **Mechanism:** Scheduled and triggered **Jenkins jobs** — NOT API calls, NOT on-the-fly loads.
+- **What it does:** Loads all ICDC study data — samples, cases, diagnoses, files, clinical trial metadata — into the ICDC databases from approved source files.
+- **Mechanism:** Scheduled **Jenkins jobs** running `DataLoader.py` from the `icdc-dataloader` repo. Not API calls. Not on-the-fly loads. Not the Data Retriever (which is unrelated — Data Retriever deals exclusively with external API data).
 - **Pipeline stages:** Full SDL promotion path — **DEV → QA → Stage → Production**. Each promotion is its own Jira ticket (e.g., COTC021 v.2 Stage was ICDC-4053, Prod was ICDC-4061).
-- **Ownership:** Managed by dedicated pipelines outside the application team's direct control.
+- **Ownership:** Managed by dedicated Jenkins pipelines outside the application team's direct control.
 - **Cadence:** Scheduled, validated, QA'd ahead of release. Never spontaneous.
 - **Demo implications:** When advising presenters, do NOT suggest anything like "refresh the TSV," "reload the data file," or "rerun the load" as a mid-demo action. There is no in-app way to swap or refresh data loaded via Jenkins. The data visible in a demo environment is what Jenkins promoted to that environment.
 
-#### 2. External API retrieval — **Data Retriever microservice** (inbound, real-time)
+#### 2. External-node data retrieval — **Data Retriever (Python ETL, Jenkins-scheduled)** (inbound, batch)
 
-- **What it does:** Fetches data from external APIs at runtime to enrich what ICDC displays.
-- **Scope as of Release 4.3.0.528:** Used ONLY on the **Study** and **Study Details** pages. Not used anywhere else in the app.
-- **Mechanism:** New backend microservice (built by Eric Miller). The frontend calls the ICDC backend, which fronts the Data Retriever.
-- **Key property:** Handles external dependency failures gracefully so user-facing pages keep rendering even when an upstream external API is unavailable.
-- **See the dedicated subsection below** for narrative framing and ticket ownership.
+- **What it does:** Fetches IDC and TCIA dataset metadata via REST/GraphQL APIs, fuzzy-matches collections to ICDC study designations, and writes one OpenSearch document per study into the `external_data` index. The frontend reads that index via the BE's `externalDataOverview` query — it does not call the Data Retriever at request time.
+- **Mechanism:** **Python ETL** in the `crdc-icdc-data-retriever` repo, invoked as `python main.py --config config/icdc.yaml` from a **Jenkins schedule** (cadence TBD, but scheduled — not runtime). Writes the results to OpenSearch `external_data`. Optionally publishes SNS success/failure notifications.
+- **Scope as of Release 4.3.0.528:** The data it produces powers the **Studies page** and the **Study Details "Supporting Data" tab**. It does NOT touch Explore Dashboard, Case Details, My Files, DMN, or any other page.
+- **Key architectural property:** Because the FE reads OpenSearch (via BE) rather than calling IDC/TCIA live, external-node outages cannot crash ICDC pages. That resilience is achieved by eliminating the real-time dependency — not by runtime graceful-degradation logic.
+- **Historical note:** This replaces the older real-time Node.js Interoperability microservice. See §2 / Data Retriever Architecture below for the full arc.
 
-#### 3. Data export to Cancer Genomics Cloud — **InterOp** (outbound)
+#### 3. Data export to the Cancer Genomics Cloud — **InterOp `storeManifest`** (outbound)
 
-- **What it does:** Exports ICDC study data **out to the Cancer Genomics Cloud (CGC / Seven Bridges)** for researcher analysis.
-- **Direction:** ICDC → CGC. Outbound only.
-- **Historical note:** As of Release 4.3.0.528, **InterOp's sole responsibility is this outbound CGC export.** Any earlier role InterOp may have had elsewhere in ICDC has been replaced.
-- **Related ticket this release:** ICDC-4093 (Export to CGC functional again) sits in this pathway — that's the "CGC export" story in the demo.
+- **What it does:** When a researcher clicks "Export to CGC" from the My Files cart, the FE sends the file manifest (CSV-formatted) to Interop's `storeManifest` GraphQL mutation. Interop uploads the manifest to S3, signs a CloudFront URL for the uploaded object, and returns the URL to the FE, which hands it off to Seven Bridges.
+- **Mechanism:** `bento-icdc-interoperation` repo. The relevant code is `graphql/schema.graphql` (`storeManifest(manifest: String!): String`) plus `connectors/s3-connector.js` (S3 PUT + CloudFront signed URL generation).
+- **Direction:** ICDC → Seven Bridges (outbound only).
+- **Related ticket this release:** ICDC-4093 (Export to CGC functional again) sits in this pathway.
+- **⚠️ Stale README caveat:** The `bento-icdc-interoperation` README still describes the legacy IDC/TCIA real-time proxy role, which was replaced by the Data Retriever. The schema (`graphql/schema.graphql`) still exposes the old `studiesByProgram` and `studyLinks` queries, but after the ICDC-4022 FE cutover they are dead code. README cleanup is tracked separately.
 
 #### ⚠️ Common misframings to avoid
 
-- ❌ "InterOp feeds study data into ICDC." — WRONG. InterOp exports data OUT to CGC.
-- ❌ "InterOp outages crash study pages." — WRONG. InterOp is not an inbound dependency; its outage affects CGC export, not page rendering.
-- ❌ "The Data Retriever replaced direct InterOp calls from the frontend." — WRONG. The Data Retriever replaced direct frontend calls to OTHER external APIs (the ones that enrich Study / Study Details pages). InterOp was not the replaced dependency.
-- ❌ "All ICDC data is loaded via Jenkins OR via API." — MISLEADING. Study data is loaded via Jenkins (inbound batch). External enrichment data is pulled via the Data Retriever (inbound real-time). CGC export data flows through InterOp (outbound). Three distinct pathways.
-- ✅ "ICDC uses Jenkins jobs to ingest study data, the Data Retriever microservice for external API calls on Study and Study Details pages, and InterOp for exporting data to the Cancer Genomics Cloud."
+- ❌ "InterOp feeds IDC/TCIA data into ICDC." — WRONG (as of Release 4.3.0.528). That role moved to the Data Retriever; Interop's active role is now CGC export.
+- ❌ "The Data Retriever is a runtime microservice / Spring Boot service / real-time backend API." — WRONG. It is a **Python batch ETL** invoked via CLI on a Jenkins schedule. Data flows through OpenSearch, not through runtime calls to the Data Retriever.
+- ❌ "DataLoader.py is complementary to the Data Retriever." — WRONG. DataLoader.py is part of `icdc-dataloader` (Pathway 1) and loads ICDC study data via Jenkins. It has nothing to do with external APIs, OpenSearch `external_data`, or the Data Retriever.
+- ❌ "The Data Retriever has graceful-degradation logic that handles external outages at runtime." — WRONG framing. The Data Retriever is a batch job; resilience to external-node outages comes from the fact that the FE never calls those external APIs at request time — it reads OpenSearch. If an external API is down when the Data Retriever runs, the batch job logs it and the OpenSearch data stays at its last-successful state.
+- ❌ "All ICDC data is loaded via Jenkins OR via API." — MISLEADING. Study data is loaded via Jenkins `DataLoader.py` (Pathway 1). External-node enrichment is loaded via the Data Retriever, also via Jenkins (Pathway 2). CGC export flows through Interop `storeManifest` (Pathway 3, outbound). All three are distinct.
+- ✅ "Study data is loaded by Jenkins running `DataLoader.py`. IDC/TCIA external-node data is populated on a Jenkins schedule by the Data Retriever Python ETL, which writes to OpenSearch. CGC export runs through Interop's `storeManifest` mutation, which uploads a manifest to S3 and returns a signed CloudFront URL."
 
-### 📡 Data Retriever Architecture — A Backend Engineering Story
+### 📡 Data Retriever Architecture — A Multi-Year Backend Redesign
 
-> **When framing Data Retriever work for stakeholders, the headline is the backend microservice — not the frontend call change.**
+> **This is Eric Miller's body of work. Release 4.3.0.528 is the deployment milestone that wraps up four years of evolution. When framing it for stakeholders, honor the scope of the redesign — don't reduce it to "the FE now calls a new endpoint."**
 
-The Data Retriever is a **backend microservice** Eric Miller built to centralize how ICDC fetches data from external APIs at runtime. The architectural model is:
+#### The full arc
 
-1. **Backend API + Data Retriever microservice** — the hard engineering work. New Spring Boot endpoints, graceful-degradation logic for external dependencies, containerized image, deployment pipeline (Dev + QA reconfigured this sprint, upper tiers to follow).
-2. **Frontend call change** — a *downstream consequence* of step 1. The frontend no longer calls the external API directly for Study / Study Details pages; it calls the ICDC backend, which fronts the Data Retriever. This change is small and mechanical compared to the microservice itself.
+| Phase | Year | Key tickets | What happened |
+|---|---|---|---|
+| **Original Interoperability microservice** | 2022 | ICDC-2800, ICDC-2862 | Eric built a Node.js microservice to proxy real-time calls to IDC and TCIA on behalf of the frontend. FE queried `studiesByProgram` via GraphQL; Interop called the external APIs and returned enriched data in-request. |
+| **Runtime resilience band-aid** | 2023 | ICDC-3238 | Because the direct-call architecture was fragile — any IDC/TCIA outage could cascade to the FE — the team added error handling so study pages could still render partial data. This was treatment, not cure. |
+| **Full redesign / rewrite** | 2025 | ICDC-3923, ICDC-3938, ICDC-3523 | Eric redesigned the service from the ground up: **Node.js → Python**, **real-time request proxy → Jenkins-scheduled batch ETL**, **in-request fetch → OpenSearch-backed reads**, **ICDC-specific → YAML-configurable and generalizable to other CRDC projects**. New repo: `crdc-icdc-data-retriever`. New BE query (`externalDataOverview`) and new OpenSearch index (`external_data`). |
+| **Generalization for CCDI** | 2025 | ICDC-4035 | Extended the redesigned service to support raw-fetch mode, multi-host OpenSearch writes, and per-project output customization — so CCDI and other future CRDC projects can adopt it. |
+| **This release (4.3.0.528)** | 2026 | ICDC-4096, ICDC-4097, ICDC-4102, ICDC-4108, ICDC-3556, **ICDC-4022** | External API investigation, Dev pipeline rebuild, QA image deploy, env vars across tiers, and — critically — the FE cutover from `studiesByProgram` (Interop GraphQL) to `externalDataOverview` (BE OpenSearch). **This is the deployment milestone that retires the real-time Interop IDC/TCIA proxy role.** |
 
-#### Current scope
+#### Why this matters architecturally
 
-The Data Retriever is **only** used on the **Study** and **Study Details** pages as of Release 4.3.0.528. It is a purpose-built service with a clear expansion path — future external integrations (CDA API, CCDI Hub, etc.) can plug into the same pattern — but today its runtime footprint is narrow. Do not imply it touches pages it doesn't.
+The shift from runtime proxy to batch ETL isn't a cosmetic change — it fundamentally decouples ICDC from the availability of external data commons. A TCIA outage that would have crashed the Studies page in 2023 now has zero user-visible impact: the FE reads OpenSearch; the next Data Retriever run will pick up fresh data when TCIA is back. It also establishes a pattern that any future CRDC external-node integration (CDA API, other commons) can plug into without bespoke code.
 
-#### What the Data Retriever does NOT do
+#### Current scope — Release 4.3.0.528
 
-- ❌ It does **not** ingest study data — that's Jenkins.
-- ❌ It does **not** handle CGC export — that's InterOp (outbound).
-- ❌ It is **not** used on the Explore Dashboard, Case Details, My Files, DMN, or other pages — Study and Study Details only.
+The Data Retriever's OpenSearch output currently powers:
+- The **Studies page** (imaging collection counts, CRDC node counts, repo links)
+- The **Study Details "Supporting Data" tab** (IDC and TCIA per-collection metadata, aggregated)
+
+It does NOT power: Explore Dashboard, Case Details, My Files, DMN, or any other page.
 
 #### Correct narrative framing
 
-- ✅ "Eric built the Data Retriever — a new backend microservice that fetches data from external APIs for Study and Study Details pages, with built-in graceful degradation when external dependencies are unavailable. The frontend was updated to call it."
-- ✅ "Eric's Data Retriever microservice is the major backend achievement of this release. Toyo's frontend change to consume it is the visible tip of a much larger engineering effort."
-- ❌ "Toyo built InterOp resilience." — WRONG on two counts: InterOp isn't inbound, and the resilience belongs to Eric's microservice.
-- ❌ "The Data Retriever handles all external data." — WRONG. Study and Study Details pages only, as of this release.
+- ✅ "Eric rewrote the service from Node.js real-time proxy to a Python Jenkins-scheduled ETL. External-node data now lives in OpenSearch; the FE reads it via the BE's `externalDataOverview` query. This release is the deployment milestone — Dev, QA, env vars, and the FE cutover all landed."
+- ✅ "This wraps up years of incremental work by Eric. The architecture went from 'FE calls Interop, Interop calls IDC/TCIA live' to 'Jenkins runs the Data Retriever, Data Retriever writes to OpenSearch, FE reads OpenSearch via BE.' Totally decoupled at the user-facing layer."
+- ✅ "Toyo's FE change (ICDC-4022) — the cutover from `studiesByProgram` to `externalDataOverview` — is the visible payoff of Eric's multi-year redesign."
+- ❌ "The Data Retriever is a new Spring Boot microservice." — WRONG tech stack and WRONG runtime model.
+- ❌ "The Data Retriever handles IDC/TCIA calls in real time with graceful degradation." — WRONG runtime model. The ETL writes to OpenSearch; the FE never waits on an external API.
+- ❌ "This release introduced the Data Retriever." — WRONG. The redesign shipped in 2025; this release is the deployment milestone that retires the old proxy role.
 
 #### Jira mapping for Release 4.3.0.528
 
-| Ticket | Developer | What it is |
+| Ticket | Developer | What shipped |
 |---|---|---|
-| ICDC-4022 | Toyo | FE change on Study / Study Details to call BE (Data Retriever) instead of the external API directly |
-| ICDC-4102 | Charles | Reconfigure Data Retriever pipeline for Dev |
-| ICDC-4108 | Charles | Deploy Data Retriever image to QA |
-| ICDC-3556 | Charles | Env vars for newly deployed Data Retriever code/service |
-| ICDC-4032 | Eric | DataLoader.py programmatic study-update investigation (ongoing, not part of the Data Retriever itself) |
-
-Eric's Data Retriever microservice itself — the backend API and graceful-degradation logic — is the foundational piece these tickets build on and consume. When producing sprint review materials, demo schedules, or leadership summaries, the Data Retriever demo should be **led by Eric** with framing that foregrounds the backend engineering, not the FE call change.
+| ICDC-4096 | Eric | Investigate IDC API endpoint used by Data Retriever for Study Details |
+| ICDC-4097 | Eric | Investigate TCIA API endpoint used by Data Retriever for Study Details |
+| ICDC-4102 | Charles | Reconfigure Data Retriever pipeline for ICDC Dev environment |
+| ICDC-4108 | Charles | Deploy Data Retriever image to QA via `deploy-release` GitHub Actions pipeline |
+| ICDC-3556 | Charles | Env vars for newly deployed Data Retriever code/service across tiers |
+| **ICDC-4022** | **Toyo** | **FE cutover: `studiesByProgram` (Interop) → `externalDataOverview` (BE/OpenSearch)** |
 
 ### ⚠️ Vocabulary Discipline — Data Model vs. Data Model Navigator
 
@@ -264,6 +292,16 @@ issue >= ICDC-XXXX AND issue <= ICDC-YYYY AND project = ICDC
 -- Date-based (when you know when the work was created)
 created >= "YYYY-MM-DD" AND project = ICDC ORDER BY created ASC
 ```
+
+### Service / Repo Topic Search — Wide Net
+
+When you need to see all tickets related to a service, do not rely on the Epic Link alone — the service may span multiple epics (original build, redesigns, deployments). Use both summary and description:
+
+```
+project = ICDC AND (summary ~ "Data Retriever" OR description ~ "Data Retriever") ORDER BY created DESC
+```
+
+This is especially important for services that have been redesigned — the arc often spans 3+ epics over multiple years.
 
 ### Recently Updated (last 24 hours — daily standup prep)
 ```
