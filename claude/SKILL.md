@@ -9,7 +9,7 @@ description: "Operational knowledge base for the ICDC Sprint Command Center Clau
 > **Ecosystem:** Cancer Research Data Commons (CRDC)  
 > **Team:** React web application engineers  
 > **Claude Project:** Sprint Command Center  
-> **Last Updated:** 2026-05-05
+> **Last Updated:** 2026-05-05 (Step 2: Slack Communication Reference)
 
 ---
 
@@ -675,7 +675,7 @@ A combined Sprint Review + Release Demo + Retro meeting produces a specific set 
 
 | # | Artifact | Format | Destination | Timing |
 |---|---|---|---|---|
-| 1 | **Slack announcement** | Slack message in `#icdc-discussions` | Channel ID TBD — pull via `slack_search_channels` on first use | 24–48 hours before meeting |
+| 1 | **Slack announcement** | Slack message in `#icdc` | Channel ID `CE0EA6W93` | 24–48 hours before meeting |
 | 2 | **Sprint Review deck** | `.pptx` | Used live in meeting | Ready 24h before meeting |
 | 3 | **Per-presenter prep sheets** | `.md` per presenter | DM to each presenter | 24h before meeting |
 | 4 | **Retro board** | retrotool.io board | URL in deck + Slack announcement | Created by TPM before meeting |
@@ -697,7 +697,7 @@ Each prep sheet contains:
 
 **Distribution:** DM each prep sheet privately 24 hours before the meeting (not the channel — they contain presenter-specific prompts). Thursday afternoon is the sweet spot for a Friday meeting; earlier and presenters forget.
 
-**ICDC roster note:** When prepping presenter sheets for ICDC, reference the team using their **Slack handles** from Section 11 (Team Roster). The handles are display-name format (e.g., `@ambar rana`, `@Toyo Udosen`), not username format. Use them verbatim.
+**ICDC roster note:** When prepping presenter sheets for ICDC, reference the team using their **Slack User IDs** from Section 11 (Team Roster) — for example, `<@U01TADC2E67>` for Ambar Rana. The display-name handles in the table (`@ambar rana`, `@Toyo Udosen`) are visual-reference only; in actual Slack messages composed via the API, you must use `<@UXXXXXXXXX>` syntax to ping a real person. See Section 14 (Slack Communication Reference) for the full distinction and examples.
 
 ### 10c. Goal Scorecard Framing
 
@@ -724,29 +724,34 @@ Headline format: *"X of Y goals delivered."* This reframes a sprint more favorab
 
 > Update this section as team membership changes.
 >
-> **Slack handles** are the exact strings that appear when typing `@` and the person's name in the `#icdc` channel. Use these verbatim in any Slack drafts — do not substitute usernames, email prefixes, or display name variations.
+> **Two different Slack identifiers** appear in the table below, and they serve different purposes:
+> - **Slack User ID** (e.g., `U01TADC2E67`) — the immutable user ID. Use this in API-composed messages with `<@U01TADC2E67>` syntax to actually ping the person. This is what you use when drafting through the Slack MCP.
+> - **Slack Display Handle** (e.g., `@ambar rana`) — the human-readable name shown in the Slack UI. Useful for prep sheets and visual reference, but does NOT ping when used literally in an API-composed message.
+>
+> See Section 14 (Slack Communication Reference) for full details on when to use which.
 
 ### Active Team Members
 
-| Role | Name | Email | Jira Username | Slack Handle |
-|------|------|-------|---------------|--------------|
-| Senior Technical PM | Gina Kuffel | gina.kuffel@nih.gov | `kuffelgr` | `@Gina Kuffel` |
-| Tech Lead / Full-Stack | Ambar Rana | ambar.rana@nih.gov | `ranaab` | `@ambar rana` |
-| Backend Engineer | Eric Miller | eric.miller4@nih.gov | `millerer` | `@Eric Miller` |
-| Frontend Engineer | Toyo Udosen | toyo.udosen@nih.gov | `udosent2` | `@Toyo Udosen` |
-| DevOps | Charles Ngu | charles.ngu@nih.gov | `nguca` | `@Charles Ngu` |
-| QA / SDET | Valentina Epishina | valentina.epishina@nih.gov | `epishinavv` | `@Valentina Epishina` |
-| Design / UX | Hannah Stogsdill | — | `stogsdillhh` | `@Hannah Stogsdill` |
-| UI / UX | Peter Scrufari | — | `scrufaripp` | `@Peter Scrufari` |
-| Business Analyst (NIH/NCI) | Philip Musk | — | `muskp2` | `@Philip Musk` |
-| Infrastructure Contributor | Michael Fleming | michael.fleming@nih.gov | `flemingme` | *(not yet confirmed)* |
+| Role | Name | Email | Jira Username | Slack User ID | Slack Display Handle |
+|------|------|-------|---------------|---------------|----------------------|
+| Senior Technical PM | Gina Kuffel | gina.kuffel@nih.gov | `kuffelgr` | `U025MCK7MD3` | `@Gina Kuffel` |
+| Tech Lead / Full-Stack | Ambar Rana | ambar.rana@nih.gov | `ranaab` | `U01TADC2E67` | `@ambar rana` |
+| Backend Engineer | Eric Miller | eric.miller4@nih.gov | `millerer` | `U03SEJFGU7L` | `@Eric Miller` |
+| Frontend Engineer | Toyo Udosen | toyo.udosen@nih.gov | `udosent2` | `U01MJCG0MS8` | `@Toyo Udosen` |
+| DevOps | Charles Ngu | charles.ngu@nih.gov | `nguca` | `U04L21QJGNM` | `@Charles Ngu` |
+| QA / SDET | Valentina Epishina | valentina.epishina@nih.gov | `epishinavv` | `U02PMPFHBRN` | `@Valentina Epishina` |
+| Design / UX | Hannah Stogsdill | hannah@toastandtiger.com | `stogsdillhh` | `U08GNMQPMFX` | `@Hannah Stogsdill` |
+| UI / UX | Peter Scrufari | scrufaripp@nih.gov | `scrufaripp` | `U07C6CJRL05` | `@Peter Scrufari` |
+| Business Analyst (NIH/NCI) | Philip Musk | — | `muskp2` | *(not yet confirmed)* | `@Philip Musk` |
+| Infrastructure Contributor | Michael Fleming | michael.fleming@nih.gov | `flemingme` | *(not yet confirmed)* | *(not yet confirmed)* |
 
 ### Guidance for Slack Communications
 
-- When drafting Slack announcements, demo schedules, or sprint comms, **use the exact Slack handle string** from the table above (including the `@` prefix).
-- Slack handles here are display names, **not** usernames — do not strip spaces or change capitalization.
-- Gina's handle `@Gina Kuffel` is included so sign-offs and tags can be applied consistently.
-- If a team member is not yet in the table (e.g., new hires, rotating contractors), ask before drafting — do not guess.
+- For **API-composed Slack messages** (drafted through the MCP via `slack_send_message` or `slack_send_message_draft`), use the **Slack User ID** with the `<@UXXX>` syntax to actually ping the person. Example: `<@U01TADC2E67>` will render as a clickable, pinging mention of Ambar Rana.
+- For **prep sheets, decks, or other reference material** that humans will read but not paste into Slack, the Slack Display Handle is fine for readability.
+- **Never** put a literal `@ambar rana` string into an API-composed Slack message and expect it to ping — Slack treats it as plain text.
+- See Section 14 (Slack Communication Reference) for full mention-syntax rules and known formatting failures.
+- If a team member is not yet in the table (e.g., new hires, rotating contractors), look up their User ID with the `slack_search_users` tool before drafting — do not guess.
 
 ### NCI / CBIIT Stakeholders
 
@@ -838,3 +843,162 @@ All stores are maintained in parallel. SharePoint is for stakeholder access; Git
 - When a new architecture leadership `.docx` is published, update the Document Storage Convention table in Section 12 if applicable
 - When deck standards or demo-day workflows change, update Sections 9 and 10 (Deck Standards and Demo Day Workflow)
 - Update the Sprint Review Summary template (Section 7c) when Jira workflow statuses change so the velocity buckets stay accurate
+- When a new ICDC Slack channel is created or an existing channel's purpose changes, update Section 14a (Channel Routing)
+- When a team member joins, leaves, or changes role, pull their Slack User ID via `slack_search_users` and update both Section 11 (Team Roster) AND any Section 14 references
+- If a new Slack formatting failure mode is discovered (e.g., a syntax that triggers `invalid_blocks`), add it to Section 14d (Known Failures) so the next session avoids it
+
+---
+
+## 14. 💬 Slack Communication Reference
+
+> **The single source of truth for Slack channel routing, mention syntax, message formatting, and known failures on the ICDC project.**
+>
+> Sections 7c, 9c, 10a–10d, and 11 all reference this section. When channel IDs change, when a new channel is created, or when a new Slack formatting failure is discovered, update this section and the cross-references will stay correct.
+
+### 14a. Channel Routing — Where Each Type of Message Goes
+
+ICDC has more channels than CTDC, and they're more topical than audience-segmented. Route by what the message is about, not by which engineer should see it (engineers are in most channels).
+
+| Channel | Channel ID | Use For |
+|---|---|---|
+| `#icdc` | `CE0EA6W93` | **Primary announcement channel.** Sprint review/release demo announcements, retro reminders, leadership-facing summaries, broad team news. *(This is the analog of CTDC's `#ctdc-discussions`.)* |
+| `#icdc-dev` | `CKGQKEGBB` | Engineering-only detail — file paths, code snippets, ticket links, design questions |
+| `#icdc-devops` | `CKENP6AH3` | Deployment activity, infra changes, environment provisioning, AWS/cloud topology |
+| `#icdc-jenkins` | `CK37T2R0B` | CI/CD notifications, build/pipeline issues, Jenkins job failures |
+| `#icdc-test-questions` | `CNPLNFR2R` | QA coordination, test environment questions, test data clarifications |
+| `#icdc-security` | `C0AT3D3KJN6` | Security work — Invicti findings, vulnerability remediation, ICDC-4120 epic activity |
+| `#icdc-monitoring` | `C023T6X65V5` | Production monitoring alerts, uptime, observability |
+| `#icdc-crdc` | `CU8CYPQKB` | Cross-team CRDC coordination (with the broader Cancer Research Data Commons program) |
+| `#icdc-links-resources` | `C04722U0W8N` | Reference links, documentation pointers, useful threads to retain |
+
+### 14b. Ephemeral / Topic-Specific Channels
+
+ICDC also creates short-lived channels for specific work streams. **Do not document these individually in the SKILL.md** — by the time the entry stabilizes, the channel is closed. Recognize the patterns instead:
+
+- `#icdc-sprint-NN-planning` — per-sprint planning channels (e.g., `#icdc-sprint-44-planning`)
+- `#icdc-YYYY-qN-software-release` — per-release coordination (e.g., `#icdc-2026-q3-software-release`)
+- `#icdc-banner-hotfix`, `#icdc-hotfix-security-vulnerability-cve-XXXX` — incident-specific channels
+- `#icdc-unit-testing`, `#icdc-2026-q3-software-release` — work-stream channels
+
+If a sprint or release announcement needs to reference one of these, link directly to it; do not try to memorize them.
+
+### 14c. Slack Mention Syntax — `<@UXXX>` vs `@display name`
+
+This is the single most-common Slack formatting mistake. Get it right:
+
+| What you write in API-composed message | What renders in Slack | Pings the person? |
+|---|---|---|
+| `<@U01TADC2E67>` | Clickable @ambar rana mention | ✅ Yes |
+| `<@ambar.rana@nih.gov>` | Plain text — fails to mention | ❌ No |
+| `@ambar rana` | Plain text "at-ambar-rana" | ❌ No |
+| `@ambar.rana` | Plain text "at-ambar.rana" | ❌ No |
+
+**Rule of thumb:** any Slack message composed via the MCP must use `<@UXXXXXXXXX>` syntax for mentions. The display-name format (`@ambar rana`) only works when typed directly into the Slack UI by a human, where the autocomplete picker resolves it to the User ID before sending.
+
+**For broadcast notifications:**
+
+| Token | Effect |
+|---|---|
+| `<!channel>` | Notifies every member of the channel currently online or away |
+| `<!here>` | Notifies only members currently active |
+| `<!everyone>` | Notifies the entire workspace (use sparingly, generally only in `#general`) |
+
+### 14d. Slack Message Formatting — Known Failures
+
+Real failures encountered when building ICDC announcements. Avoid these patterns.
+
+- **`---` horizontal rules trigger `invalid_blocks` errors.** Slack's block validator rejects them. Use blank lines or a `:large_blue_diamond:` / `:white_medium_square:` as a visual break between sections instead.
+- **Arrow characters (`→`) combined with user mentions can fail validation.** Use plain text labels ("Presenters:", "Tickets:") instead of decorative arrows in the same line as `<@U123>` mentions.
+- **User mentions render as `<@U123456>`.** If you see `<mailto:@U123...>` in a message (often in pasted content from Slack exports), that's a malformed mention — strip and re-format.
+- **For `@channel` notifications, use `<!channel>` in the API payload.** Slack UI renders it as `@channel` and pings the channel on send.
+- **Bot-sent messages show bot attribution** (e.g., "sent by Claude"). To post as yourself, copy the message text and paste it in the Slack UI directly. The draft tool solves this for new messages — drafts created via MCP send as the user when they hit "Send."
+
+### 14e. Draft Tool Behavior
+
+- Drafts created via `slack_send_message_draft` attach to a specific channel. They appear **only when you navigate to that channel**, not in the global "Drafts & Sent" sidebar view. If a user says they don't see the draft, the most likely cause is they're looking at the global Drafts view instead of the target channel.
+- **Only one attached draft per channel at a time.** Creating a new draft may replace an existing draft.
+- When the user has already reviewed the message in chat, `slack_send_message` is appropriate. If they haven't, use `slack_send_message_draft` so they can review in the Slack UI.
+
+### 14f. Standard Sprint Review + Release Demo Announcement Template
+
+Use this structure for combined Sprint Review + Release Demo announcements in `#icdc` (`CE0EA6W93`):
+
+```
+<!channel>  (use only if you need to notify the full channel — most sprint reviews warrant it)
+:feet::dna: *Sprint [N] Review + Release [version] Demo Day!* :dog2:
+
+[Hook sentence — what's happening and why it matters]
+
+:calendar: *When:* [Day] at [Time] [Timezone]
+
+*What's on the docket:*
+• Sprint [N] review — what we shipped, what's carrying over ([goal scorecard tease])
+• Live demos from the devs on every feature and bug fix
+• Retrospective — Liked / Lacked / Learned on our retro board
+• Action items
+
+Full release notes: <[github release URL]|[release tag]>
+
+:microphone: *Demo Schedule — who's on deck:*
+
+*Slot N ([N] min)* — [Feature name]
+Presenter(s): <@[slack_user_id]>  ← USE USER ID, not display name
+Tickets: [ICDC-XXXX, ICDC-YYYY]
+
+[repeat for each slot]
+
+<@[QA Slack User ID]> will be in the room to back up QA acceptance — thank you for shepherding *[N] tickets* through QA this sprint! :test_tube: :trophy:
+
+:clipboard: *Retro board — bookmark before [day]:*
+<[retrotool URL]|[retrotool URL]>
+Format: *10 min silent brainstorm* → group similar cards → discuss → dot-vote top 3 actions
+
+*Demo presenters — quick prep ask (24h before):*
+• [Prep item 1]
+• [Prep item 2]
+
+*Shout-outs from the release:* :gift:
+• [Cross-team wins, on-time delivery, notable collaboration]
+
+See you [day] at [time]! :raised_hands: Drop questions, heckles, or demo tips in the thread.
+```
+
+**ICDC-specific emoji conventions** observed in real announcements:
+- :feet: :dna: :dog2: — opening flair for sprint announcements (canine theme)
+- :siren2: — schedule changes / urgency
+- :microphone: — demo schedule section
+- :test_tube: :trophy: — QA shoutout
+- :clipboard: — retro board reference
+- :gift: — release shoutouts
+
+These are conventions, not requirements. Match the team's existing voice.
+
+### 14g. Per-Presenter Prep Sheet DM Template
+
+When DM'ing prep sheets, use the presenter's User ID as the channel:
+
+```
+slack_send_message_draft(
+  channel_id = "U01MJCG0MS8",   # Toyo Udosen's User ID — DM goes here
+  message    = "[full prep sheet markdown content]"
+)
+```
+
+The draft will appear in your DM thread with that person, ready to review and send.
+
+### 14h. Searching Slack History — When and How
+
+Use `slack_search_public_and_private` for:
+- Finding past announcements to model new ones on (`from:@Gina Kuffel sprint review`)
+- Confirming where a specific kind of message was previously posted
+- Pulling context for an ongoing thread
+
+Use `slack_search_channels` to:
+- Look up a channel's User ID before composing a message
+- Discover topic-specific channels created since the last SKILL.md update
+
+Use `slack_search_users` to:
+- Look up a User ID by name before composing a mention
+- Find the right person when only an email or display name is known
+
+**Do not memorize User IDs across sessions** — always pull from this section's roster table or the `slack_search_users` tool. The MCP user-ID-by-display-name search is reliable; assumptions are not.
