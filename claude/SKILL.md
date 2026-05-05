@@ -9,7 +9,7 @@ description: "Operational knowledge base for the ICDC Sprint Command Center Clau
 > **Ecosystem:** Cancer Research Data Commons (CRDC)  
 > **Team:** React web application engineers  
 > **Claude Project:** Sprint Command Center  
-> **Last Updated:** 2026-04-23
+> **Last Updated:** 2026-05-05
 
 ---
 
@@ -424,9 +424,9 @@ A second category of leadership document exists alongside epic summaries: **arch
 
 ---
 
-## 7. Sprint Reporting Templates
+## 7. ☀️ Sprint Reporting Templates
 
-### Daily Standup Prep Checklist
+### 7a. Daily Standup Prep Checklist
 Run these checks before each standup:
 1. Pull blocked items: `status = "Blocked"` in current sprint
 2. Pull items with no update in 48+ hours: `updated <= -48h` in current sprint
@@ -435,29 +435,101 @@ Run these checks before each standup:
 5. Note any tickets with no assignee
 6. Flag any tickets **not formally linked to their epic** (common ICDC issue — check `customfield_12350`)
 
-### Sprint Review Summary Format
+---
+
+### 7b. 🔢 Verify Before You Count — A Rule, Not a Suggestion
+
+**Always verify Jira totals in code before building charts, narrative, or deck content.** Never hand-count from a JSON dump.
+
+**Required workflow:**
+1. Pull the sprint/release/epic tickets with a single `jira_search`
+2. Write a short Node or Python script that reads the raw JSON, tallies by status / type / assignee, and prints counts
+3. Use those verified counts to populate the deck, doc, or Slack message
+4. Never guess or eyeball the totals from chat or JSON
+
+**Why this matters:** Confusing "In Progress" with "In Progress + Ready for Review + Ready for QA + Testing" is easy when they're all `In Progress` category. Confusing "Reopened" with "Open" is easy. Hand-counting a 40-ticket sprint across 8 statuses is where mistakes land in stakeholder materials.
+
+**Also verify before building:**
+- **Sprint name** — the sprint being reviewed is NOT the active sprint (active = next one). Use `jira_get_sprints_from_board` with board `574` to confirm dates match the meeting date.
+- **Ticket counts per metric** — total, done, carry-over, by status, by type, by assignee. All should sum correctly.
+- **Release scope** — cross-reference GitHub release notes against Jira `fixVersion` query. Gaps reveal tagging hygiene issues.
+- **Developer field, not Assignee** — see Section 3 (Jira Quirks). On ICDC the Assignee on a closed ticket is often QA; the Developer field (`customfield_23650` for Tasks/Bugs, `customfield_18250` for Stories) is the source of truth for who built it.
+
+---
+
+### 7c. Sprint Review Summary Format (Enhanced)
+
 ```
 ## Sprint [N] Review — ICDC
-**Sprint Dates:** [start] → [end]
-**Goal:** [sprint goal text from Jira]
+**Sprint Dates:** [start] → [end] (pulled from Jira, not memory)
+**Sprint Goal:** [exact goal text from Jira sprint record]
 
-### Velocity
-- Committed: X points
-- Completed: Y points
-- Completion Rate: Z%
+### 🎯 Goal Scorecard
+[X] of [Y] goals delivered. Each goal scored: ✓ DELIVERED / ▲ PARTIAL / ✗ NOT STARTED.
+Score against the Jira-recorded sprint goal, not raw ticket completion.
 
-### Completed Work
-[table: key | summary | points]
+### 📊 Velocity (by ticket count — team does not track story points)
+- Total tickets: X
+- Done / Closed: Y (Z%)
+- In Motion (In Progress + Ready for Review + Ready for QA + Testing): A
+- On Hold: B
+- Open / Reopened: C
+- Carry-overs: (Total − Done)
 
-### Carried Over
-[table: key | summary | reason for carry-over]
+### 🧩 Breakdown by Work Type
+- Tasks: done / total
+- Bugs: done / total
+- Stories (if used): done / total
 
-### Blockers Encountered
-[list]
+### 👥 Who Closed What
+Table of Done tickets by **Developer field** (not Assignee), ordered by count descending.
+On ICDC, Developer is the source of truth — Assignee is often QA who closed the ticket.
 
-### Notes for Next Sprint
-[list]
+### 🚀 Release Scope (if a release shipped in this sprint)
+- Versions shipped (FE, BE, Data Retriever, Interop, Dataloader, DMN if applicable)
+- Tickets by fixVersion
+- Data gaps worth naming (versions without Jira tickets; tickets shipped without fixVersion tags)
+
+### ✅ Completed Work
+[table: key | summary | type | developer | assignee]
+
+### 🔄 Carried Over
+[table: key | summary | status | developer | reason]
+
+### 🚩 Risks & Flags
+[list with color coding: 🟥 high / 🟨 medium / 🟩 info]
+
+### 🎤 Demo Schedule (if combined with release demo)
+[table: slot | time | feature | demo lead | supporting | tickets]
+
+### 🔄 Retro Format
+Liked · Lacked · Learned (not Start/Stop/Continue). 10-min silent brainstorm.
+Retro board URL: [varies per sprint — confirm with TPM]
 ```
+
+---
+
+### 7d. 🔄 Retrospective Format
+
+**The ICDC team uses Liked · Lacked · Learned** — same format as CTDC. Do not default to Start/Stop/Continue.
+
+| Rule | Value |
+|---|---|
+| **Format** | Liked · Lacked · Learned |
+| **Silent brainstorm duration** | 10 minutes |
+| **Full retro block** | 20 minutes (10 silent + 10 group/discuss/vote) |
+| **Retro tool** | [retrotool.io](https://retrotool.io) |
+| **Board URL** | Varies per sprint — **always confirm with the TPM before referencing in materials** |
+| **Action items** | Owner + deadline required or they won't happen |
+
+**Facilitation flow:**
+1. Open board link (10 min silent brainstorm — everyone drops cards, no talking)
+2. Group similar cards
+3. Discuss as a team
+4. Dot-vote the top 3 action items
+5. Assign owners and deadlines
+
+**Sprint-in-motion caveat:** When a retro happens mid-sprint (next sprint has already started), action items coming out of the retro can't go into next sprint planning because that's already happened. Triage options: insert into the in-flight sprint as additions, or defer to the following sprint. State this explicitly when opening the retro so the team calibrates expectations.
 
 ---
 
@@ -534,7 +606,121 @@ When creating tickets from Invicti or other security scan reports:
 
 ---
 
-## 9. Team Roster & Contacts
+## 9. 🎨 Sprint Review & Release Demo Deck Standards
+
+Combined Sprint Review + Release Demo + Retro decks follow this standard. Built with the `pptxgenjs` npm package and delivered as `.pptx`.
+
+### 9a. Build Tool & Setup
+
+- **Package:** `pptxgenjs` (global npm install: `npm install -g pptxgenjs`)
+- **Layout:** `LAYOUT_WIDE` (13.333" × 7.5")
+- **QA workflow:** Build → convert to PDF via `soffice` → rasterize with `pdftoppm` → inspect each slide image → fix defects → re-render once. Stop after one fix cycle unless a new user-visible defect appears.
+
+### 9b. Palette & Typography
+
+| Element | Value |
+|---|---|
+| **Primary (NIH Blue)** | `#20558A` |
+| **Primary dark (NIH Blue Dark)** | `#143458` — dark slide backgrounds |
+| **Accent light** | `#EAF1F8` — alternating rows, soft card backgrounds |
+| **Accent red (NIH Red)** | `#BE0000` — sparingly, for risk callouts and the single repeat motif |
+| **Supporting green** | `#16A34A` — "Done" / delivered / positive |
+| **Supporting amber** | `#D97706` — carry-over / warning |
+| **Text ink** | `#1F2937` |
+| **Muted text** | `#64748B` |
+| **Subtle dividers** | `#E2E8F0` |
+| **Header font** | Georgia (bold) |
+| **Body font** | Calibri |
+
+### 9c. Standard Slide Order (Combined Review + Release + Retro)
+
+1. **Cover** (dark bg) — Sprint number, release tag, meeting date/time, sprint dates, preparer block
+2. **Agenda** (light bg) — Numbered card rows, duration per block, total
+3. **Sprint [N] by the Numbers** — Big stat callout + status doughnut chart
+4. **Sprint [N] Goal Scorecard** — "X of Y goals delivered" + one card per goal (✓/▲/✗)
+5. **Breakdown by Work Type** — Stacked bar (Done vs Carry-over) by Task / Bug / Story + takeaways panel
+6. **Who Closed What** — Horizontal bar by Developer (not Assignee — see Section 3) + shout-out callout
+7. **Release [version] Overview** (dark bg, section break) — 4 stat cards
+8. **Demo Schedule** — Table: slot | time | feature | presenter(s) | tickets
+9–12. **Presenter Intro Slides** — One per demo slot: role eyebrow, presenter card(s), "What you'll see" bullets, ticket refs
+13. **Looking Ahead: Sprint [N+1]** — Carry-over chart + key flags panel
+14. **Up Next: Retrospective** (dark bg, section break) — Title + format + timebox
+15. **Retro Board Link** — Call to action with clickable retrotool URL + ground rules strip
+
+### 9d. Design Rules (what NOT to do)
+
+- **Never put red accent bars under slide titles.** Accent lines under titles read as AI-generated slop. Use whitespace or a dark background instead. A red motif line elsewhere on the slide (between content blocks, not attached to a heading) is OK.
+- **Never let big stat numbers overflow their text box.** `fontSize: 72` in an `h: 1.2` box with `valign: "middle"` will clip the top of the glyph. Use `fontSize: 64` in `h: 1.3` with valign middle, or size the box generously.
+- **Multi-presenter slots** get a single slide with two presenter cards stacked vertically on the left, "What you'll see" bullets on the right. Allocate 8 min instead of 5–6 for two-presenter demos.
+
+### 9e. Presenter Intro Slide Structure
+
+Each demo slot gets one intro slide with this layout:
+
+- **Top-left:** `SLOT N` in red eyebrow caps
+- **Top-right:** duration (e.g., `8 MINUTES`) in muted caps
+- **Title:** feature name in large Georgia bold
+- **Subtitle:** plain-English "why this matters" in italic NIH Blue
+- **Left column (1 or 2 cards):** Role eyebrow + Name in Georgia + focus sentence in muted Calibri
+- **Right column:** "What you'll see" bullets (use square bullets, `bullet: { code: "25A0" }`)
+- **Bottom-right:** Ticket references in muted + bold NIH Blue
+
+---
+
+## 10. 🎤 Demo Day Artifacts Workflow
+
+A combined Sprint Review + Release Demo + Retro meeting produces a specific set of artifacts. Build them in this order and deliver on this schedule.
+
+### 10a. The Five Artifacts
+
+| # | Artifact | Format | Destination | Timing |
+|---|---|---|---|---|
+| 1 | **Slack announcement** | Slack message in `#icdc-discussions` | Channel ID TBD — pull via `slack_search_channels` on first use | 24–48 hours before meeting |
+| 2 | **Sprint Review deck** | `.pptx` | Used live in meeting | Ready 24h before meeting |
+| 3 | **Per-presenter prep sheets** | `.md` per presenter | DM to each presenter | 24h before meeting |
+| 4 | **Retro board** | retrotool.io board | URL in deck + Slack announcement | Created by TPM before meeting |
+| 5 | **Goal scorecard framing** | Built into deck slide 4 | — | Built with deck |
+
+### 10b. Per-Presenter Prep Sheets
+
+**One sheet per person**, not per slot. If a presenter owns two slots, both go in their one sheet.
+
+Each prep sheet contains:
+- Meeting date/time + slot(s) + total airtime
+- Pre-meeting checklist (what to open, what to test, what to pre-load)
+- Context on what they're showing and why
+- Talking points with suggested wording (not a script — they can borrow or discard)
+- Step-by-step live demo walkthrough
+- Likely questions with prepared answers
+- "If something goes wrong" fallbacks
+- Ticket reference list
+
+**Distribution:** DM each prep sheet privately 24 hours before the meeting (not the channel — they contain presenter-specific prompts). Thursday afternoon is the sweet spot for a Friday meeting; earlier and presenters forget.
+
+**ICDC roster note:** When prepping presenter sheets for ICDC, reference the team using their **Slack handles** from Section 11 (Team Roster). The handles are display-name format (e.g., `@ambar rana`, `@Toyo Udosen`), not username format. Use them verbatim.
+
+### 10c. Goal Scorecard Framing
+
+Always pull the sprint goal from Jira (`jira_get_sprints_from_board`, then check the `goal` field on the sprint object). Score each goal against the real outcome in the sprint:
+
+| Marker | Meaning |
+|---|---|
+| ✓ **DELIVERED** | Goal fully met |
+| ▲ **PARTIAL** | Progress made but not complete |
+| ✗ **NOT STARTED** | Goal not addressed |
+
+Headline format: *"X of Y goals delivered."* This reframes a sprint more favorably for leadership than raw ticket completion % alone. When the raw completion rate is low (e.g., 28%) but major goals were delivered (e.g., release shipped, major data load completed), the scorecard tells a more accurate story.
+
+### 10d. ICDC-Specific Demo Day Notes
+
+- **No data-release vs software-release split.** ICDC is all open access — there's no separate data-release announcement channel like CTDC has. Sprint review and release demo combine into a single meeting and a single Slack post.
+- **Three data pathways are demo-relevant.** When framing what shipped in a release, be precise about which pathway changed (Jenkins `DataLoader.py` for study data ingestion, Data Retriever Python ETL for external-node data, Interop `storeManifest` for CGC export — see Section 2 for the full reference). Misframing pathways in a demo announcement is a common mistake.
+- **Vocabulary discipline.** Never say "DMN v2.0" or "Data Model Navigator v2.0" — see Section 2's Data Model vs. DMN rule. Versioning applies to the Data Model content, not the Navigator tool.
+- **Developer-field shoutouts.** When calling out who built what in a Slack announcement, pull from the Developer field, not Assignee. Tagging the QA who closed the ticket as the builder is a real and common mistake on ICDC.
+
+---
+
+## 11. 👥 Team Roster & Contacts
 
 > Update this section as team membership changes.
 >
@@ -573,7 +759,7 @@ When creating tickets from Invicti or other security scan reports:
 
 ---
 
-## 10. Claude Knowledge Base — Reference Library
+## 12. 🗂️ Claude Knowledge Base — Reference Library
 
 > ⚠️ **Fetch-on-demand only. Do NOT auto-fetch these files at the start of every session.**
 >
@@ -639,14 +825,16 @@ All stores are maintained in parallel. SharePoint is for stakeholder access; Git
 
 ---
 
-## 11. Maintenance Notes
+## 13. 🔧 Maintenance Notes
 
 - This file lives at `CBIIT/icdc-documentation/claude/SKILL.md`
 - Update JQL recipes when Jira workflow statuses change
 - Update the Jira Quirks section immediately if new custom field behaviors are discovered
-- Update the Team Roster (Section 9) when team members are added, removed, or roles change
+- Update the Team Roster (Section 11) when team members are added, removed, or roles change
 - Update domain context when new repos or major architectural changes occur
 - Review stakeholder doc standards before each major release cycle
 - New SOPs or workflow patterns discovered in Claude conversations should be added here via PR
-- When new files are added to `claude/`, update Section 10 (Knowledge Base) so they remain discoverable
-- When a new architecture leadership `.docx` is published, update the Document Storage Convention table in Section 10 if applicable
+- When new files are added to `claude/`, update Section 12 (Knowledge Base) so they remain discoverable
+- When a new architecture leadership `.docx` is published, update the Document Storage Convention table in Section 12 if applicable
+- When deck standards or demo-day workflows change, update Sections 9 and 10 (Deck Standards and Demo Day Workflow)
+- Update the Sprint Review Summary template (Section 7c) when Jira workflow statuses change so the velocity buckets stay accurate
