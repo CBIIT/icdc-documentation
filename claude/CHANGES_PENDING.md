@@ -4,6 +4,8 @@ These changes are queued for `claude/SKILL.md` but not yet applied to the live f
 
 The next session that touches SKILL.md (epic normalization, section update, etc.) should apply these queued changes in the same commit.
 
+**⚠️ Affiliation discipline reminder.** When applying these changes (or any future SKILL.md edit involving roster entries), do NOT silently change anyone's affiliation tag. The `@nih.gov` email domain is given to FNL/BACS/CTOS contractors as well as federal employees and is not evidence of federal status. Confirmed federal employees on ICDC: Mark Jensen (NIH/NCI). Confirmed FNL/BACS contractors: Gina Kuffel, Ambar Rana, Eric Miller, Toyo Udosen, Charles Ngu, Philip Musk. Any other affiliation tag must be verified with the user before being added or changed. When unsure, ask.
+
 ---
 
 ## Change 1 — Insert 7e-4 reference block
@@ -63,11 +65,59 @@ The next session that touches SKILL.md (epic normalization, section update, etc.
 
 ---
 
+## Change 3 — Update Philip Musk's row in §11 Active Team Members
+
+**Where:** Section 11 Active Team Members table.
+
+**Find this row:**
+
+```
+| Business Analyst (NIH/NCI) | Philip Musk | — | `muskp2` | *(not yet confirmed)* | `@Philip Musk` |
+```
+
+**Replace with:**
+
+```
+| Business Analyst, FNL/BACS — leads ICDC Data team | Philip Musk | philip.musk@nih.gov | `muskp2` | `UE1AJ02EB` | `@Philip Musk` |
+```
+
+**Why three changes in one row:**
+
+1. **Role correction:** "Business Analyst (NIH/NCI)" → "Business Analyst, FNL/BACS — leads ICDC Data team". Philip is an FNL/BACS contractor (not NIH/NCI federal), and he leads the ICDC Data team (correcting a prior misattribution to Todd Pihl).
+2. **Email added:** `philip.musk@nih.gov` (sourced from his Slack profile via `slack_search_users`).
+3. **Slack User ID added:** `UE1AJ02EB` (sourced from `slack_search_users` query "Philip Musk").
+
+---
+
+## Change 4 — Remove Todd Pihl's row from §11 NCI/CBIIT Stakeholders (or verify and reframe)
+
+**Where:** Section 11 NCI/CBIIT Stakeholders table.
+
+**Find this row:**
+
+```
+| DataHub Adoption Driver | Todd Pihl | NCI/CBIIT — drove DMN adoption in CRDC DataHub |
+```
+
+**Two options — pick based on what is verified:**
+
+**Option A — Remove the row entirely.** Use this if the user wants to clean out unverified stakeholder entries. The DataHub adoption history is already preserved in the Data Model Explorer / Navigator product summary document and in the cross-project Jira ticket history (CRDCDH-18, CRDCDH-550, etc.) — it doesn't need to live in the SKILL.md roster.
+
+**Option B — Verify Todd's affiliation and keep the row with corrected text.** If Todd is confirmed FNL/BACS or another contractor org rather than NCI/CBIIT federal, replace the row with:
+
+```
+| DataHub Adoption Driver (historical) | Todd Pihl | <verified affiliation> — drove DMN adoption in CRDC DataHub circa 2023 |
+```
+
+**The change recorded in user memory** (and reflected in the ICDC-4134 epic description) is that Philip Musk leads the ICDC Data team — NOT Todd Pihl. The Todd-Pihl-as-DataHub-driver framing is historical and may still be accurate in that narrow sense, but Todd's affiliation tag (NCI/CBIIT) is unverified. The next session applying these changes should ask the user before keeping it as `NCI/CBIIT`.
+
+---
+
 ## How to apply
 
 Either:
 
-1. **Manual PR:** edit `claude/SKILL.md` directly in GitHub UI, paste in the two changes above, commit. ~2 minutes.
-2. **Next Claude session:** ask "apply the pending SKILL.md changes from claude/CHANGES_PENDING.md and then delete the file." The next session can fetch SKILL.md fresh, apply the two surgical edits, push, and clean this file up.
+1. **Manual PR:** edit `claude/SKILL.md` directly in GitHub UI, paste in the changes above, commit. ~5 minutes for all four.
+2. **Next Claude session:** ask "apply the pending SKILL.md changes from claude/CHANGES_PENDING.md and then delete the file." The next session can fetch SKILL.md fresh, apply the surgical edits, push, and clean this file up. For Change 4, the next session must ask the user about Todd's affiliation before proceeding.
 
-After applying both changes, **delete this file** so it stays a true to-do queue.
+After applying all four changes, **delete this file** so it stays a true to-do queue.
