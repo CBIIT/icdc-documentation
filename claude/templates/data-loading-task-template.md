@@ -143,7 +143,8 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
 - **No Acceptance Criteria section.** Data loading is operational SOP work; the completion bar is the Testing Signoff table plus the Verification Surfaces checklist.
 - **No Open Questions / Risks section.** Open questions and risks live on the parent submission user story, not on this Task. If a question or risk surfaces during the load, raise it as a bullet under the parent user story's Open Questions / Risks section so it's tracked at the program level.
 - **One Task per end-to-end load** — Dev through Prod, not one ticket per environment. The Testing Signoff table is the single source of truth for where the load is in the pipeline.
-- **Issue type is User Story** for the ICDC data load (intentional ICDC choice; the paired IndexD Registration ticket remains a Task). Do not use Subtask. As a Story, the Developer value belongs in `customfield_18250` (Developer Legacy), not the Task/Bug field `customfield_23650` — see SKILL.md §3.
+- **Issue type is User Story** for the ICDC data load (intentional ICDC choice; the paired IndexD Registration ticket remains a Task). Do not use Subtask. **The Developer value goes in `customfield_23650`** — the canonical Developer field for all issue types, including Story — and names the engineer who runs the load. `customfield_18250` ("Developer Legacy") is deprecated and stays empty. See SKILL.md §3.
+- **No `Data-Concierge` label.** Data loading is engineering work, not part of the Data Concierge service (which covers the IndexD registration/indexing handoff). Do not apply the `Data-Concierge` label to load tickets — it belongs only on the paired IndexD Registration Task. See SKILL.md §3.
 - **Parent Epic set via `customfield_12350`** (confirmed — e.g., ICDC-4176 → epic ICDC-3342 "ICDC Data").
 - **`Relates` link to related tickets.** Parent epic via Epic Link (`customfield_12350`); the paired IndexD Registration Task via `Relates`. `[ICDC-VERIFY]` — ICDC does not appear to keep a separate program-level submission user story (the data epic + this load Story serve that role); confirm with Ambar Rana.
 - **`Relates` link to the paired IndexD Registration Task.** Registration and the load are paired, but registration does **not** technically block the load, so use `Relates`, not `Blocks`.
@@ -207,5 +208,5 @@ Still open for Ambar Rana:
 
 1. **Object Files bucket** — confirm `nci-crdc-data-bucket-prod` is correct for ICDC (assumed; flagged in ICDC-4175).
 2. **Parent submission user story** — ICDC appears to use a data epic + load Story rather than a CTDC-style program-level submission user story; confirm the intended pattern.
-3. **Developer-field placement on the load Story** — per SKILL.md §3 a Story's Developer is `customfield_18250`; confirm the load Story follows that (or is a deliberate exception).
+3. **Developer-field placement on the load Story** — ✅ **RESOLVED (2026-05-28):** the Developer field is `customfield_23650` for *all* issue types including Story (confirmed on ICDC-4176; the Jira UI "Developer" field reads from it). `customfield_18250` is deprecated/unused. SKILL.md §3 and this template updated to match.
 4. **Initial ownership** — confirm whether the load Story is assigned to the data engineer or the TPM at creation.
