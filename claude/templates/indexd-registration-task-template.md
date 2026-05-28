@@ -1,6 +1,6 @@
 ### 🔖 IndexD Registration Task Template (v1-DRAFT — 2026-05-27)
 
-> **Status:** **v1-DRAFT.** Ported from CTDC's `claude/templates/indexd-registration-task-template.md` (v3). Carries `[ICDC-VERIFY]` callouts at every spot where the CTDC pattern was adapted for ICDC but the ICDC-specific assumption needs Ambar Rana's review before the template becomes canonical. Once `[ICDC-VERIFY]` items are resolved, this template promotes to v1 canonical.
+> **Status:** **v1-DRAFT (rev. 2026-05-28).** Ported from CTDC's `claude/templates/indexd-registration-task-template.md` (v3), then revised against the first real ICDC ticket drafted under it (ICDC-4175, with intake ticket CRINTAKE-478). This revision confirms ICDC uses the same external CTDS / CRINTAKE / DCF Google Drive handoff as CTDC but **without consent codes / `acl`** (all files open access), renames the Release Package row, adds an AWS Account ID row, and uses **`Relates`** (not `Blocks`) to the paired Data Loading ticket. Remaining open items are listed at the end; once Ambar Rana confirms them this promotes to v1 canonical.
 
 > **Use this template for every ICDC data management task that registers a study's files in CRDC IndexD — minting GUIDs that the downstream Data Loading Task will reference.** Canonical example: TBD (will be filled in when the first ICDC IndexD Registration ticket is drafted under this template). This template covers the **upstream artifact creation** work pattern within the loading-data sub-function — it is the prerequisite to a Data Loading Task, not a substitute for one. See "When NOT to use this template" at the end.
 
@@ -10,7 +10,7 @@ The ICDC team has two primary functions — software development and data manage
 
 ICDC's role in IndexD registration is **coordination**, not engineering: validate the indexd.tsv manifest, hand it off to the external indexing team via the agreed channels, then verify the minted GUIDs resolve correctly before the downstream Data Loading Task can proceed.
 
-> **`[ICDC-VERIFY]` callout — fundamental scope question:** Does ICDC actually use CRDC IndexD the same way CTDC does, or does ICDC have a simpler workflow because all files are open access and there are no consent codes / `acl` fields? If ICDC has IndexD work but it's structurally simpler (no consent codes, no external CRINTAKE handoff), this template may be over-engineered and needs to be re-shaped to ICDC's actual workflow. Ambar Rana confirms.
+> **Scope (largely confirmed by ICDC-4175):** ICDC uses CRDC IndexD via the same external handoff as CTDC — a DCF Google Drive drop plus a CRINTAKE intake ticket to CTDS (e.g., CRINTAKE-478 for COTC030) — but **without consent codes / `acl`** (all ICDC files are open access). Remaining nuance for Ambar Rana: confirm the Object Files bucket name and that ICDC permanently shares CTDC's DCF folder and CRINTAKE board rather than having its own.
 
 **Tasks execute; user stories deliberate.** This is the core principle the template enforces. Tasks are operational work units the assignee executes — they should carry only what's needed to do the work. **Open questions, risks, and unresolved decisions belong on the parent user story**, where the team negotiates scope and tracks risk at the program level. By the time work is decomposed into Tasks, those questions should be resolved enough that the Task can be executed.
 
@@ -18,7 +18,7 @@ The template is **task-shaped: five sections totaling under 700 words, with owne
 
 The most common antipatterns this template prevents:
 
-1. **Treating IndexD registration as internal pipeline work.** It is not. There is no Jenkins job, no Memgraph write, no environment promotion. IndexD is a centralized service that mints GUIDs for the entire CRDC platform. The bottleneck is an external team's queue, not ICDC's pipeline capacity.
+1. **Treating IndexD registration as internal pipeline work.** It is not. There is no Jenkins job, no Neo4j write, no environment promotion. IndexD is a centralized service that mints GUIDs for the entire CRDC platform. The bottleneck is an external team's queue, not ICDC's pipeline capacity.
 2. **Treating the indexd.tsv as a manifest ICDC authors.** `[ICDC-VERIFY]` — In CTDC the indexd.tsv ships inside the validated Release Package the CRDC Submission Portal produces. ICDC's submission lineage may produce this artifact differently (COTC trials may have a different intake mechanism). Confirm with Ambar Rana.
 3. **Duplicating Jira's native Links panel inside the description body.** A standalone "Linked Work" section in a Task description duplicates what the right-sidebar Links panel already shows. The template omits this section entirely.
 4. **Accumulating open questions on a Task that should be on the parent user story.** Program-level risks belong on the parent submission user story (`[ICDC-VERIFY]` — does ICDC maintain submission-level user stories the way CTDC does? Confirm with Ambar Rana), not on each child Task.
@@ -31,30 +31,31 @@ The most common antipatterns this template prevents:
 - **DCF Google Drive** — `[ICDC-VERIFY]` — The drop-off point for the indexd.tsv copy. CTDC uses the folder at `https://drive.google.com/drive/u/2/folders/1ZVsv2vFEcTPBT2IYsaOb_XCjpWjjMGTb` — ICDC may share this folder or have its own. Confirm with Ambar Rana.
 - **CRINTAKE Jira board** — `tracker.nci.nih.gov/projects/CRINTAKE/`. `[ICDC-VERIFY]` — In CTDC this is the external team's intake queue; ICDC may use the same board (since CTDS serves the whole CRDC platform) or a different one. Confirm with Ambar Rana.
 - **Resolution endpoint** — `https://nci-crdc.datacommons.io/index/<guid>`. Public endpoint for resolving a GUID to its IndexD record. Used for verification spot-checks. This is universal across the CRDC platform.
-- **Downstream Data Loading Task** — The ICDC ticket that this registration unblocks. Once the GUIDs are minted and verified, the load ticket can proceed with the metadata loading file referencing those GUIDs.
+- **Paired Data Loading Task** — The ICDC ticket this registration feeds, linked via `Relates`. Once the GUIDs are minted and verified, the load can proceed referencing those GUIDs. (Registration is paired with, but does not technically block, the load.)
 
 **Section order (5 sections, exactly this sequence)**
 
 Each section header is an `h3` Markdown heading using the emoji + bold title format shown. If a section has no real content for a given registration, omit the header entirely rather than stub it with "None at this time."
 
-1. `### 🎯 **Registration Summary**` — One paragraph. What's being indexed (file count + file type if known), which submission this registration belongs to (named by parent user story key — set via Jira `Relates` link, NOT restated in description), and the downstream Data Loading Task this registration unblocks. **Do not duplicate study identity from the parent submission user story** — chronology, submitter, study identifiers, POC team, and study description all live on the parent user story and the registration ticket references them by the native Links panel.
+1. `### 🎯 **Registration Summary**` — One paragraph. What's being indexed (file count + file type if known), which submission this registration belongs to (named by parent epic / Story — set via the native Links panel, NOT restated in description), and the paired Data Loading Task this registration feeds. **Do not duplicate study identity from the parent submission user story** — chronology, submitter, study identifiers, POC team, and study description all live on the parent and the registration ticket references them by the native Links panel.
 
    **`[ICDC-VERIFY]` — Canonical example placeholder:** The first ICDC ticket drafted under this template will become the canonical example reference here. Until then, refer to CTDC-2060 (NCTN-NCORP TCIA Images-Only AHEP0731) in the CTDC repo as the closest sibling pattern.
 
 2. `### 📦 **Submission & Artifacts**` — Required field. A table holding the artifacts the external indexing team needs to do the work. Study identity (program, study name, identifiers, submitter, chronology) lives on the parent submission user story linked via the native Links panel — not in this table.
 
-   The CTDC v3 of this template uses five rows. **For ICDC, the consent group / ACL value row is REMOVED** because ICDC files are open access. The remaining four rows:
+   The CTDC v3 of this template uses five rows. **For ICDC, the consent group / ACL value row is REMOVED** (open access). The rows below also add an **AWS Account ID** row (both ICDC load tickets carry it):
 
    | Field | Value | Notes |
    |---|---|---|
-   | CRDC Submission ID | *(Submission Portal ID or ICDC equivalent — one per submission)* | `[ICDC-VERIFY]` — does ICDC use the CRDC Submission Portal the same way CTDC does, or do ICDC submissions originate elsewhere (e.g., direct COTC trial intake)? Confirm with Ambar Rana. |
-   | Release Package Location | AWS Bucket: `[ICDC-VERIFY]` | The bucket holding the Release Package + indexd.tsv manifest. CTDC uses `nci-cbiit-clinicaltrialdatacommons-metadata` — ICDC equivalent TBD. |
-   | Object Files Location | AWS Bucket: `[ICDC-VERIFY]` | The bucket holding the physical object files. CTDC uses `nci-crdc-data-bucket-prod` — ICDC equivalent TBD. GUIDs are listed per-file in the indexd.tsv manifest inside the Release Package, not enumerated here. |
-   | Example GUID | *(the first minted GUID, used as the spot-check anchor)* | Used for spot-check anchor in the Verification section. Fill in once the Release Package is generated; the CRDC Submission Portal pipeline assigns the GUIDs ahead of registration. |
+   | CRDC Submission ID | *(CRDC Submission Portal ID — one per submission)* | ICDC submissions originate from the CRDC Submission Portal (confirmed). |
+   | AWS Account ID | *(12-digit ICDC data commons AWS account)* | Standard ICDC data commons AWS account. Use one consistent format across the paired Data Loading ticket. |
+   | Release Package | AWS S3: `s3://nci-cbiit-caninedatacommons-dev/<timestamp>-<submission-id>` | Source of truth. Holds the IndexD manifest + validated data-loading TSVs (confirmed from ICDC-4175). |
+   | Object Files Location | AWS S3 Bucket: `nci-crdc-data-bucket-prod` `[ICDC-VERIFY — confirm with Ambar / Charles]` | The bucket holding the physical object files. Each manifest row's `url` resolves here. GUIDs are listed per-file in the manifest, not enumerated here. |
+   | Example GUID | *(the first minted GUID — used as the spot-check anchor; CRDC prefix `dg.4DFC/`)* | Used for the spot-check anchor in the Verification section. |
 
-   **Naming discipline**: rows that point at *where artifacts live* end in "Location" (e.g., "Release Package Location", "Object Files Location"). This makes the row's purpose unambiguous — the row holds an address, not a content description.
+   **Naming discipline**: rows that point at *where artifacts live* carry an address, not a content description — e.g., "Object Files Location" names a bucket, and "Release Package" names the source-of-truth S3 path.
 
-   **Rows omitted compared to CTDC v3**: "Consent group / ACL value" (not applicable to ICDC — open access); "CRDC Submission ID" may also be omitted if `[ICDC-VERIFY]` confirms ICDC doesn't use Submission Portal IDs.
+   **Rows omitted compared to CTDC v3**: "Consent group / ACL value" (not applicable to ICDC — open access). CRDC Submission ID is **retained** — ICDC uses CRDC Submission Portal IDs (confirmed).
 
 3. `### 🚦 **Registration Workflow**` — Numbered list grouped into three phases. **`[ICDC-VERIFY]` — The entire workflow below is CTDC's standard sequence. ICDC's actual sequence may differ in steps 2–5 (external handoff) depending on which external team handles ICDC indexing and via what mechanism.** Ambar Rana confirms.
 
@@ -69,7 +70,7 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
 
    **Confirmation and verification**
    6. Confirm the indexing team has received the manifest and acknowledged the intake ticket.
-   7. Once indexing is complete, spot-check minted GUIDs using the example GUID in the Submission & Artifacts section. GUID spot-check success is the trigger to transition the ticket to Closed and unblock the downstream Data Loading Task.
+   7. Once indexing is complete, spot-check minted GUIDs using the example GUID in the Submission & Artifacts section. GUID spot-check success is the trigger to transition the ticket to Closed and clear the paired Data Loading Task to proceed.
 
 4. `### 🧪 **Verification**` — How ICDC confirms the registration actually worked. Bullet list (italic-labelled, em-dash separators — this is the rendering-safe pattern verified on CTDC; assumed to apply to ICDC's Jira tracker as well since both projects use the same `tracker.nci.nih.gov` instance):
 
@@ -122,7 +123,7 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
 5. Create the IndexD registration task via `jira_create_issue` with `issue_type = "Task"`, a short placeholder description, and the parent epic linked via the standard custom field. Assign to the TPM `[ICDC-VERIFY] — confirm ICDC TPM ownership pattern with Ambar Rana` initially.
 6. Push the full description in a second call via `jira_update_issue` with the full Markdown body.
 7. Add `Relates` links from the registration ticket to the parent submission user story (if applicable) using `jira_create_issue_link`.
-8. Add a `Blocks` link from the registration ticket to the downstream Data Loading Task using `jira_create_issue_link`.
+8. Add a `Relates` link from the registration ticket to the paired Data Loading ticket using `jira_create_issue_link`. (IndexD registration is paired with, but does not technically block, the load.)
 9. Verify the rendered description with a UI screenshot.
 10. As the workflow progresses, add the external intake ticket remote link via `jira_create_remote_issue_link` once step 3 of the workflow is complete.
 11. After GUID spot-check passes, transition the ticket to Closed with the appropriate resolution. **GUID spot-check success is the close trigger.**
@@ -149,19 +150,22 @@ When the canonical example is identified, this section should be updated with:
 
 ---
 
-## Open `[ICDC-VERIFY]` items (for Ambar Rana's review)
+## `[ICDC-VERIFY]` items — status
 
-This template carries the following assumptions that need ICDC-specific confirmation before promotion to canonical:
+Resolved from ICDC-4175 / CRINTAKE-478 (v1-DRAFT → on track for canonical once the remaining items below are confirmed):
 
-1. **Fundamental scope** — Does ICDC use CRDC IndexD the same way CTDC does? Or is ICDC's workflow simpler because all files are open access?
-2. **Indexd.tsv source** — Does the indexd.tsv ship inside a CRDC Submission Portal Release Package the same way it does for CTDC, or does ICDC's submission lineage produce this artifact differently (e.g., direct COTC trial intake)?
-3. **External team** — Is CTDS the indexing team for ICDC the same way they are for CTDC? Or does a different external team handle ICDC's indexing?
-4. **Object Files bucket** — What's ICDC's equivalent of CTDC's `nci-crdc-data-bucket-prod`?
-5. **Release Package bucket** — What's ICDC's equivalent of CTDC's `nci-cbiit-clinicaltrialdatacommons-metadata`?
-6. **DCF Google Drive folder** — Does ICDC use the same DCF folder as CTDC, or a different one?
-7. **CRINTAKE board** — Does ICDC file intake tickets on the same CRINTAKE Jira board as CTDC?
-8. **PM notification chain** — When a due date matters, who gets notified for ICDC submissions? (CTDC notifies NCI CRDC PM and NCI DCFS PM.)
-9. **IndexD record shape** — Are `acl` and `authz` fields present-but-empty or absent for ICDC records?
-10. **Parent submission user story pattern** — Does ICDC maintain program-level submission user stories the way CTDC maintains tickets like CTDC-1805 (NCTN-NCORP TCIA Images-Only Data Submissions)?
-11. **Jira custom field for Parent Epic** — Does ICDC use `customfield_12350` the same way CTDC does, or a different field?
-12. **TPM ownership pattern** — Is the TPM the initial assignee for ICDC IndexD Registration Tasks, the same way CTDC assigns to the TPM initially?
+- ✅ **Fundamental scope** — ICDC uses CRDC IndexD via the same external handoff as CTDC, minus consent codes / `acl` (open access).
+- ✅ **Indexd manifest source** — ships inside the CRDC Submission Portal Release Package.
+- ✅ **External team** — CTDS, via the CRINTAKE board (CRINTAKE-478 filed for COTC030).
+- ✅ **Release Package bucket** — `nci-cbiit-caninedatacommons-dev`.
+- ✅ **IndexD record shape** — `acl` / `authz` absent or empty for ICDC (open access).
+- ✅ **Parent Epic custom field** — `customfield_12350`.
+
+Still open for Ambar Rana:
+
+1. **Object Files bucket** — confirm `nci-crdc-data-bucket-prod` is correct for ICDC (assumed; flagged in ICDC-4175).
+2. **DCF Google Drive folder** — confirm ICDC permanently shares CTDC's folder (`…/1ZVsv2vFEcTPBT2IYsaOb_XCjpWjjMGTb`) rather than having its own.
+3. **CRINTAKE board** — confirm ICDC files intake on the shared CRINTAKE board long-term.
+4. **PM notification chain** — who is notified for ICDC submissions when a due date matters?
+5. **Parent submission user story** — does ICDC keep a program-level submission user story, or does the data epic + paired load Story serve that role?
+6. **TPM ownership pattern** — is the TPM the initial assignee for ICDC IndexD Registration Tasks?
