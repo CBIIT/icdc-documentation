@@ -11,8 +11,8 @@ Templates are organized by **work lane** — the team has two primary functions 
 | Template | Lane | Status | Canonical Example | Notes |
 |---|---|---|---|---|
 | `7e-4-products.md` | Software development (Products epic) | Drafted | TBD | Pre-existing. Covers standalone deliverables consumed by external systems (manifest format spec, the ICDC application as a whole, the Data Model itself as a versioned product). |
-| `indexd-registration-task-template.md` | Data management — loading data | **v1-DRAFT (2026-05-27)** | None yet — needs ICDC ticket | Ported from CTDC v3 with ICDC adaptations. **Open-access model only — no consent codes / `acl` complexity.** Ambar Rana review required before canonical. Look for `[ICDC-VERIFY]` callouts. |
-| `data-loading-task-template.md` | Data management — loading data | **v1-DRAFT (2026-05-27)** | None yet — needs ICDC ticket | Ported from CTDC v5 with ICDC adaptations. Application surfaces are Cases / Studies / Samples (not Participants / Studies / Specimens). Ambar Rana review required before canonical. Look for `[ICDC-VERIFY]` callouts. |
+| `indexd-registration-task-template.md` | Data management — loading data | **v1-DRAFT (rev. 2026-05-28)** | ICDC-4175 | Ported from CTDC v3. Open-access only (no `acl`). Revised against ICDC-4175 / CRINTAKE-478: `Relates` (not `Blocks`), Release Package row, AWS Account ID row, most `[ICDC-VERIFY]` items resolved. A few open items remain for Ambar Rana. |
+| `data-loading-task-template.md` | Data management — loading data | **v1-DRAFT (rev. 2026-05-28)** | ICDC-4176 | Ported from CTDC v5. Cases / Studies / Samples. Revised against ICDC-4176 + `icdc-dataloader`: **Neo4j** (not Memgraph), hybrid Dev-local / Jenkins pipeline, **User Story** issue type, `Relates` (not `Blocks`), five-row artifacts table. A few open items remain for Ambar Rana. |
 | `data-modeling-for-study-submission-template.md` | Data management — modeling data | Planned (next session) | TBD | Will be ported from CTDC v3 with ICDC adaptations — repo is `icdc-model-tool`, not `ctdc-model`. |
 | `data-model-update-task-template.md` | Data management — modeling data | Planned (next session) | TBD | Will be ported from CTDC v2 with ICDC adaptations. |
 
@@ -23,7 +23,7 @@ Templates are organized by **work lane** — the team has two primary functions 
 The ICDC team's work splits cleanly along two operational lanes:
 
 - **Software development** — designing, coding, testing, releasing the React frontend (Bento framework) and supporting services. Verified against application *behavior*. Tracked with epic templates by grouping (see ICDC SKILL.md Section 7e — Pages / Microservices / Features / Products / Infrastructure / Sandbox / Data).
-- **Data management** — managing study data submissions (COTC trials and others), modeling the shape of ICDC's data in `icdc-model-tool`, and loading data through Jenkins into ICDC's Memgraph + OpenSearch stack. Verified against application *contents* and schema state.
+- **Data management** — managing study data submissions (COTC trials and others), modeling the shape of ICDC's data in `icdc-model-tool`, and loading data into ICDC's **Neo4j + OpenSearch** stack (Dev runs locally; QA / Stage / Prod via Jenkins). Verified against application *contents* and schema state.
 
 Data management has two sub-functions:
 
@@ -43,11 +43,12 @@ These templates were ported from the CTDC documentation repo (`CBIIT/ctdc-docume
 | File access control | Open + controlled (two tiers) | **Open access only** |
 | Consent codes / `acl` field | Required for controlled studies (e.g., `phs004135.c1`) | **Not applicable** |
 | Login required for file downloads | Yes — NIH eRA Commons via CRDC Fence | **No — all files downloadable without login** |
-| External handoff for IndexD | Yes — CTDS via CRINTAKE | **TBD — may differ; `[ICDC-VERIFY]`** |
+| External handoff for IndexD | Yes — CTDS via CRINTAKE | **Same — CTDS via CRINTAKE + DCF Google Drive (CRINTAKE-478); no `acl`** |
 | Data Model repo | `CBIIT/ctdc-model` | `CBIIT/icdc-model-tool` |
+| Graph metadata store | Memgraph | **Neo4j** (loader connects via `bolt://…:7687`) |
 | Application surface terminology | Participants, Studies, Specimens | **Cases, Studies, Samples** |
-| Submission ingestion source | CRDC Submission Portal | **COTC trials primarily; `[ICDC-VERIFY]`** |
-| Submission user story pattern | Program-level (e.g., CTDC-1805) | **TBD — `[ICDC-VERIFY]` whether ICDC has equivalent** |
+| Submission ingestion source | CRDC Submission Portal | **CRDC Submission Portal (COP / COTC trials enter via the Portal)** |
+| Submission user story pattern | Program-level (e.g., CTDC-1805) | **Data epic + load Story; `[ICDC-VERIFY]` whether a separate submission Story exists** |
 
 The templates here have been adapted for these differences where the adaptation is obvious. Where it isn't, **`[ICDC-VERIFY]` callouts** flag the assumptions that need Ambar Rana's review before the templates become canonical.
 
@@ -61,12 +62,12 @@ The following shape principles apply to all four data management templates and a
 - **No Linked Work section.** Jira's native Links panel (right sidebar) shows Epic Link, Relates links, Blocks links, and remote links. Duplicating this in the description body is noise.
 - **No Collaboration & Handoffs section.** Ownership is implicit in the Jira assignee field + comment audit trail.
 - **No Open Questions / Risks section on Tasks.** Open questions live on the parent submission user story.
-- **"Location" naming discipline.** Submission & Artifacts table rows that point at *where things live* end in "Location" (e.g., "Release Package Location", "Object Files Location"). The row holds an address, not a content description.
+- **Address-row naming discipline.** Submission & Artifacts rows that point at *where things live* hold an address, not a content description (e.g., "Object Files Location" names a bucket; "Release Package" names the source-of-truth S3 path).
 - **Italic-em-dash bullet pattern.** `* *Label* — content` for rendering safety on this Jira tracker. NOT `- **Label:** content` (which the MCP converter mangles).
 - **Jira-wiki tables** (`||header||` / `|cell|` syntax) — NOT GitHub-flavored Markdown `|h|h|` (which doesn't render reliably on this tracker).
 - **Two-step ticket creation.** `jira_create_issue` with a placeholder description, then `jira_update_issue` with the full Markdown body. This avoids long-Markdown rendering issues at create time.
 - **`Relates` link to the parent submission user story** is mandatory when one exists. Set via `jira_create_issue_link` after ticket creation.
-- **`Blocks` link from upstream to downstream** is mandatory when both tickets exist (e.g., IndexD Registration Task `Blocks` the Data Loading Task that consumes its GUIDs).
+- **`Relates` link between the paired IndexD Registration Task and the Data Loading ticket** is mandatory when both exist. Registration is paired with, but does not technically block, the load — use `Relates`, not `Blocks`.
 
 ---
 
@@ -83,6 +84,7 @@ Look for files prefixed with the template name and dated, e.g., `claude/decision
 | Date | Event |
 |---|---|
 | 2026-05-27 | Initial port from CTDC: README, IndexD Registration Task v1-DRAFT, Data Loading Task v1-DRAFT committed |
+| 2026-05-28 | Templates revised against first real ICDC tickets (ICDC-4175 / ICDC-4176) + `icdc-dataloader`: Neo4j confirmed (not Memgraph), hybrid Dev-local / Jenkins pipeline, User Story load type, `Relates` (not `Blocks`), reduced five-row artifacts table, most `[ICDC-VERIFY]` items resolved |
 | Pending | Data Modeling for Study Submission v1-DRAFT, Data Model Update Task v1-DRAFT, ICDC SKILL.md Section 7 update with decision tree |
 | Pending | Ambar Rana review of all four data templates; `[ICDC-VERIFY]` callouts resolved; templates promoted from v1-DRAFT to v1 canonical |
 
