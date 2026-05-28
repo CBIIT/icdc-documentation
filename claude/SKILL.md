@@ -9,7 +9,7 @@ description: "Operational knowledge base for the ICDC Sprint Command Center Clau
 > **Ecosystem:** Cancer Research Data Commons (CRDC)  
 > **Team:** React web application engineers  
 > **Claude Project:** Sprint Command Center  
-> **Last Updated:** 2026-05-05 (Step 3: Epic Templates by Grouping)
+> **Last Updated:** 2026-05-28 (§7e-shared: Neo4j ingestion vs. OpenSearch serving correction)
 
 ---
 
@@ -572,7 +572,7 @@ These rules apply to **every** epic template, regardless of grouping. The per-gr
 
 **Domain content rules**
 - **OpenSearch named explicitly** when the epic surfaces aggregations, counts, or facet-driven queries. ICDC's frontend reads OpenSearch (via the BE's GraphQL resolvers) for nearly every data-bearing surface — naming it in scope and dependencies makes the architecture legible to stakeholders.
-- **No graph database in the active stack.** ICDC does not use Neo4j or Memgraph as a primary data store; the Spring Boot backend reads/writes OpenSearch indices. Do not introduce graph-DB framing into ICDC epics — that pattern belongs to CTDC.
+- **Serving path vs. ingestion path — don't conflate them.** ICDC's *serving (runtime read) path* is OpenSearch: the frontend reads OpenSearch via the Spring Boot backend's GraphQL resolvers for nearly every data-bearing surface. ICDC's *ingestion path* loads study data into **Neo4j**, the graph metadata store the loader writes to via `bolt://…:7687` (`DataLoader.py`, Pathway 1 in Section 2). Both are true at once — they describe different paths. Do **not** write "ICDC has no graph database" (wrong) or "ICDC serves queries from Neo4j" (also wrong). The Memgraph-as-primary-store framing belongs to CTDC, not ICDC.
 - **FAIR mission stated.** Connect the epic back to making ICDC data Findable, Accessible, Interoperable, and Reusable somewhere in the description (typically in Context & Background and User Impact).
 - **Comparative Oncology Program (COP) framing** appears in user-facing epics where scientific motivation matters. ICDC's mission is to advance human cancer research by studying spontaneous canine tumors — anchor user-facing epics in that purpose. See Section 2 for the full vocabulary.
 - **CTDC ↔ ICDC translations.** When mirroring a CTDC pattern, translate node names and relationship names — `case`/`participant`, `sample`/`specimen`, `of_*`/`associated_with`, `file_uuid`/`data_file_uuid`, `clinical_study_designation`/`study_accession`. ICDC uses the per-destination naming convention (`of_case`, `of_study`, `of_sample`, `from_diagnosis`); CTDC uses a single `associated_with` relationship distinguished by `Src`/`Dst` types.
