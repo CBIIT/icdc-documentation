@@ -9,7 +9,7 @@ description: "Operational knowledge base for the ICDC Sprint Command Center Clau
 > **Ecosystem:** Cancer Research Data Commons (CRDC)  
 > **Team:** React web application engineers  
 > **Claude Project:** Sprint Command Center  
-> **Last Updated:** 2026-05-28 (§7e-shared: Neo4j ingestion vs. OpenSearch serving correction)
+> **Last Updated:** 2026-05-28 (§3: Developer field = customfield_23650 for all issue types; data-management ticket dev/label conventions)
 
 ---
 
@@ -218,27 +218,42 @@ The ICDC Jira instance uses a **non-standard custom field** for epic linking. Th
 
 **Never assume epic linking worked without verifying** — always confirm with a follow-up `jira_get_issue` check if there's any doubt.
 
-### Developer Field — Issue-Type Dependent
+### Developer Field — `customfield_23650` for All Issue Types
 
-The ICDC Jira instance uses **different custom fields for the Developer value depending on issue type**. Always populate both Assignee AND Developer when assigning tickets — the Developer field is the source of truth for who actually implemented the work (Assignee is typically QA closing the ticket).
+The Developer field is the source of truth for **who actually implemented the work** — always read it, never Assignee (the Assignee on a closed ticket is often the QA who closed it, or the TPM coordinating it). Populate Developer alongside Assignee on any ticket that involved real development.
+
+**Use `customfield_23650` for every issue type — Task, Bug, AND Story.** It is a multi-user picker and takes an array even for a single person:
 
 | Issue Type | Developer Field | Format | Example |
 |---|---|---|---|
-| Task | `customfield_23650` (multi-user picker) | Array of usernames | `{"customfield_23650": ["ranaab"]}` |
-| Story | `customfield_18250` ("Developer Legacy", single user) | String username | `{"customfield_18250": "ranaab"}` |
-| Bug | `customfield_23650` (same as Task) | Array of usernames | `{"customfield_23650": ["udosent2"]}` |
+| Task | `customfield_23650` | Array of usernames | `{"customfield_23650": ["ranaab"]}` |
+| Bug | `customfield_23650` | Array of usernames | `{"customfield_23650": ["udosent2"]}` |
+| Story | `customfield_23650` | Array of usernames | `{"customfield_23650": ["ranaab"]}` |
 
-- `customfield_18250` is **absent from Task-type screen schemes** (always null on Tasks). Confirmed via live inspection of ICDC-4121.
-- When generating demo schedules, release reports, or ownership analyses, **always read the Developer field — not Assignee** — to determine who did the work.
-- Tickets closed with no code change (e.g., "works as designed," duplicates) correctly have an empty Developer field.
+- **`customfield_18250` ("Developer Legacy") is a deprecated field — treat it as unused.** Despite the name suggesting a Story-specific field, it is NOT where the Developer value lives on Stories, and it is absent from Task-type screen schemes (always null on Tasks). Confirmed on ICDC-4176 (a User Story): the developer sits in `customfield_23650`, `customfield_18250` is null, and the Jira UI "Developer" field reads from `23650`. Do not read or write `18250`.
+- When generating demo schedules, release reports, or ownership analyses, **always read `customfield_23650` — not Assignee** — to determine who did the work.
+- An **empty Developer field is correct** for any ticket that involved no development — tickets closed with no code change (e.g., "works as designed," duplicates) and, by design, data-management coordination tickets (see next).
+
+### Data-Management Tickets — Developer & Label Conventions
+
+ICDC data-management work splits into two **paired** ticket types with **opposite** Developer and label conventions. They look similar but are owned and classified differently — get this right.
+
+| Ticket type | Example | Development? | Developer (`customfield_23650`) | `Data-Concierge` label |
+|---|---|---|---|---|
+| **Data loading** (load a study into ICDC) | ICDC-4176 | **Yes** — engineering pipelines: local Neo4j + `DataLoader.py`, Jenkins lower/upper-tier, OpenSearch ETL | **Populated** — the engineer who ran the load | **No** — loading is engineering, not the Data Concierge service |
+| **IndexD registration** (register file GUIDs with DCF) | ICDC-4175 | **No** — coordination with DCF to mint/register GUIDs; nothing is built | **Empty by design** | **Yes** — registration *is* part of the Data Concierge service |
+
+- **Do not "fix" an empty Developer field on an IndexD-registration task** — empty is the correct state.
+- **Do not "fix" a populated Developer field on a data-loading task** — it should name the engineer who ran the pipeline.
+- The `Data-Concierge` label tracks the Data Concierge **service**, which covers the DCF registration/indexing handoff — **not** the engineering load. When drafting or normalizing these tickets, apply the label to registration tasks and omit it from loading tasks.
 
 ### Other Custom Fields
 | Field | Custom Field ID | Notes |
 |-------|----------------|-------|
 | Epic Link (child → epic) | `customfield_12350` | Set via update after creation |
 | Epic Name | `customfield_12351` | Set on the epic issue itself |
-| Developer (Task, Bug) | `customfield_23650` | Multi-user, array format |
-| Developer Legacy (Story) | `customfield_18250` | Single user, string format |
+| Developer (all issue types) | `customfield_23650` | Multi-user, array format — canonical |
+| Developer Legacy | `customfield_18250` | Deprecated; unused — do not read or write |
 
 ### Issue Types
 - **Confirmed working:** `Epic`, `Task`
@@ -453,7 +468,7 @@ Run these checks before each standup:
 - **Sprint name** — the sprint being reviewed is NOT the active sprint (active = next one). Use `jira_get_sprints_from_board` with board `574` to confirm dates match the meeting date.
 - **Ticket counts per metric** — total, done, carry-over, by status, by type, by assignee. All should sum correctly.
 - **Release scope** — cross-reference GitHub release notes against Jira `fixVersion` query. Gaps reveal tagging hygiene issues.
-- **Developer field, not Assignee** — see Section 3 (Jira Quirks). On ICDC the Assignee on a closed ticket is often QA; the Developer field (`customfield_23650` for Tasks/Bugs, `customfield_18250` for Stories) is the source of truth for who built it.
+- **Developer field, not Assignee** — see Section 3 (Jira Quirks). On ICDC the Assignee on a closed ticket is often QA; the Developer field (`customfield_23650`, canonical for all issue types) is the source of truth for who built it.
 
 ---
 
@@ -1000,6 +1015,10 @@ claude/
     *.md                            ← Other scope, architecture, and process decisions.
   conventions/
     workflow.md                     ← Team conventions Claude applies automatically.
+  templates/
+    data-loading-task-template.md       ← Data Loading Task template (data management).
+    indexd-registration-task-template.md ← IndexD Registration Task template (data management).
+    README.md                       ← Template index and conventions.
 ```
 
 ### Current Files
@@ -1010,6 +1029,8 @@ claude/
 | `claude/epics/ICDC-4120.md` | Starting work on the Invicti security remediation epic |
 | `claude/decisions/sprint-43-scope.md` | Questions arise about why CSP/SRI were deferred, or Sprint 43 scope |
 | `claude/conventions/workflow.md` | Onboarding a new session, or when a workflow question comes up (e.g., PR strategy, SDL, role clarification) |
+| `claude/templates/data-loading-task-template.md` | Drafting or normalizing an ICDC data-loading ticket |
+| `claude/templates/indexd-registration-task-template.md` | Drafting or normalizing an ICDC IndexD registration ticket |
 
 ### Fetch Strategy by Session Type
 
@@ -1020,6 +1041,7 @@ claude/
 | Sprint planning or retrospective | `claude/conventions/workflow.md` |
 | New session after a long gap | `claude/conventions/workflow.md` |
 | Scope or deferral question | `claude/decisions/` — the relevant decision file |
+| Data-management ticket drafting (load / IndexD) | the relevant `claude/templates/` file |
 | Quick one-off ticket work | No fetch needed — pull live from Jira |
 
 ### How to Add New Files
