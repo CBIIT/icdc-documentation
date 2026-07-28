@@ -1,6 +1,6 @@
 ### 📦 Data Loading Task Template (v1-DRAFT — 2026-05-27)
 
-> **Status:** **v1-DRAFT (rev. 2026-05-28).** Ported from CTDC's `claude/templates/data-loading-task-template.md` (v5), then revised against the first real ICDC tickets (ICDC-4175 / ICDC-4176) and the `icdc-dataloader` repo. This revision confirms **Neo4j** (not Memgraph) as the graph store, a **hybrid Dev-local / Jenkins** pipeline, **User Story** as the issue type for the load, **`Relates`** (not `Blocks`) to the paired IndexD task, and a **five-row** Submission & Artifacts table. Remaining open items are listed at the end; once Ambar Rana confirms them this promotes to v1 canonical.
+> **Status:** **v1-DRAFT (rev. 2026-07-28).** Ported from CTDC's `claude/templates/data-loading-task-template.md` (v5), then revised against the first real ICDC tickets (ICDC-4175 / ICDC-4176) and the `icdc-dataloader` repo. **This revision (2026-07-28) streamlines the task body to a four-section structure — Load Summary, Submission & Artifacts, Loading Workflow, Testing Signoff — dropping the standalone Verification Surfaces, Per-Environment Verification, and Notes sections (verification is now folded into the Loading Workflow per-environment steps and the Testing Signoff record). It also corrects the loader entry-point script name from `DataLoader.py` to `loader.py` to match the `icdc-dataloader` repo — the runnable script is `loader.py`; `DataLoader` is the class defined inside `data_loader.py`.** An earlier revision confirmed **Neo4j** (not Memgraph) as the graph store, a **hybrid Dev-local / Jenkins** pipeline, **User Story** as the issue type for the load, **`Relates`** (not `Blocks`) to the paired IndexD task, and a **five-row** Submission & Artifacts table. Remaining open items are listed at the end; once Ambar Rana confirms them this promotes to v1 canonical.
 
 > **Use this template for every ICDC data management task that loads a study submission into ICDC — either a brand-new study or new data added to an existing study — and promotes it through Dev → QA → Stage → Prod.** Canonical example: TBD (will be filled in when the first ICDC Data Loading ticket is drafted under this template). This template covers the **loading-data** sub-function of the team's data management work. It is **not** for changes to the data model itself, and **not** for the upstream IndexD registration that mints the file GUIDs this load consumes (use the IndexD Registration Task template). See "When NOT to use this template" at the end.
 
@@ -34,17 +34,17 @@ The most common antipatterns this template prevents:
 A CTDC data load touches multiple systems in sequence. ICDC's anatomy is structurally similar but with ICDC-specific repos and bucket names:
 
 - **Source artifacts** — Release Package + IndexD manifest live in the **AWS S3 Release Package bucket** `nci-cbiit-caninedatacommons-dev` (confirmed from ICDC-4175 / ICDC-4176). Object files live in the **AWS S3 object files bucket** `nci-crdc-data-bucket-prod` `[ICDC-VERIFY — confirm with Ambar / Charles]`. The data-loading TSVs the pipeline consumes all live inside the Release Package (multiple files, not a single named file).
-- **Loader repo** — `CBIIT/icdc-dataloader` (confirmed). Home of `DataLoader.py` and `config/data-loader-config.example.yml`.
-- **Loading pipeline** — **Hybrid** (confirmed from ICDC-4176; differs from CTDC, where all four tiers use Jenkins): **Dev runs locally** (local Neo4j instance + `DataLoader.py`), and **QA / Stage / Prod run through Jenkins** with a two-tier split — *lower tier* targets QA, *upper tier* targets Stage and Prod.
+- **Loader repo** — `CBIIT/icdc-dataloader` (confirmed). Home of `loader.py` (the runnable entry-point script) and `config/data-loader-config.example.yml`.
+- **Loading pipeline** — **Hybrid** (confirmed from ICDC-4176; differs from CTDC, where all four tiers use Jenkins): **Dev runs locally** (local Neo4j instance + `loader.py`), and **QA / Stage / Prod run through Jenkins** with a two-tier split — *lower tier* targets QA, *upper tier* targets Stage and Prod.
 - **Graph database** — **Neo4j**. ICDC's canonical metadata store — the `icdc-dataloader` config connects to it via `bolt://…:7687` (CTDC uses Memgraph in this slot; ICDC does not). The loading pipeline writes nodes and relationships here. **The model is assumed stable for a data load — if the model is changing, that's a modeling Task and uses a modeling template.**
 - **Search index** — **OpenSearch**. The frontend's Explore Dashboard, autocomplete, and filters read from OpenSearch, not from Neo4j directly. After every metadata load, OpenSearch must be reindexed from Neo4j before the frontend reflects the change.
 - **Application surfaces** — Cases page, Studies page, Samples page, Explore Dashboard, Files surface (confirmed from ICDC-4176). These are the pages a tester loads in their browser to verify the data actually shows up correctly.
 
 The template walks all of this in order: payload → pipeline run per environment → verification per environment → signoff per environment.
 
-**Section order (7 sections, exactly this sequence)**
+**Section order (4 sections, exactly this sequence)**
 
-Each section header is an `h3` Markdown heading using the emoji + bold title format shown. Don't omit, reorder, or merge sections. If a section genuinely has no content, state so explicitly ("None at this time") rather than dropping the header.
+Each section header is an `h3` Markdown heading using the emoji + bold title format shown. Don't omit, reorder, or merge sections. If a section genuinely has no content, state so explicitly ("None at this time") rather than dropping the header. Per-environment verification is carried out within the Loading Workflow steps and recorded in the Testing Signoff table — there is no separate verification section.
 
 1. `### 🎯 **Load Summary**` — Two to three sentences. What's being loaded, which study or release it belongs to, whether this is a new study or an addition to an existing study, and what application surfaces it lights up.
 
@@ -58,11 +58,11 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
    | AWS Account ID | *(12-digit ICDC data commons AWS account)* | Standard ICDC data commons AWS account. Use one consistent format across the paired IndexD Registration ticket. |
    | Release Package | AWS S3: `s3://nci-cbiit-caninedatacommons-dev/<timestamp>-<submission-id>` | Source of truth. Contains the validated data-loading TSVs and the IndexD manifest. There are multiple loading files and they all live here, so no separate per-file row is carried. SharePoint copies are convenience only. |
    | Object Files Location | AWS S3 Bucket: `nci-crdc-data-bucket-prod` `[ICDC-VERIFY — confirm with Ambar / Charles]` | The bucket holding the physical object files. Each manifest row's `url` resolves here. |
-   | Study (acronym + version) | *(e.g., `COTC030 v.1`)* | New study vs. addition to an existing study. Drives the Study Details page verification in Section 4. |
+   | Study (acronym + version) | *(e.g., `COTC030 v.1`)* | New study vs. addition to an existing study. Drives the Study Details page verification in the Loading Workflow. |
 
    **Naming discipline**: rows that point at *where artifacts live* carry an address, not a content description — e.g., "Object Files Location" names a bucket, and "Release Package" names the source-of-truth S3 path. Keep the value an address.
 
-3. `### 🚦 **Loading Workflow**` — Numbered list of the end-to-end promotion steps. ICDC uses a **hybrid pipeline**: **Dev runs locally** (local Neo4j instance + `DataLoader.py`), and **QA / Stage / Prod run through Jenkins** with a two-tier split — *lower tier* targets QA, *upper tier* targets Stage and Prod. (This differs from CTDC, where all four environments use Jenkins.)
+3. `### 🚦 **Loading Workflow**` — Numbered list of the end-to-end promotion steps. ICDC uses a **hybrid pipeline**: **Dev runs locally** (local Neo4j instance + `loader.py`), and **QA / Stage / Prod run through Jenkins** with a two-tier split — *lower tier* targets QA, *upper tier* targets Stage and Prod. (This differs from CTDC, where all four environments use Jenkins.) Per-environment verification is part of these steps; record the outcome in the Testing Signoff table (Section 4).
 
    **Pre-load**
    1. Confirm the Release Package exists in S3 and the loading files inside it are the expected ones. Confirm the IndexD manifest inside the Release Package matches the paired IndexD Registration Task's spot-check verification (GUIDs minted and resolving correctly). If IndexD registration is incomplete, do not proceed.
@@ -71,44 +71,24 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
 
    **Dev — local execution**
    4. Create a local Neo4j instance from a dump of the Dev Neo4j server. Pull the latest data model from `CBIIT/icdc-model-tool` and the loading files from the Release Package in S3. Create a `data-loader-config.yml` from `CBIIT/icdc-dataloader/config/data-loader-config.example.yml`.
-   5. Run `DataLoader.py` locally against the local Neo4j instance; validate node and relationship counts with the Data Team. Once local validation passes, load to the Dev Neo4j environment and trigger the OpenSearch ETL for Dev.
-   6. Verify in Dev: Neo4j node counts updated, OpenSearch reindex completed, application surfaces render the new data, no errors in application metrics or page loads. Record results in Section 5 (Per-Environment Verification), then reassign to the TPM for Dev signoff.
+   5. Run `loader.py` locally against the local Neo4j instance; validate node and relationship counts with the Data Team. Once local validation passes, load to the Dev Neo4j environment and trigger the OpenSearch ETL for Dev.
+   6. Verify in Dev: Neo4j node counts updated, OpenSearch reindex completed, application surfaces render the new data, no errors in application metrics or page loads. Record the Dev outcome in the Testing Signoff table (Section 4), then reassign to the TPM for Dev signoff.
 
    **QA — lower-tier Jenkins**
    7. Run the Jenkins **lower-tier** data loading pipeline targeting QA, then the OpenSearch Loader Jenkins job for QA.
-   8. Assign for QA testing (**Valentina Epishina**, `epishinavv`). Tester verifies: data renders on expected pages, file download links (if applicable) initiate a successful download of the correct file, no regressions on existing studies. Tester initials Section 6 (Testing Signoff) on completion.
+   8. Assign for QA testing (**Valentina Epishina**, `epishinavv`). Tester verifies: data renders on expected pages, file download links (if applicable) initiate a successful download of the correct file, no regressions on existing studies. Tester initials the Testing Signoff table (Section 4) on completion.
 
    **Stage — upper-tier Jenkins**
    9. Run the Jenkins **upper-tier** data loading pipeline targeting Stage, then the upper-tier OpenSearch Loader for Stage.
-   10. Assign for Stage testing and signoff (`epishinavv`). Same verification points as QA, plus production-parity sanity checks. Tester initials Section 6 on completion.
+   10. Assign for Stage testing and signoff (`epishinavv`). Same verification points as QA, plus production-parity sanity checks. Tester initials the Testing Signoff table (Section 4) on completion.
 
    **Prod — upper-tier Jenkins**
    11. Run the Jenkins **upper-tier** data loading pipeline targeting Prod, then the upper-tier OpenSearch Loader for Prod.
-   12. Assign for Prod verification and signoff. Verify in production at the live application URL (`caninecommons.cancer.gov`). Tester initials Section 6 on completion. **This is the trigger to close the ticket.**
+   12. Assign for Prod verification and signoff. Verify in production at the live application URL (`caninecommons.cancer.gov`). Tester initials the Testing Signoff table (Section 4) on completion. **This is the trigger to close the ticket.**
 
-4. `### 🧪 **Verification Surfaces**` — Bullet list naming every application surface that must be checked after each environment load (italic-labelled, em-dash separators — the rendering-safe pattern). ICDC's surfaces are Cases / Studies / Samples (vs CTDC's Participants / Studies / Specimens).
+   **Verification checklist per environment** (Neo4j and OpenSearch are both required checks — a Neo4j write without an OpenSearch reindex leaves the frontend stale): Neo4j node and relationship counts post-load; OpenSearch reindex completed and doc counts align with Neo4j; Cases / Studies / Samples pages render the new records; Files surface renders new file records and download links resolve; Explore Dashboard counts reflect the load; no spike in 4xx / 5xx application errors; no exceptions in the logs (CloudWatch or equivalent).
 
-   - *Neo4j node counts* — confirm expected node and relationship counts post-load (drives the integrity check)
-   - *OpenSearch reindex* — confirm reindex completed without error and counts match Neo4j
-   - *Cases page* — for the affected study, confirm new case records render correctly
-   - *Studies page* — confirm new study (or updated study) appears in the global study list
-   - *Samples page* — confirm new sample records render and link correctly to their parent cases / studies
-   - *Files surface* — confirm new file records render and any file download links initiate the right file
-   - *Explore Dashboard* — confirm case, study, sample, and file counts reflect the load
-   - *Application error metrics* — confirm no spike in 4xx / 5xx after load
-   - *Logs (CloudWatch or equivalent)* — confirm no exceptions during reindex
-   - *Data Model Navigator (DMN)* — if this load came with a coordinated model update introducing new node types or properties, confirm the DMN renders them post-load (the DMN renders the model live, so this is typically automatic)
-
-5. `### 📊 **Per-Environment Verification**` — Table to record observed Neo4j counts, OpenSearch counts, and any anomalies, per environment.
-
-   | Environment | Neo4j node count (post-load) | OpenSearch doc count (post-reindex) | Application surfaces verified | Anomalies / notes |
-   |---|---|---|---|---|
-   | Dev | | | | |
-   | QA | | | | |
-   | Stage | | | | |
-   | Prod | | | | |
-
-6. `### ✅ **Testing Signoff**` — The completion record. Tester fills in date and initials per environment as work progresses. **Prod signoff is the trigger to transition the ticket to Closed.**
+4. `### ✅ **Testing Signoff**` — The completion record. Tester fills in date and initials per environment as work progresses. **Prod signoff is the trigger to transition the ticket to Closed.**
 
    | Environment | Testing Completion Date | Tester Initials |
    |---|---|---|
@@ -117,30 +97,33 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
    | Stage | | |
    | Prod | | |
 
-7. `### 📝 **Notes**` — Bullet list. Optional content: prior load lessons learned, links to retrospective notes if a prior load surfaced an issue worth remembering, terminology translations (Bento "Case" → ICDC "Case", note any other Bento-to-ICDC mappings), known constraints. If there's no meaningful note, write "None at this time."
+**Sections omitted**
 
-**Sections omitted compared to CTDC v4 of this template**
+Omitted compared to CTDC v4 of this template:
 
 - ❌ **🔗 Linked Work** — Jira's native Links panel covers it.
 - ❌ **🤝 Collaboration & Handoffs** — Implicit via assignee + comments.
 - ❌ **🔍 Open Questions / Risks** — Belongs on the parent submission user story, not the Task.
 
-**Standing emoji set (7 entries)**
+Additionally removed in the 2026-07-28 revision (were Sections 4, 5, and 7 in the earlier 7-section structure):
+
+- ❌ **🧪 Verification Surfaces** — Folded into the Loading Workflow per-environment verification steps (Section 3).
+- ❌ **📊 Per-Environment Verification** — Redundant with the Testing Signoff record; the per-environment counts are validated in the workflow steps.
+- ❌ **📝 Notes** — Load-specific notes, lessons learned, and terminology mappings belong on the parent submission user story / data epic, not the Task.
+
+**Standing emoji set (4 entries)**
 
 | Section | Emoji |
 |---|---|
 | Load Summary | 🎯 *(shared with IndexD Registration Task)* |
 | Submission & Artifacts | 📦 *(shared with IndexD Registration Task)* |
 | Loading Workflow | 🚦 *(shared with IndexD Registration Task)* |
-| Verification Surfaces | 🧪 *(shared with IndexD Registration Task)* |
-| Per-Environment Verification | 📊 *(unique to data loading task — environment-level table)* |
 | Testing Signoff | ✅ *(unique to data loading task — the per-environment audit record)* |
-| Notes | 📝 *(shared with IndexD Registration Task)* |
 
 **Required content rules**
 
 - **Scope is loading-data work only.** Loading a study submission into ICDC — either a new study or new data added to an existing study. **Schema or model changes** do not use this template — those use a modeling template. **IndexD registration** does not use this template — that uses the IndexD Registration Task template. **Software development work** does not use this template.
-- **No Acceptance Criteria section.** Data loading is operational SOP work; the completion bar is the Testing Signoff table plus the Verification Surfaces checklist.
+- **No Acceptance Criteria section.** Data loading is operational SOP work; the completion bar is the Testing Signoff table plus the per-environment verification checklist embedded in the Loading Workflow.
 - **No Open Questions / Risks section.** Open questions and risks live on the parent submission user story, not on this Task. If a question or risk surfaces during the load, raise it as a bullet under the parent user story's Open Questions / Risks section so it's tracked at the program level.
 - **One Task per end-to-end load** — Dev through Prod, not one ticket per environment. The Testing Signoff table is the single source of truth for where the load is in the pipeline.
 - **Issue type is User Story** for the ICDC data load (intentional ICDC choice; the paired IndexD Registration ticket remains a Task). Do not use Subtask. **The Developer value goes in `customfield_23650`** — the canonical Developer field for all issue types, including Story — and names the engineer who runs the load. `customfield_18250` ("Developer Legacy") is deprecated and stays empty. See SKILL.md §3.
@@ -148,10 +131,10 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
 - **Parent Epic set via `customfield_12350`** (confirmed — e.g., ICDC-4176 → epic ICDC-3342 "ICDC Data").
 - **`Relates` link to related tickets.** Parent epic via Epic Link (`customfield_12350`); the paired IndexD Registration Task via `Relates`. `[ICDC-VERIFY]` — ICDC does not appear to keep a separate program-level submission user story (the data epic + this load Story serve that role); confirm with Ambar Rana.
 - **`Relates` link to the paired IndexD Registration Task.** Registration and the load are paired, but registration does **not** technically block the load, so use `Relates`, not `Blocks`.
-- **Hybrid pipeline must be explicit** in the Loading Workflow: Dev local (Neo4j + `DataLoader.py`), QA lower-tier Jenkins, Stage / Prod upper-tier Jenkins.
-- **Neo4j and OpenSearch both named in Verification Surfaces.** A successful Neo4j write without an OpenSearch reindex means the frontend won't show the new data; a successful reindex against an incomplete Neo4j write means stale or partial results. Both surfaces are required checks.
+- **Hybrid pipeline must be explicit** in the Loading Workflow: Dev local (Neo4j + `loader.py`), QA lower-tier Jenkins, Stage / Prod upper-tier Jenkins.
+- **Neo4j write and OpenSearch reindex are both verified.** A successful Neo4j write without an OpenSearch reindex means the frontend won't show the new data; a successful reindex against an incomplete Neo4j write means stale or partial results. Both checks are called out in the Loading Workflow per-environment verification steps.
 - **Submission & Artifacts table is mandatory and complete.** All five rows present. Use an explicit placeholder when a value is pending upstream — never silently omit a row.
-- **Rendering-safe authoring patterns** — section headers use `### **Title**` Markdown form; bullet lists with italic labels use `* *Label* — content` (italic-and-em-dash); tables use Jira-wiki `||header||` syntax, NOT GitHub-flavored Markdown `|h|h|`. Verified on CTDC's tracker; assumed to apply to ICDC since both use the same Jira instance.
+- **Rendering-safe authoring patterns** — section headers use `### **Title**` Markdown form; tables use Jira-wiki `||header||` syntax, NOT GitHub-flavored Markdown `|h|h|`. Verified on CTDC's tracker; assumed to apply to ICDC since both use the same Jira instance.
 
 **Writing-and-publishing workflow**
 
@@ -163,8 +146,8 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
 6. Push the description in two steps: create with the placeholder, then `jira_update_issue` with the full Markdown body.
 7. Add `Relates` links from the load ticket to the parent submission user story.
 8. Verify the rendered description with a UI screenshot — wiki source is unreliable as a render preview.
-9. As each environment completes, the assigned tester adds their initials and date to Section 6 (Testing Signoff) and notes counts in Section 5 (Per-Environment Verification).
-10. **Prod signoff is the close trigger.** Once Section 6's Prod row is filled in, transition the ticket to Closed.
+9. As each environment completes, the assigned tester adds their initials and date to the Testing Signoff table (Section 4).
+10. **Prod signoff is the close trigger.** Once the Testing Signoff table's Prod row is filled in, transition the ticket to Closed.
 
 **When NOT to use this template**
 
@@ -194,7 +177,7 @@ Resolved from ICDC-4175 / ICDC-4176 and the `icdc-dataloader` repo (v1-DRAFT →
 - ✅ **Application surfaces** — Cases / Studies / Samples / Explore Dashboard / Files.
 - ✅ **Submission origin** — CRDC Submission Portal (COP / COTC trials enter via the Portal).
 - ✅ **Release Package bucket** — `nci-cbiit-caninedatacommons-dev`.
-- ✅ **Loader repo** — `CBIIT/icdc-dataloader` (`DataLoader.py` + `config/data-loader-config.example.yml`).
+- ✅ **Loader repo** — `CBIIT/icdc-dataloader` (`loader.py` entry-point script + `config/data-loader-config.example.yml`). Note: `loader.py` is the runnable script; `DataLoader` is the class inside `data_loader.py` — do not refer to the script as `DataLoader.py`.
 - ✅ **Graph store** — **Neo4j** (loader config connects via `bolt://…:7687`), not Memgraph.
 - ✅ **Pipeline organization** — hybrid: Dev local, QA lower-tier Jenkins, Stage / Prod upper-tier Jenkins.
 - ✅ **Model version** — derivable from the Submission ID; no separate table row needed.
