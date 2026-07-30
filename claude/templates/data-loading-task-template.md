@@ -1,8 +1,8 @@
 ### 📦 Data Loading Task Template (v1-DRAFT — 2026-05-27)
 
-> **Status:** **v1-DRAFT (rev. 2026-07-28).** Ported from CTDC's `claude/templates/data-loading-task-template.md` (v5), then revised against the first real ICDC tickets (ICDC-4175 / ICDC-4176) and the `icdc-dataloader` repo. **This revision (2026-07-28) streamlines the task body to a four-section structure — Load Summary, Submission & Artifacts, Loading Workflow, Testing Signoff — dropping the standalone Verification Surfaces, Per-Environment Verification, and Notes sections (verification is now folded into the Loading Workflow per-environment steps and the Testing Signoff record). It also corrects the loader entry-point script name from `DataLoader.py` to `loader.py` to match the `icdc-dataloader` repo — the runnable script is `loader.py`; `DataLoader` is the class defined inside `data_loader.py`.** An earlier revision confirmed **Neo4j** (not Memgraph) as the graph store, a **hybrid Dev-local / Jenkins** pipeline, **User Story** as the issue type for the load, **`Relates`** (not `Blocks`) to the paired IndexD task, and a **five-row** Submission & Artifacts table. Remaining open items are listed at the end; once Ambar Rana confirms them this promotes to v1 canonical.
+> **Status:** **v1-DRAFT (rev. 2026-07-30).** Ported from CTDC's `claude/templates/data-loading-task-template.md` (v5), then revised against the first real ICDC tickets (ICDC-4175 / ICDC-4176) and the `icdc-dataloader` repo. **This revision streamlines the task body to a four-section structure — Load Summary, Submission & Artifacts, Loading Workflow, Testing Signoff — dropping the standalone Verification Surfaces, Per-Environment Verification, and Notes sections (verification is now folded into the Loading Workflow per-environment steps and the Testing Signoff record). It also corrects the loader entry-point script name from `DataLoader.py` to `loader.py` to match the `icdc-dataloader` repo — the runnable script is `loader.py`; `DataLoader` is the class defined inside `data_loader.py`. This revision also adds the runnable Dev-local loader.py command block to the Loading Workflow and names ICDC-4176 (the COTC030 load) as the canonical example.** An earlier revision confirmed **Neo4j** (not Memgraph) as the graph store, a **hybrid Dev-local / Jenkins** pipeline, **User Story** as the issue type for the load, **`Relates`** (not `Blocks`) to the paired IndexD task, and a **five-row** Submission & Artifacts table. Remaining open items are listed at the end; once Ambar Rana confirms them this promotes to v1 canonical.
 
-> **Use this template for every ICDC data management task that loads a study submission into ICDC — either a brand-new study or new data added to an existing study — and promotes it through Dev → QA → Stage → Prod.** Canonical example: TBD (will be filled in when the first ICDC Data Loading ticket is drafted under this template). This template covers the **loading-data** sub-function of the team's data management work. It is **not** for changes to the data model itself, and **not** for the upstream IndexD registration that mints the file GUIDs this load consumes (use the IndexD Registration Task template). See "When NOT to use this template" at the end.
+> **Use this template for every ICDC data management task that loads a study submission into ICDC — either a brand-new study or new data added to an existing study — and promotes it through Dev → QA → Stage → Prod.** Canonical example: the COTC030 load (ICDC-4176). This template covers the **loading-data** sub-function of the team's data management work. It is **not** for changes to the data model itself, and **not** for the upstream IndexD registration that mints the file GUIDs this load consumes (use the IndexD Registration Task template). See "When NOT to use this template" at the end.
 
 **Why this template**
 
@@ -48,7 +48,7 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
 
 1. `### 🎯 **Load Summary**` — Two to three sentences. What's being loaded, which study or release it belongs to, whether this is a new study or an addition to an existing study, and what application surfaces it lights up.
 
-   `[ICDC-VERIFY]` — Canonical example placeholder: The first ICDC ticket drafted under this template will become the canonical example reference here. Until then, refer to the CTDC v5 Load Summary example as the closest sibling pattern.
+   **Canonical example:** the COTC030 load (**ICDC-4176**) — the first ICDC ticket built to this template; use it as the house-style reference for the Load Summary and the sections below.
 
 2. `### 📦 **Submission & Artifacts**` — Required field. A five-row table holding the artifacts the load consumes. Study identity (program, study name, submitter, chronology) lives on the parent data epic / submission Story linked via the native Links panel — not in this table. The five rows:
 
@@ -71,7 +71,11 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
 
    **Dev — local execution**
    4. Create a local Neo4j instance from a dump of the Dev Neo4j server. Pull the latest data model from `CBIIT/icdc-model-tool` and the loading files from the Release Package in S3. Create a `data-loader-config.yml` from `CBIIT/icdc-dataloader/config/data-loader-config.example.yml`.
-   5. Run `loader.py` locally against the local Neo4j instance; validate node and relationship counts with the Data Team. Once local validation passes, load to the Dev Neo4j environment and trigger the OpenSearch ETL for Dev.
+   5. Run `loader.py` locally against the local Neo4j instance; validate node and relationship counts with the Data Team. Once local validation passes, load to the Dev Neo4j environment and trigger the OpenSearch ETL for Dev. From the `icdc-dataloader` repo root — dry-run to validate node/relationship counts, then load:
+   ```
+   python3 loader.py config/data-loader-config.yml --dataset <path-to-release-package-loading-files> --dry-run
+   python3 loader.py config/data-loader-config.yml --dataset <path-to-release-package-loading-files>
+   ```
    6. Verify in Dev: Neo4j node counts updated, OpenSearch reindex completed, application surfaces render the new data, no errors in application metrics or page loads. Record the Dev outcome in the Testing Signoff table (Section 4), then reassign to the TPM for Dev signoff.
 
    **QA — lower-tier Jenkins**
@@ -132,6 +136,7 @@ Additionally removed in the 2026-07-28 revision (were Sections 4, 5, and 7 in th
 - **`Relates` link to related tickets.** Parent epic via Epic Link (`customfield_12350`); the paired IndexD Registration Task via `Relates`. `[ICDC-VERIFY]` — ICDC does not appear to keep a separate program-level submission user story (the data epic + this load Story serve that role); confirm with Ambar Rana.
 - **`Relates` link to the paired IndexD Registration Task.** Registration and the load are paired, but registration does **not** technically block the load, so use `Relates`, not `Blocks`.
 - **Hybrid pipeline must be explicit** in the Loading Workflow: Dev local (Neo4j + `loader.py`), QA lower-tier Jenkins, Stage / Prod upper-tier Jenkins.
+- **Dev-local command block included.** The Loading Workflow Dev step carries the runnable `loader.py` invocation (dry-run to validate, then load) so every downstream load ticket shows the exact local command. Replace the `<path-to-release-package-loading-files>` placeholder with the study's data path. The flag is `--dataset` (not `--data`); the dataset may alternatively be set in the config file's `dataset:` key.
 - **Neo4j write and OpenSearch reindex are both verified.** A successful Neo4j write without an OpenSearch reindex means the frontend won't show the new data; a successful reindex against an incomplete Neo4j write means stale or partial results. Both checks are called out in the Loading Workflow per-environment verification steps.
 - **Submission & Artifacts table is mandatory and complete.** All five rows present. Use an explicit placeholder when a value is pending upstream — never silently omit a row.
 - **Rendering-safe authoring patterns** — section headers use `### **Title**` Markdown form; tables use Jira-wiki `||header||` syntax, NOT GitHub-flavored Markdown `|h|h|`. Verified on CTDC's tracker; assumed to apply to ICDC since both use the same Jira instance.
@@ -166,7 +171,7 @@ If a study submission requires schema changes before it can be loaded, that's tw
 
 **Canonical example**
 
-**TBD.** The first ICDC Data Loading ticket drafted under this v1-DRAFT template will become the canonical example. Until then, refer to the CTDC v5 template in the CTDC documentation repo (`CBIIT/ctdc-documentation` → `claude/templates/data-loading-task-template.md`) as the closest sibling pattern.
+**ICDC-4176 — Load the COTC030 study.** The first ICDC load ticket built to this template; use it as the house-style reference. Its upstream sibling (the paired IndexD Registration Task) is ICDC-4175. For the closest cross-commons sibling pattern, see the CTDC v8 template in `CBIIT/ctdc-documentation` → `claude/templates/data-loading-task-template.md` (canonical CTDC example: the AHEP0731 load, CTDC-2063).
 
 ---
 
@@ -186,6 +191,7 @@ Resolved from ICDC-4175 / ICDC-4176 and the `icdc-dataloader` repo (v1-DRAFT →
 - ✅ **QA tester** — Valentina Epishina (`epishinavv`).
 - ✅ **Production URL** — `caninecommons.cancer.gov`.
 - ✅ **Issue type** — User Story (intentional ICDC choice).
+- ✅ **Canonical example** — ICDC-4176 (Load the COTC030 study); upstream sibling ICDC-4175 (IndexD registration).
 
 Still open for Ambar Rana:
 
