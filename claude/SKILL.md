@@ -247,6 +247,26 @@ ICDC data-management work splits into two **paired** ticket types with **opposit
 - **Do not "fix" a populated Developer field on a data-loading task** — it should name the engineer who ran the pipeline.
 - The `Data-Concierge` label tracks the Data Concierge **service**, which covers the DCF registration/indexing handoff — **not** the engineering load. When drafting or normalizing these tickets, apply the label to registration tasks and omit it from loading tasks.
 
+### Data-Management Work — Which Template
+
+ICDC data-management work has two sub-functions, and each has its own templates in `claude/templates/`. Pick by **what the work is**; for modeling, pick by **who drives it** (not how big it is).
+
+**Loading data** — getting a study's *contents* into ICDC's databases:
+
+- *Pre-load review* → **Data Submission Review Task** template — a local Neo4j + OpenSearch check of the CRDC Submission Portal's loading TSVs, viewed in the Dev frontend to catch data-entry errors *before* the load. Issue type **Task**; owned by Philip Musk (Data Concierge); carries the `Data-Concierge` label.
+- *IndexD registration* → **IndexD Registration Task** template — mint file GUIDs via the shared CTDS / DCF handoff. Issue type **Task**; `Data-Concierge` label; Developer field empty by design (coordination, not engineering).
+- *The load itself* → **Data Loading Task** template — promote a validated Release Package through Dev → QA → Stage → Prod. Issue type **User Story**; Developer field populated; **no** `Data-Concierge` label (engineering).
+
+**Modeling data** — changing the *shape* of the ICDC data model (`CBIIT/icdc-model-tool`). The split is by **driver, not size**:
+
+- *A change requested by a study submission* → **Data Modeling for Study Submission** template. Anchored on that study's CDE Request Workbook (owned by the Data Concierge, Philip Musk); carries a ⭐ Data Concierge section; requires a `Relates` link to the parent Data Submission user story. Issue type **Task**.
+- *A change initiated internally by the ICDC project* (application roadmap / data team) → **Data Model Update Task** template. Anchored on the single persistent **ICDC Internal CDE Request Workbook** (project-owned, no individual owner); owned by Philip Musk; no study, no Data Concierge section. Issue type **Task**.
+- The rule is the **driver**: a study-requested change is Study-Submission modeling *even if it is one property*; an internally-driven change is a Model Update Task *even if it is tiny*. Both pass the **DM Federal Lead & SME review** gate (Heather Creasy) and record term-level detail in a CDE Request Workbook — the ticket itself never enumerates terms, permissible values, or counts.
+
+**The umbrella:** every study submission has a parent **Data Submission user story** (owned by Philip Musk, the ICDC Data Concierge) that all of the above *submission-related* tasks (review, IndexD registration, data loading, study-submission modeling) link back to via `Relates`. Internally-driven model updates have no submission user story.
+
+**Developer / label convention for modeling tickets:** populate the **Developer** field (`customfield_23650`) with the person who makes the `icdc-model-tool` change (Data Model Author: Mark Jensen); modeling tickets do **not** carry the `Data-Concierge` label (modeling is engineering, though the Data Concierge coordinates study-driven modeling).
+
 ### Other Custom Fields
 | Field | Custom Field ID | Notes |
 |-------|----------------|-------|
@@ -1045,9 +1065,13 @@ claude/
   conventions/
     workflow.md                     ← Team conventions Claude applies automatically.
   templates/
-    data-loading-task-template.md       ← Data Loading Task template (data management).
-    indexd-registration-task-template.md ← IndexD Registration Task template (data management).
-    README.md                       ← Template index and conventions.
+    README.md                                       ← Template inventory + canonical tickets; read first to pick a data-management template.
+    data-submission-user-story-template.md          ← Parent Data Submission user story for a submission.
+    data-submission-review-task-template.md         ← Pre-load Data Submission Review task.
+    indexd-registration-task-template.md            ← ICDC IndexD registration ticket.
+    data-loading-task-template.md                   ← ICDC data-loading ticket.
+    data-modeling-for-study-submission-template.md  ← Submission-driven data-modeling ticket.
+    data-model-update-task-template.md              ← Internally-driven data model update ticket.
 ```
 
 ### Current Files
@@ -1058,8 +1082,13 @@ claude/
 | `claude/epics/ICDC-4120.md` | Starting work on the Invicti security remediation epic |
 | `claude/decisions/sprint-43-scope.md` | Questions arise about why CSP/SRI were deferred, or Sprint 43 scope |
 | `claude/conventions/workflow.md` | Onboarding a new session, or when a workflow question comes up (e.g., PR strategy, SDL, role clarification) |
+| `claude/templates/README.md` | Deciding which data-management template applies; template inventory + canonical tickets (read first) |
+| `claude/templates/data-submission-user-story-template.md` | Drafting the parent Data Submission user story for a submission |
+| `claude/templates/data-submission-review-task-template.md` | Drafting the pre-load Data Submission Review task |
+| `claude/templates/indexd-registration-task-template.md` | Drafting an ICDC IndexD registration ticket |
 | `claude/templates/data-loading-task-template.md` | Drafting or normalizing an ICDC data-loading ticket |
-| `claude/templates/indexd-registration-task-template.md` | Drafting or normalizing an ICDC IndexD registration ticket |
+| `claude/templates/data-modeling-for-study-submission-template.md` | Drafting a submission-driven data-modeling ticket |
+| `claude/templates/data-model-update-task-template.md` | Drafting an internally-driven data model update ticket |
 
 ### Fetch Strategy by Session Type
 
