@@ -1,6 +1,6 @@
-### 📦 Data Loading Task Template (v1-DRAFT — 2026-05-27)
+### 📦 Data Loading Task Template (v1 — canonical 2026-07-30)
 
-> **Status:** **v1-DRAFT (rev. 2026-07-30).** Ported from CTDC's `claude/templates/data-loading-task-template.md` (v5), then revised against the first real ICDC tickets (ICDC-4175 / ICDC-4176) and the `icdc-dataloader` repo. **This revision streamlines the task body to a four-section structure — Load Summary, Submission & Artifacts, Loading Workflow, Testing Signoff — dropping the standalone Verification Surfaces, Per-Environment Verification, and Notes sections (verification is now folded into the Loading Workflow per-environment steps and the Testing Signoff record). It also corrects the loader entry-point script name from `DataLoader.py` to `loader.py` to match the `icdc-dataloader` repo — the runnable script is `loader.py`; `DataLoader` is the class defined inside `data_loader.py`. This revision also adds the runnable Dev-local loader.py command block to the Loading Workflow and names ICDC-4176 (the COTC030 load) as the canonical example.** An earlier revision confirmed **Neo4j** (not Memgraph) as the graph store, a **hybrid Dev-local / Jenkins** pipeline, **User Story** as the issue type for the load, **`Relates`** (not `Blocks`) to the paired IndexD task, and a **five-row** Submission & Artifacts table. All `[ICDC-VERIFY]` items were resolved by the TPM on 2026-07-30 (see the end of this file); the template is ready for promotion from v1-DRAFT to v1 canonical.
+> **Status:** **v1 (canonical, 2026-07-30).** Ported from CTDC's `claude/templates/data-loading-task-template.md` (v5), then revised against the first real ICDC tickets (ICDC-4175 / ICDC-4176) and the `icdc-dataloader` repo. **This revision streamlines the task body to a four-section structure — Load Summary, Submission & Artifacts, Loading Workflow, Testing Signoff — dropping the standalone Verification Surfaces, Per-Environment Verification, and Notes sections (verification is now folded into the Loading Workflow per-environment steps and the Testing Signoff record). It also corrects the loader entry-point script name from `DataLoader.py` to `loader.py` to match the `icdc-dataloader` repo — the runnable script is `loader.py`; `DataLoader` is the class defined inside `data_loader.py`. This revision also adds the runnable Dev-local loader.py command block to the Loading Workflow and names ICDC-4176 (the COTC030 load) as the canonical example.** An earlier revision confirmed **Neo4j** (not Memgraph) as the graph store, a **hybrid Dev-local / Jenkins** pipeline, **User Story** as the issue type for the load, **`Relates`** (not `Blocks`) to the paired IndexD task, and a **five-row** Submission & Artifacts table. All `[ICDC-VERIFY]` items were resolved by the TPM on 2026-07-30 (see the end of this file); the template was promoted from draft to **v1 canonical** on 2026-07-30.
 
 > **Use this template for every ICDC data management task that loads a study submission into ICDC — either a brand-new study or new data added to an existing study — and promotes it through Dev → QA → Stage → Prod.** Canonical example: the COTC030 load (ICDC-4176). This template covers the **loading-data** sub-function of the team's data management work. It is **not** for changes to the data model itself, and **not** for the upstream IndexD registration that mints the file GUIDs this load consumes (use the IndexD Registration Task template). See "When NOT to use this template" at the end.
 
@@ -178,7 +178,7 @@ If a study submission requires schema changes before it can be loaded, that's tw
 
 ## `[ICDC-VERIFY]` items — status
 
-Resolved from ICDC-4175 / ICDC-4176 and the `icdc-dataloader` repo (v1-DRAFT → on track for canonical once the remaining items below are confirmed):
+Resolved from ICDC-4175 / ICDC-4176 and the `icdc-dataloader` repo (now **v1 canonical**, 2026-07-30):
 
 - ✅ **Application surfaces** — Cases / Studies / Samples / Explore Dashboard / Files.
 - ✅ **Submission origin** — CRDC Submission Portal (COP / COTC trials enter via the Portal).
@@ -201,4 +201,4 @@ Resolved by the TPM (2026-07-30) — all items now confirmed:
 3. ✅ **Developer-field placement on the load Story** — `customfield_23650` for *all* issue types including Story (confirmed on ICDC-4176; the Jira UI "Developer" field reads from it). `customfield_18250` is deprecated/unused. SKILL.md §3 and this template updated to match.
 4. ✅ **Initial ownership** — the parent Data Submission user story is owned by Philip Musk (ICDC Data Concierge) at creation.
 
-With these confirmed, the template is ready for promotion from **v1-DRAFT** to **v1 canonical**.
+With these confirmed, the template was promoted from draft status to **v1 canonical** on 2026-07-30.
