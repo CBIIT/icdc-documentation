@@ -42,7 +42,7 @@ The **Integrated Canine Data Commons (ICDC)** is part of the NCI's Cancer Resear
   - `bento-icdc-backend` — Spring Boot backend (GraphQL; reads/writes OpenSearch indices)
   - `crdc-icdc-data-retriever` — **Python ETL** that fetches external-node data (IDC, TCIA) and writes to OpenSearch's `external_data` index. Runs on a **Jenkins schedule**, not in response to runtime requests.
   - `bento-icdc-interoperation` — Node.js service. **As of Release 4.3.0.528, its active role is the outbound CGC export** (`storeManifest` GraphQL mutation → S3 upload → CloudFront pre-signed URL → Seven Bridges). The legacy `studiesByProgram` / `studyLinks` queries in this repo are now dead code after the FE cutover in ICDC-4022.
-  - `icdc-dataloader` — Data ingestion pipeline. Home of `DataLoader.py`, the Python job that runs via Jenkins to load ICDC study data from approved source files.
+  - `icdc-dataloader` — Data ingestion pipeline. Home of `loader.py`, the Python job that runs via Jenkins to load ICDC study data from approved source files.
   - `icdc-model-tool` — Data model representations and build tools
   - `icdc-deployments` — Deployment configurations
   - `icdc-devops` — DevOps infrastructure
@@ -75,10 +75,10 @@ Before writing any stakeholder-facing description of an ICDC service, integratio
 
 ICDC has three distinct data-movement pathways. Each is owned, scheduled, and scoped differently.
 
-#### 1. Study data ingestion — **Jenkins jobs running `DataLoader.py`** (inbound, batch)
+#### 1. Study data ingestion — **Jenkins jobs running `loader.py`** (inbound, batch)
 
 - **What it does:** Loads all ICDC study data — samples, cases, diagnoses, files, clinical trial metadata — into the ICDC databases from approved source files.
-- **Mechanism:** Scheduled **Jenkins jobs** running `DataLoader.py` from the `icdc-dataloader` repo. Not API calls. Not on-the-fly loads. Not the Data Retriever (which is unrelated — Data Retriever deals exclusively with external API data).
+- **Mechanism:** Scheduled **Jenkins jobs** running `loader.py` from the `icdc-dataloader` repo. Not API calls. Not on-the-fly loads. Not the Data Retriever (which is unrelated — Data Retriever deals exclusively with external API data).
 - **Pipeline stages:** Full SDL promotion path — **DEV → QA → Stage → Production**. Each promotion is its own Jira ticket (e.g., COTC021 v.2 Stage was ICDC-4053, Prod was ICDC-4061).
 - **Ownership:** Managed by dedicated Jenkins pipelines outside the application team's direct control.
 - **Cadence:** Scheduled, validated, QA'd ahead of release. Never spontaneous.
@@ -104,10 +104,10 @@ ICDC has three distinct data-movement pathways. Each is owned, scheduled, and sc
 
 - ❌ "InterOp feeds IDC/TCIA data into ICDC." — WRONG (as of Release 4.3.0.528). That role moved to the Data Retriever; Interop's active role is now CGC export.
 - ❌ "The Data Retriever is a runtime microservice / Spring Boot service / real-time backend API." — WRONG. It is a **Python batch ETL** invoked via CLI on a Jenkins schedule. Data flows through OpenSearch, not through runtime calls to the Data Retriever.
-- ❌ "DataLoader.py is complementary to the Data Retriever." — WRONG. DataLoader.py is part of `icdc-dataloader` (Pathway 1) and loads ICDC study data via Jenkins. It has nothing to do with external APIs, OpenSearch `external_data`, or the Data Retriever.
+- ❌ "loader.py is complementary to the Data Retriever." — WRONG. loader.py is part of `icdc-dataloader` (Pathway 1) and loads ICDC study data via Jenkins. It has nothing to do with external APIs, OpenSearch `external_data`, or the Data Retriever.
 - ❌ "The Data Retriever has graceful-degradation logic that handles external outages at runtime." — WRONG framing. The Data Retriever is a batch job; resilience to external-node outages comes from the fact that the FE never calls those external APIs at request time — it reads OpenSearch. If an external API is down when the Data Retriever runs, the batch job logs it and the OpenSearch data stays at its last-successful state.
-- ❌ "All ICDC data is loaded via Jenkins OR via API." — MISLEADING. Study data is loaded via Jenkins `DataLoader.py` (Pathway 1). External-node enrichment is loaded via the Data Retriever, also via Jenkins (Pathway 2). CGC export flows through Interop `storeManifest` (Pathway 3, outbound). All three are distinct.
-- ✅ "Study data is loaded by Jenkins running `DataLoader.py`. IDC/TCIA external-node data is populated on a Jenkins schedule by the Data Retriever Python ETL, which writes to OpenSearch. CGC export runs through Interop's `storeManifest` mutation, which uploads a manifest to S3 and returns a signed CloudFront URL."
+- ❌ "All ICDC data is loaded via Jenkins OR via API." — MISLEADING. Study data is loaded via Jenkins `loader.py` (Pathway 1). External-node enrichment is loaded via the Data Retriever, also via Jenkins (Pathway 2). CGC export flows through Interop `storeManifest` (Pathway 3, outbound). All three are distinct.
+- ✅ "Study data is loaded by Jenkins running `loader.py`. IDC/TCIA external-node data is populated on a Jenkins schedule by the Data Retriever Python ETL, which writes to OpenSearch. CGC export runs through Interop's `storeManifest` mutation, which uploads a manifest to S3 and returns a signed CloudFront URL."
 
 ### 📡 Data Retriever Architecture — A Multi-Year Backend Redesign
 
@@ -240,7 +240,7 @@ ICDC data-management work splits into two **paired** ticket types with **opposit
 
 | Ticket type | Example | Development? | Developer (`customfield_23650`) | `Data-Concierge` label |
 |---|---|---|---|---|
-| **Data loading** (load a study into ICDC) | ICDC-4176 | **Yes** — engineering pipelines: local Neo4j + `DataLoader.py`, Jenkins lower/upper-tier, OpenSearch ETL | **Populated** — the engineer who ran the load | **No** — loading is engineering, not the Data Concierge service |
+| **Data loading** (load a study into ICDC) | ICDC-4176 | **Yes** — engineering pipelines: local Neo4j + `loader.py`, Jenkins lower/upper-tier, OpenSearch ETL | **Populated** — the engineer who ran the load | **No** — loading is engineering, not the Data Concierge service |
 | **IndexD registration** (register file GUIDs with DCF) | ICDC-4175 | **No** — coordination with DCF to mint/register GUIDs; nothing is built | **Empty by design** | **Yes** — registration *is* part of the Data Concierge service |
 
 - **Do not "fix" an empty Developer field on an IndexD-registration task** — empty is the correct state.
@@ -587,7 +587,7 @@ These rules apply to **every** epic template, regardless of grouping. The per-gr
 
 **Domain content rules**
 - **OpenSearch named explicitly** when the epic surfaces aggregations, counts, or facet-driven queries. ICDC's frontend reads OpenSearch (via the BE's GraphQL resolvers) for nearly every data-bearing surface — naming it in scope and dependencies makes the architecture legible to stakeholders.
-- **Serving path vs. ingestion path — don't conflate them.** ICDC's *serving (runtime read) path* is OpenSearch: the frontend reads OpenSearch via the Spring Boot backend's GraphQL resolvers for nearly every data-bearing surface. ICDC's *ingestion path* loads study data into **Neo4j**, the graph metadata store the loader writes to via `bolt://…:7687` (`DataLoader.py`, Pathway 1 in Section 2). Both are true at once — they describe different paths. Do **not** write "ICDC has no graph database" (wrong) or "ICDC serves queries from Neo4j" (also wrong). The Memgraph-as-primary-store framing belongs to CTDC, not ICDC.
+- **Serving path vs. ingestion path — don't conflate them.** ICDC's *serving (runtime read) path* is OpenSearch: the frontend reads OpenSearch via the Spring Boot backend's GraphQL resolvers for nearly every data-bearing surface. ICDC's *ingestion path* loads study data into **Neo4j**, the graph metadata store the loader writes to via `bolt://…:7687` (`loader.py`, Pathway 1 in Section 2). Both are true at once — they describe different paths. Do **not** write "ICDC has no graph database" (wrong) or "ICDC serves queries from Neo4j" (also wrong). The Memgraph-as-primary-store framing belongs to CTDC, not ICDC.
 - **FAIR mission stated.** Connect the epic back to making ICDC data Findable, Accessible, Interoperable, and Reusable somewhere in the description (typically in Context & Background and User Impact).
 - **Comparative Oncology Program (COP) framing** appears in user-facing epics where scientific motivation matters. ICDC's mission is to advance human cancer research by studying spontaneous canine tumors — anchor user-facing epics in that purpose. See Section 2 for the full vocabulary.
 - **CTDC ↔ ICDC translations.** When mirroring a CTDC pattern, translate node names and relationship names — `case`/`participant`, `sample`/`specimen`, `of_*`/`associated_with`, `file_uuid`/`data_file_uuid`, `clinical_study_designation`/`study_accession`. ICDC uses the per-destination naming convention (`of_case`, `of_study`, `of_sample`, `from_diagnosis`); CTDC uses a single `associated_with` relationship distinguished by `Src`/`Dst` types.
@@ -595,7 +595,7 @@ These rules apply to **every** epic template, regardless of grouping. The per-gr
 **Three data pathways (ICDC-specific)**
 
 When an epic touches data movement, name the correct pathway from Section 2:
-- **Pathway 1 — Study data ingestion via Jenkins `DataLoader.py`** (inbound, batch). Cases, samples, diagnoses, files, clinical-trial metadata.
+- **Pathway 1 — Study data ingestion via Jenkins `loader.py`** (inbound, batch). Cases, samples, diagnoses, files, clinical-trial metadata.
 - **Pathway 2 — External-node data via Data Retriever Python ETL** (inbound, batch, Jenkins-scheduled). IDC + TCIA metadata into OpenSearch `external_data` index.
 - **Pathway 3 — CGC export via Interop `storeManifest`** (outbound). Manifest → S3 → CloudFront signed URL → Seven Bridges.
 
@@ -757,6 +757,35 @@ When normalizing or drafting an Application Pages epic, cross-reference these:
 5. **Verify the rendered description with a UI screenshot** from the user. The wiki source is unreliable as a render preview.
 6. **If rendering is broken**, first re-check the Markdown source for any unescaped `{...}` — that's the most likely cause. If the source is clean and the render is still broken, fall back to UI paste.
 7. **Update the related-epics cross-reference list** in the Notes section of every other Application Pages epic when a new page epic is added or an existing one is retitled.
+
+---
+
+### 7e-4. 📦 Products (Drafted)
+
+> **Use this template for every epic that scopes a standalone deliverable consumed by external systems or end users.** Anchor example: ICDC-4134 (synthetic data generator). Other examples include the ICDC Data Model itself as a versioned product, manifest format specifications, and any tool published publicly to GitHub or Hugging Face Spaces for use by data submitters or downstream commons.
+
+**The full template lives at** `claude/templates/7e-4-products.md` in this repo.
+
+**Why a separate file:** SKILL.md is already large; per-grouping templates are referenced rather than embedded so the operational sections (1–6, 8–14) stay scannable. The fragment file is the canonical source of truth for the Products template — fetch it on demand when drafting or normalizing a Products epic.
+
+**Quick reference — what's in the fragment:**
+
+- **Section order:** identical to 7e-1 (15 sections, same emojis, same order).
+- **Content rules tuned for Products:** distribution channels (GitHub, Hugging Face Spaces, PyPI, npm) instead of live URLs; predecessor product cross-reference (e.g., the existing Bento Data Generator); cold-start and zero-data generation modes considered; reproducibility, contextual fidelity, and schema conformance as the Performance & Quality bar; open-source license stance and no-PHI/PII constraint stated explicitly.
+- **Components Breakdown sub-blocks:** Generation Engine / Configuration & Inputs / Distribution & Documentation / Testing (UI optional).
+- **Verification workflow:** verify the public repo state, the schema source on `icdc-model-tool`, and any predecessor product README before drafting.
+
+**When to fetch the fragment:**
+
+- Drafting a new Products epic — read `claude/templates/7e-4-products.md` first
+- Normalizing or refreshing an existing Products epic
+- Auditing whether a candidate epic belongs in Products vs. Microservices vs. Features (the fragment's "why this template" section is the deciding lens)
+
+**When the fragment changes:**
+
+- Update the fragment in `claude/templates/7e-4-products.md`
+- Note the change here if it affects the Quick Reference summary above
+- Consider a normalization pass across all existing Products epics so they stay consistent — see Section 13 (Maintenance Notes)
 
 ---
 
@@ -941,7 +970,7 @@ Headline format: *"X of Y goals delivered."* This reframes a sprint more favorab
 ### 10d. ICDC-Specific Demo Day Notes
 
 - **No data-release vs software-release split.** ICDC is all open access — there's no separate data-release announcement channel like CTDC has. Sprint review and release demo combine into a single meeting and a single Slack post.
-- **Three data pathways are demo-relevant.** When framing what shipped in a release, be precise about which pathway changed (Jenkins `DataLoader.py` for study data ingestion, Data Retriever Python ETL for external-node data, Interop `storeManifest` for CGC export — see Section 2 for the full reference). Misframing pathways in a demo announcement is a common mistake.
+- **Three data pathways are demo-relevant.** When framing what shipped in a release, be precise about which pathway changed (Jenkins `loader.py` for study data ingestion, Data Retriever Python ETL for external-node data, Interop `storeManifest` for CGC export — see Section 2 for the full reference). Misframing pathways in a demo announcement is a common mistake.
 - **Vocabulary discipline.** Never say "DMN v2.0" or "Data Model Navigator v2.0" — see Section 2's Data Model vs. DMN rule. Versioning applies to the Data Model content, not the Navigator tool.
 - **Developer-field shoutouts.** When calling out who built what in a Slack announcement, pull from the Developer field, not Assignee. Tagging the QA who closed the ticket as the builder is a real and common mistake on ICDC.
 
@@ -969,7 +998,7 @@ Headline format: *"X of Y goals delivered."* This reframes a sprint more favorab
 | QA / SDET | Valentina Epishina | valentina.epishina@nih.gov | `epishinavv` | `U02PMPFHBRN` | `@Valentina Epishina` |
 | Design / UX | Hannah Stogsdill | hannah@toastandtiger.com | `stogsdillhh` | `U08GNMQPMFX` | `@Hannah Stogsdill` |
 | UI / UX | Peter Scrufari | scrufaripp@nih.gov | `scrufaripp` | `U07C6CJRL05` | `@Peter Scrufari` |
-| Business Analyst (NIH/NCI) | Philip Musk | — | `muskp2` | *(not yet confirmed)* | `@Philip Musk` |
+| Business Analyst, FNL/BACS — leads ICDC Data team | Philip Musk | philip.musk@nih.gov | `muskp2` | `UE1AJ02EB` | `@Philip Musk` |
 | Infrastructure Contributor | Michael Fleming | michael.fleming@nih.gov | `flemingme` | *(not yet confirmed)* | *(not yet confirmed)* |
 
 ### Guidance for Slack Communications
@@ -986,7 +1015,7 @@ Headline format: *"X of Y goals delivered."* This reframes a sprint more favorab
 |------|------|-------|
 | NCI/CBIIT Stakeholders | — | NCI leadership, data submitters, COP research community |
 | Data Model Author | Mark Jensen | NIH/NCI — author of `icdc-model-tool` |
-| DataHub Adoption Driver | Todd Pihl | NCI/CBIIT — drove DMN adoption in CRDC DataHub |
+| DataHub Adoption Driver (historical) | Todd Pihl | FNL/BACS — drove DMN adoption in CRDC DataHub circa 2023 |
 | COP PI | Dr. Amy K. LeBlanc | NCI Comparative Oncology Program — PI for COTC021/COTC022 |
 
 ---
@@ -1064,6 +1093,17 @@ All stores are maintained in parallel. SharePoint is for stakeholder access; Git
 
 ---
 
+### 🔁 Building in `icdc-documentation` — mirror `ctdc-documentation` (reference repo)
+
+When building or extending anything in this `icdc-documentation` repo — templates, workflows, decision records, architecture notes, or this SKILL.md — use **`CBIIT/ctdc-documentation`** as the reference implementation. CTDC is ICDC's sister project under the same CRDC umbrella, runs the same Bento framework, and its `claude/` knowledge base is more mature, so it is the model to mirror — adapting for ICDC's specifics rather than copying verbatim.
+
+- **Structure to mirror.** `ctdc-documentation/claude/` organizes content as `templates/`, `workflows/`, `architecture/`, and `lessons-learned/` (ICDC uses `decisions/` for that role), plus a top-level `README.md` component-library index and `SKILL.md`. When adding a new kind of artifact, check where CTDC puts it first.
+- **Templates index.** The ICDC template inventory — every template mapped to its file and canonical Jira ticket — lives in `claude/templates/README.md`; keep it current when templates are added or revised. CTDC's equivalent index is in `claude/README.md`, mirrored in its SKILL.md §9a "Canonical Example Index."
+- **Always translate, never copy verbatim.** CTDC and ICDC differ in ways that matter: graph store (Memgraph vs **Neo4j**), model repo (`ctdc-model` vs **`icdc-model-tool`**), loader (`crdc-ctdc-dataloader`, all-Jenkins vs **`icdc-dataloader`**, hybrid Dev-local `loader.py`), application surfaces (Participants / Studies / Specimens vs **Cases / Studies / Samples**), and file access (controlled + open vs **open-access only**). The "differences from CTDC" table in `claude/templates/README.md` is the running list — consult it before porting anything.
+- **Reference, don't share.** CTDC and ICDC keep separate repos deliberately; port useful patterns, but each repo owns and maintains its own copy. Never create a cross-repo dependency.
+
+---
+
 ## 13. 🔧 Maintenance Notes
 
 - This file lives at `CBIIT/icdc-documentation/claude/SKILL.md`
@@ -1092,7 +1132,7 @@ Track which per-grouping epic templates are drafted vs. still TBD. Each future s
 | Application Pages (7e-1) | ✅ Drafted v1 (2026-05-05) | ICDC-2036 (Home — anchor) |
 | Microservices (7e-2) | 🚧 TBD | TBD |
 | Features (7e-3) | 🚧 TBD | TBD |
-| Products (7e-4) | 🚧 TBD | TBD |
+| Products (7e-4) | ✅ Drafted v1 (2026-05-05) | ICDC-4134 (Synthetic Data Generator — anchor) |
 | Infrastructure (7e-5) | 🚧 TBD | TBD |
 | Security (7e-6) | 🚧 TBD | TBD (candidate: ICDC-4120 Invicti remediation) |
 | Data (7e-7) | 🚧 TBD | TBD |
