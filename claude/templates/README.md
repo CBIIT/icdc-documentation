@@ -12,7 +12,7 @@ Templates are organized by **work lane** — the team has two primary functions 
 |---|---|---|---|---|
 | `7e-4-products.md` | Software development (Products epic) | Drafted | TBD | Pre-existing. Covers standalone deliverables consumed by external systems (manifest format spec, the ICDC application as a whole, the Data Model itself as a versioned product). |
 | `indexd-registration-task-template.md` | Data management — loading data | **v1-DRAFT (rev. 2026-05-28)** | ICDC-4175 | Ported from CTDC v3. Open-access only (no `acl`). Revised against ICDC-4175 / CRINTAKE-478: `Relates` (not `Blocks`), Release Package row, AWS Account ID row, most `[ICDC-VERIFY]` items resolved. A few open items remain for Ambar Rana. |
-| `data-loading-task-template.md` | Data management — loading data | **v1-DRAFT (rev. 2026-05-28)** | ICDC-4176 | Ported from CTDC v5. Cases / Studies / Samples. Revised against ICDC-4176 + `icdc-dataloader`: **Neo4j** (not Memgraph), hybrid Dev-local / Jenkins pipeline, **User Story** issue type, `Relates` (not `Blocks`), five-row artifacts table. A few open items remain for Ambar Rana. |
+| `data-loading-task-template.md` | Data management — loading data | **v1-DRAFT (rev. 2026-07-30)** | ICDC-4176 | Ported from CTDC v5. Cases / Studies / Samples. Revised against ICDC-4176 + `icdc-dataloader`: **Neo4j** (not Memgraph), hybrid Dev-local / Jenkins pipeline, **User Story** issue type, `Relates` (not `Blocks`), five-row artifacts table. **2026-07-30 rev:** slimmed to the 4-section shape (Load Summary · Submission & Artifacts · Loading Workflow · Testing Signoff); corrected loader script name to `loader.py` (`DataLoader` is the class inside `data_loader.py`, not a script); added the runnable Dev-local `loader.py` command block (dry-run then load, `--dataset`); named ICDC-4176 canonical. A few open items remain for Ambar Rana. |
 | `data-modeling-for-study-submission-template.md` | Data management — modeling data | Planned (next session) | TBD | Will be ported from CTDC v3 with ICDC adaptations — repo is `icdc-model-tool`, not `ctdc-model`. |
 | `data-model-update-task-template.md` | Data management — modeling data | Planned (next session) | TBD | Will be ported from CTDC v2 with ICDC adaptations. |
 
@@ -46,6 +46,8 @@ These templates were ported from the CTDC documentation repo (`CBIIT/ctdc-docume
 | External handoff for IndexD | Yes — CTDS via CRINTAKE | **Same — CTDS via CRINTAKE + DCF Google Drive (CRINTAKE-478); no `acl`** |
 | Data Model repo | `CBIIT/ctdc-model` | `CBIIT/icdc-model-tool` |
 | Graph metadata store | Memgraph | **Neo4j** (loader connects via `bolt://…:7687`) |
+| Loader repo & script | `CBIIT/crdc-ctdc-dataloader`, Jenkins-run | `CBIIT/icdc-dataloader`, `loader.py` run locally for Dev (`DataLoader` is a class inside `data_loader.py`, not a script) |
+| Loading pipeline | All four tiers via Jenkins | **Hybrid — Dev local (`loader.py`), QA/Stage/Prod via Jenkins** |
 | Application surface terminology | Participants, Studies, Specimens | **Cases, Studies, Samples** |
 | Submission ingestion source | CRDC Submission Portal | **CRDC Submission Portal (COP / COTC trials enter via the Portal)** |
 | Submission user story pattern | Program-level (e.g., CTDC-1805) | **Data epic + load Story; `[ICDC-VERIFY]` whether a separate submission Story exists** |
@@ -85,6 +87,7 @@ Look for files prefixed with the template name and dated, e.g., `claude/decision
 |---|---|
 | 2026-05-27 | Initial port from CTDC: README, IndexD Registration Task v1-DRAFT, Data Loading Task v1-DRAFT committed |
 | 2026-05-28 | Templates revised against first real ICDC tickets (ICDC-4175 / ICDC-4176) + `icdc-dataloader`: Neo4j confirmed (not Memgraph), hybrid Dev-local / Jenkins pipeline, User Story load type, `Relates` (not `Blocks`), reduced five-row artifacts table, most `[ICDC-VERIFY]` items resolved |
+| 2026-07-30 | Data Loading Task revised (PR against `main`): slimmed to 4-section shape, corrected loader script name `DataLoader.py` → `loader.py`, added the Dev-local `loader.py` command block (`--dataset`, dry-run then load), named ICDC-4176 canonical. Same fixes applied to the live tickets ICDC-4174 / ICDC-4176. |
 | Pending | Data Modeling for Study Submission v1-DRAFT, Data Model Update Task v1-DRAFT, ICDC SKILL.md Section 7 update with decision tree |
 | Pending | Ambar Rana review of all four data templates; `[ICDC-VERIFY]` callouts resolved; templates promoted from v1-DRAFT to v1 canonical |
 
