@@ -2,6 +2,8 @@
 
 > **Use this template for every ICDC data management task that registers a study's files in CRDC IndexD: minting GUIDs that the paired Data Loading Task will reference.** This ICDC template mirrors CTDC's IndexD Registration Task template (v7) exactly, filled with ICDC-specific values, because the IndexD registration task is identical across commons: it uses the shared CRDC / DCF IndexD service that serves the whole CRDC platform. The canonical example is **ICDC-4175** (Index files for COTC030), paired with intake ticket CRINTAKE-478. This template covers the **upstream artifact creation** work pattern within the loading-data sub-function; it is the **parallel partner** of a Data Loading Task, not a substitute for one, and not a blocker of one. See "When NOT to use this template" at the end.
 
+> **Changelog — 2026-07-30:** Folded in four IndexD-ticket refinements approved on the live tickets — (A) Submission & Artifacts kept to the CTDC v7 five-row shape (no Object Files Location / indexd.tsv manifest rows); (B) the pre-registration manifest `url` check softened to a format-only check; (C) completion tracked by monitoring the CRINTAKE intake ticket; (D) verification simplified to a single-GUID resolution pasted into a ticket comment — plus the rename of the UChicago indexing team to DCF. ICDC-4193 / ICDC-4194 (COTC021 / COTC022 multi-submission indexing) are the first real tickets drafted under this revision. Canonical example remains ICDC-4175.
+
 **Why this template**
 
 The ICDC team has two primary functions (software development and data management), and data management has two sub-functions: loading data and modeling data. The Data Loading Task template covers the *promotion of a CRDC submission's contents* into ICDC's databases through Jenkins. But before that load can run, every file in the submission needs a globally unique identifier (GUID) registered in **CRDC IndexD**, and that registration is performed by an **external team, the DCF (the University of Chicago team that operates CRDC IndexD)**, not by the ICDC engineering team.
@@ -52,7 +54,7 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
 3. `### 🚦 **Registration Workflow**`: Numbered list grouped into two phases. Standard ICDC sequence:
 
    **Pre-registration**
-   1. Extract the indexd.tsv manifest from the Release Package in the `nci-cbiit-caninedatacommons-dev` bucket. Validate that every row carries the uniform ICDC open-access `acl` value across all rows (ICDC files are open access; there are no controlled-access consent codes), the row count matches the file count for this study, every row's `url` resolves to a real object-file location, and the GUID placeholder format is consistent with the `dg.4DFC/` prefix.
+   1. Extract the indexd.tsv manifest from the Release Package in the `nci-cbiit-caninedatacommons-dev` bucket. Validate that every row carries the uniform ICDC open-access `acl` value across all rows (ICDC files are open access; there are no controlled-access consent codes), the row count matches the file count for this study, every row's `url` is well-formed — a format check is sufficient; there is no need to confirm each one resolves — and the GUID placeholder format is consistent with the `dg.4DFC/` prefix.
 
    **External handoff**
    2. Upload the extracted indexd.tsv to the [DCF Google Drive folder](https://drive.google.com/drive/folders/1eYXAEOFab-lbLdpNT0sLhXsqfVehcTqW) for indexing. Filename convention is preserved from the Release Package; do not rename.
@@ -62,11 +64,10 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
 
    **Step count: 5 (1 pre-registration, 4 external handoff).**
 
-4. `### 🧪 **Verification**`: How ICDC confirms the registration worked, and the close trigger. Once DCF/DCFS reports indexing complete (via CRINTAKE or direct notification), spot-check the minted GUIDs; a successful spot-check is the trigger to close the ticket. Bullet list (italic-labelled, colon separators, the rendering-safe pattern):
+4. `### 🧪 **Verification**`: How ICDC confirms the registration worked, and the close trigger. Completion is tracked by **monitoring the CRINTAKE intake ticket** — its status is how ICDC knows when the DCF has finished indexing. Once the CRINTAKE ticket shows indexing is complete, spot-check a minted GUID; a successful spot-check is the trigger to close the ticket. Bullet list (italic-labelled, colon separators, the rendering-safe pattern):
 
-   - *How to spot-check*: Resolve a sample of GUIDs by hitting the IndexD resolution endpoint at `nci-crdc.datacommons.io/index/` with the GUID appended. A pass returns a non-error response with the full IndexD record (`did`, `urls`, `hashes`, `size`, `acl`, `authz`, `rev`, `baseid`): `urls` points to the expected S3 object-file location, `acl` carries the uniform ICDC open-access value (non-empty; ICDC files are open access), and `size`/`hashes` are non-empty.
-   - *How many GUIDs to spot-check*: At minimum, the first, middle, and last GUIDs in the manifest. If the study has more than 1,000 files, spot-check at least 5, including any GUIDs flagged by the DCF as edge cases.
-   - *If a spot-check fails*: Do not close this ticket. Reopen the CRINTAKE ticket with the specific GUIDs and resolution-endpoint responses, coordinate the fix with the DCF, and surface the issue on the parent submission user story so it's tracked at the program level.
+   - *How to spot-check*: Resolve a single GUID (the Sample GUID from the Submission & Artifacts table) by hitting the IndexD resolution endpoint at `nci-crdc.datacommons.io/index/` with the GUID appended, and paste the returned IndexD record into a comment on this ticket. A pass returns a non-error response with the full IndexD record (`did`, `urls`, `hashes`, `size`, `acl`, `authz`, `rev`, `baseid`): `urls` points to the expected S3 object-file location, `acl` carries the uniform ICDC open-access value (non-empty; ICDC files are open access), and `size`/`hashes` are non-empty.
+   - *If the check fails*: Do not close this ticket. Reopen the CRINTAKE ticket with the GUID and its resolution-endpoint response, coordinate the fix with the DCF, and surface the issue on the parent submission user story so it's tracked at the program level.
 
 **Sections omitted compared to v1**
 
