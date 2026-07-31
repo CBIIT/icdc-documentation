@@ -7,7 +7,7 @@
 **Two Portal status gates drive the back half of the pipeline.** Watch for these:
 
 - **Release to DC:** the Portal programmatically writes the Release Package into the ICDC metadata bucket. The Release Package is **immutable** from this point; any change needs the submission reopened to produce a new one.
-- **Complete:** the Portal moves the object files into the CRDC production bucket. Only now do the IndexD GUIDs resolve and file downloads work. Indexing can be registered earlier, but the GUIDs will not resolve until Complete.
+- **Complete:** the Portal moves the object files into the CRDC production bucket, so the IndexD GUIDs can resolve. **ICDC does not begin indexing until the submission is Complete.** Once Complete, loading and indexing run in parallel.
 
 ## Pipeline at a glance
 
@@ -19,12 +19,12 @@
 | 2a | Modeling fork (only if new terms needed) | Data Concierge; Data Model Author (Mark Jensen) | Data Modeling for Study Submission | New model version live on both DMNs; DM Fed Lead review (Heather Creasy) |
 | 3 | Pre-load review (before Release to DC) | Reviewer (triaged) | Data Submission Review Task | Clean review of the submitter-uploaded TSVs |
 | 4 | Release to DC (Portal) | Data Concierge | (tracked on the user story) | Release Package written to metadata bucket; now immutable |
-| 5a | IndexD registration (parallel) | Data Concierge; external DCF | IndexD Registration ("Data Indexing") task | Handoff filed; GUIDs mint (they resolve only after Complete) |
-| 5b | Data load Dev to Prod (parallel) | Loading engineer; QA (Valentina Epishina) | Data Loading Task | Prod load and signoff |
-| 6 | Mark submission Complete (Portal) | Data Concierge | (tracked on the user story) | Object files moved to production bucket; GUIDs resolve |
+| 5 | Submission marked Complete (Portal) | Data Concierge | (tracked on the user story) | Object files moved to production bucket; GUIDs can resolve; indexing may now begin |
+| 6a | Data load Dev to Prod (parallel) | Loading engineer; QA (Valentina Epishina) | Data Loading Task | Prod load and signoff |
+| 6b | IndexD registration (parallel; only after Complete) | Data Concierge; external DCF | IndexD Registration ("Data Indexing") task | GUID spot-check resolves |
 | 7 | Production release confirmed | Loading engineer; TPM (Gina Kuffel); Data Concierge | (closes the load task) | Study live and downloads resolve at caninecommons.cancer.gov |
 
-Link every Jira task (2a, 3, 5a, 5b) to the parent user story with `Relates`, never `Blocks`. Release to DC and Complete are Portal actions tracked on the user story, not separate tasks. Stages 5a and 5b are paired and run in parallel.
+Link every Jira task (2a, 3, 6a, 6b) to the parent user story with `Relates`, never `Blocks`. Release to DC and Complete are Portal actions tracked on the user story, not separate tasks. Stages 6a and 6b run in parallel, and both follow the pre-load review; do not start indexing (6b) until the submission is Complete (stage 5).
 
 ## Stages
 
@@ -38,31 +38,31 @@ Link every Jira task (2a, 3, 5a, 5b) to the parent user story with `Relates`, ne
 
 **3. Pre-load review (before Release to DC).** While the submission is still open, a reviewer downloads the submitter-uploaded loading TSVs directly from the Portal (not from a Release Package, which does not exist yet) and loads them into a local Neo4j and OpenSearch, points the Dev frontend at them, and works the review checklist (spelling, stray or non-printing characters, unresolvable DOIs and URLs, counts, required IDs, permissible values, dates and numbers, orphan relationships, rendering). A clean review clears the study to be released; any issues go back to the submitter to correct in the still-open submission and re-review. Doing this before release matters: once the submission is released the Release Package is immutable, so catching errors now avoids a reopen. Template: `data-submission-review-task-template.md`.
 
-**4. Release to DC (Portal).** Once the review is clean and any required modeling is deployed, the Data Concierge marks the submission **Release to DC** in the Portal. On release, the Portal programmatically writes the **Release Package** into the metadata bucket `nci-cbiit-caninedatacommons-dev` (AWS account `152091478849`): a directory named `<timestamp>-<submission-id>` holding the metadata loading TSVs and the `indexd.tsv` manifest. The Release Package is **immutable** at this point and is the source of truth for both the load and indexing. If a change is needed after release, the submission must be reopened to generate a new Release Package.
+**4. Release to DC (Portal).** Once the review is clean and any required modeling is deployed, the submission is marked **Release to DC** in the Portal. On release, the Portal programmatically writes the **Release Package** into the metadata bucket `nci-cbiit-caninedatacommons-dev` (AWS account `152091478849`): a directory named `<timestamp>-<submission-id>` holding the metadata loading TSVs and the `indexd.tsv` manifest. The Release Package is **immutable** at this point and is the source of truth for the load and for indexing. If a change is needed after release, the submission must be reopened to generate a new Release Package.
 
-**5a. IndexD registration (runs parallel to the load).** Register every file's GUID in CRDC IndexD through the external DCF handoff: extract the `indexd.tsv` from the Release Package, drop it in the DCF Google Drive folder, file a CRINTAKE intake ticket, then verify by resolving a minted GUID. The handoff and minting can happen now, but **the GUIDs do not resolve until the submission is marked Complete** (stage 6), because that is when the object files land in the production bucket. The registration's GUID spot-check therefore only passes after Complete. Template: `indexd-registration-task-template.md`.
+**5. Submission marked Complete (Portal).** The submission is marked **Complete** in the Portal, which moves the object files into the CRDC production bucket `nci-crdc-data-bucket-prod` so the IndexD GUIDs can resolve. This is the gate for indexing: **ICDC does not begin IndexD registration until the submission is Complete.** Once Complete, the load (6a) and the indexing (6b) run in parallel.
 
-**5b. Data load, Dev to Prod (runs parallel to registration).** One Data Loading Task promotes the study through all four environments, using the loading TSVs from the Release Package. Template: `data-loading-task-template.md`.
+**6a. Data load, Dev to Prod (runs in parallel with indexing).** One Data Loading Task promotes the study through all four environments, using the loading TSVs from the immutable Release Package. Template: `data-loading-task-template.md`.
 
-- **Pre-load gate:** the Release Package is present in the metadata bucket, and the model version tied to the Submission ID is the version deployed in each target environment. (The IndexD GUID spot-check is a close condition that only passes after Complete, so schedule the final download verification for after the submission is Complete.)
+- **Pre-load gate:** the Release Package is present in the metadata bucket, and the model version tied to the Submission ID is the version deployed in each target environment.
 - **Dev (local):** build a local Neo4j from a Dev dump, pull the model plus the loading files, configure `data-loader-config.yml`, run `loader.py` (dry-run, then load), trigger the OpenSearch ETL, verify the surfaces, then the TPM signs off Dev.
 - **QA (Jenkins lower-tier):** run the QA load and OpenSearch job; Valentina Epishina tests (rendering, file downloads, no regressions) and signs off.
 - **Stage (Jenkins upper-tier):** run the Stage load and OpenSearch job; test with production-parity checks and sign off.
 - **Prod (Jenkins upper-tier):** run the Prod load and OpenSearch job.
-- Every environment requires both a Neo4j load and an OpenSearch reindex; a Neo4j write without a reindex leaves the frontend stale.
+- Every environment requires both a Neo4j load and an OpenSearch reindex; a Neo4j write without a reindex leaves the frontend stale. File-download checks resolve through the central CRDC IndexD, so the final Prod download verification depends on the parallel indexing (6b) being complete.
 
-**6. Mark submission Complete (Portal).** The Data Concierge marks the submission **Complete** in the Portal. This moves the object files into the CRDC production bucket `nci-crdc-data-bucket-prod`, which is what makes the IndexD GUIDs resolve. Until Complete, files may be indexed but downloads will not work.
+**6b. IndexD registration (only after Complete; runs in parallel with the load).** Register every file's GUID in CRDC IndexD through the external DCF handoff: extract the `indexd.tsv` from the Release Package, drop it in the DCF Google Drive folder, file a CRINTAKE intake ticket, then verify by resolving a minted GUID. Because the object files are already in the production bucket (the submission is Complete), the GUID spot-check resolves. A passing spot-check is the close trigger. Template: `indexd-registration-task-template.md`.
 
-**7. Production release confirmed.** With the study loaded to Prod (visible at `caninecommons.cancer.gov`) and the submission Complete (object files in the production bucket, GUIDs resolving), the data is fully released: it renders and file downloads work, with no login since ICDC is open access. The Prod row in the load task's Testing Signoff table closes the load; the IndexD GUID spot-check now passes and closes the registration task. The Data Concierge confirms the study looks correct in production, which completes the parent user story's lifecycle.
+**7. Production release confirmed.** With the study loaded to Prod (visible at `caninecommons.cancer.gov`) and its files indexed and resolving, the data is fully released: it renders and file downloads work, with no login since ICDC is open access. The Prod row in the load task's Testing Signoff table closes the load; the IndexD GUID spot-check closes the registration task. The Data Concierge confirms the study looks correct in production, which completes the parent user story's lifecycle.
 
 ## Reference
 
-**Roles.** Data Concierge = Philip Musk (owns the user story; coordinates submission, review, release/complete in the Portal, and IndexD). Loading engineer = whoever is named in the Developer field (`customfield_23650`). QA tester = Valentina Epishina. DM Federal Lead and SME review = Heather Creasy (gates the model `develop` to `master` promotion). Data Model Author = Mark Jensen. ICDC TPM = Gina Kuffel.
+**Roles.** Data Concierge = Philip Musk (owns the user story; coordinates submission, review, Release to DC and Complete in the Portal, and IndexD). Loading engineer = whoever is named in the Developer field (`customfield_23650`). QA tester = Valentina Epishina. DM Federal Lead and SME review = Heather Creasy (gates the model `develop` to `master` promotion). Data Model Author = Mark Jensen. ICDC TPM = Gina Kuffel.
 
 **Environments.** Data promotes Dev (local Neo4j and OpenSearch) to QA (Jenkins lower-tier) to Stage (Jenkins upper-tier) to Prod (Jenkins upper-tier). Model code promotes on its own track: feature branch to `develop` (Dev and QA) to `master` (Stage and Prod).
 
-**Key locations.** Metadata bucket (immutable Release Package, written at Release to DC): `nci-cbiit-caninedatacommons-dev`. Object-files / production bucket (populated at Complete, when GUIDs resolve): `nci-crdc-data-bucket-prod`. AWS account: `152091478849`. Model repo: `CBIIT/icdc-model-tool`. Loader: `CBIIT/icdc-dataloader` (`loader.py`). Live site: `caninecommons.cancer.gov`. Submission Portal: `hub.datacommons.cancer.gov`.
+**Portal status gates.** Release to DC = the Release Package is written to the metadata bucket and frozen (reopen the submission for any change). Complete = the object files move to the production bucket and the GUIDs can resolve; ICDC does not begin indexing until Complete. Both are Portal actions tracked on the parent user story. After Complete, loading and indexing run in parallel.
 
-**Portal status gates.** Release to DC = Release Package written to the metadata bucket and frozen (reopen the submission for any change). Complete = object files moved to the production bucket, GUIDs resolve, downloads work. Both are Portal actions performed by the Data Concierge and tracked on the parent user story.
+**Key locations.** Metadata bucket (immutable Release Package, written at Release to DC): `nci-cbiit-caninedatacommons-dev`. Object-files / production bucket (populated at Complete, when GUIDs resolve): `nci-crdc-data-bucket-prod`. AWS account: `152091478849`. Model repo: `CBIIT/icdc-model-tool`. Loader: `CBIIT/icdc-dataloader` (`loader.py`). Live site: `caninecommons.cancer.gov`. Submission Portal: `hub.datacommons.cancer.gov`.
 
 **Jira conventions.** Every data task is issue type Task except the parent, which is a User Story. Parent Epic is ICDC-3342 (ICDC Data), set via `customfield_12350`. Link related work with `Relates`, never `Blocks`. IndexD registration and the parent user story carry the `Data-Concierge` label; the load and modeling tasks do not (engineering). Each template carries its own full field rules.
