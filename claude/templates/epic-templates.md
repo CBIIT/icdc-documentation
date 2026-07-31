@@ -240,3 +240,4 @@ When normalizing or drafting an Application Pages epic, cross-reference these:
 - Consider a normalization pass across all existing Products epics so they stay consistent — see Section 13 (Maintenance Notes)
 
 ---
+
