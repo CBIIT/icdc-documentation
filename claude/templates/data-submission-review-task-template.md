@@ -1,6 +1,6 @@
 ### 🔎 Data Submission Review Task Template (v1 — 2026-07-30)
 
-> **Status:** **v1 (2026-07-30).** ICDC-original — there is no CTDC equivalent. This is ICDC's pre-load quality gate: before the Data Loading Task ever runs, the loading TSVs are pulled straight from the CRDC Submission Portal and loaded into a **local Neo4j + local OpenSearch**, then viewed through the ICDC Dev frontend to catch submitter-side data-entry errors (spelling mistakes, stray/non-printing characters, DOIs that don't resolve, malformed values) while they are still cheap to fix. Mirrors the Data Loading Task template's four-section shape.
+> **Status:** **v1 (2026-07-30).** ICDC-original — there is no CTDC equivalent. This is ICDC's pre-load quality gate: before the Data Loading Task ever runs, the loading TSVs are pulled straight from the CRDC Submission Portal and loaded into a **local Neo4j + local OpenSearch**, then viewed through the ICDC Dev frontend to catch submitter-side data-entry errors (spelling mistakes, stray/non-printing characters, DOIs that don't resolve, malformed values) while they are still cheap to fix. Mirrors the Data Loading Task template's four-section shape. **Revision (2026-07-31):** Data Submission Review Tasks are created unassigned (the assignee is set later during sprint triage or when work begins), matching the Data Loading Task standard; the `Data-Concierge` label still applies.
 
 > **Use this template for the pre-load review of every ICDC study submission** — the quality gate that runs **before** the paired Data Loading Task. Canonical example: **TBD** (the first ICDC Data Submission Review task drafted under this template becomes the canonical example). This template covers the **submission-review** work pattern within the loading-data sub-function: it is the prerequisite quality check that clears a submission for loading, not the load itself (use the Data Loading Task template for that) and not IndexD registration. See "When NOT to use this template" at the end.
 
@@ -84,7 +84,7 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
 - **Scope is pre-load submission review only.** A local load of the Portal's loading TSVs to catch data-entry errors before the pipeline load. **The actual load** uses the Data Loading Task template. **IndexD registration** uses the IndexD Registration Task template. **Schema / model changes** use a modeling template.
 - **Runs before the Data Loading Task.** This review is the gate; a clean review clears the paired Data Loading Task to proceed. Link the two via `Relates`.
 - **Issue type is Task.** Do not use Story or Subtask.
-- **Assign to Philip Musk (ICDC Data Concierge) at creation**, and apply the **`Data-Concierge`** label — submission review is Data Concierge work. *(If the team later decides to treat this as pure engineering like the load, drop the label.)*
+- **Created unassigned.** The assignee is left empty at creation; it is set later during sprint triage or when work begins. Apply the **`Data-Concierge`** label; submission review is Data Concierge work. *(If the team later decides to treat this as pure engineering like the load, drop the label.)*
 - **Parent Epic via `customfield_12350`** — ICDC-3342 (ICDC Data). **`Relates` link to the parent Data Submission user story** (owned by Philip Musk). **`Relates` link to the paired Data Loading Task** (this review gates it).
 - **No Release Package / bucket rows in Submission & Artifacts.** At review time there is no Release Package and nothing in S3 — the CRDC Submission Portal is the source. Carry only the three rows shown.
 - **The whole review is local.** Local Neo4j + local OpenSearch + the Dev frontend pointed at them; never the shared Dev / QA / Stage / Prod environments.
@@ -97,7 +97,7 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
 1. Confirm the submission exists in the CRDC Submission Portal and its loading TSVs are downloadable. (A Release Package is **not** required — this review runs before one exists.)
 2. Confirm this is a pre-load review, not the actual load, IndexD registration, or modeling.
 3. Identify the parent Data Submission user story and the paired Data Loading Task (add the `Relates` links after creation).
-4. Create the review task via `jira_create_issue` with `issue_type = "Task"`, a short placeholder description, the parent epic (ICDC-3342) via `customfield_12350`, and the `Data-Concierge` label. Assign to Philip Musk.
+4. Create the review task via `jira_create_issue` with `issue_type = "Task"`, a short placeholder description, the parent epic (ICDC-3342) via `customfield_12350`, and the `Data-Concierge` label. Leave it unassigned at creation; the assignee is set later during sprint triage or when work begins.
 5. Push the full body via `jira_update_issue` (two-step create-then-update).
 6. Add the `Relates` links (parent Data Submission user story; paired Data Loading Task).
 7. Verify the rendered description with a UI screenshot.
