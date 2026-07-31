@@ -30,7 +30,7 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
 
    | Field | Value | Notes |
    |---|---|---|
-   | CRDC Submission ID | *(CRDC Submission Portal ID; one per submission; link it to the Portal submission if a URL is handy)* | The anchor for the review, and the submission's identity in the CRDC Submission Portal (where the loading TSVs are downloaded from). The review runs before a Release Package exists, so this is the identifier the reviewer works from; nothing is in S3 at review time. |
+   | CRDC Submission ID | *(CRDC Submission Portal ID; one per submission; link it to the Portal submission if a URL is handy)* | Issued by the CRDC Submission Portal; one per submission. |
    | Study (acronym + version) | *(e.g., `COTC030 v.1`)* | New study vs. addition to an existing study. |
 
    **Naming discipline**: the CRDC Submission ID names the review's input by identity (the submission in the Portal, where the loading TSVs live), not by a content description.
