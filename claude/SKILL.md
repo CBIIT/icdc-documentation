@@ -255,7 +255,7 @@ ICDC data-management work has two sub-functions, and each has its own templates 
 
 - *Pre-load review* → **Data Submission Review Task** template — a local Neo4j + OpenSearch check of the CRDC Submission Portal's loading TSVs, viewed in the Dev frontend to catch data-entry errors *before* the load. Issue type **Task**; owned by Philip Musk (Data Concierge); carries the `Data-Concierge` label.
 - *IndexD registration* → **IndexD Registration Task** template — mint file GUIDs via the shared DCF handoff. Issue type **Task**; `Data-Concierge` label; Developer field empty by design (coordination, not engineering).
-- *The load itself* → **Data Loading Task** template — promote a validated Release Package through Dev → QA → Stage → Prod. Issue type **User Story**; Developer field populated; **no** `Data-Concierge` label (engineering).
+- *The load itself* → **Data Loading Task** template — promote a validated Release Package through Dev → QA → Stage → Prod. Issue type **Task**; Developer field populated; **no** `Data-Concierge` label (engineering).
 
 **Modeling data** — changing the *shape* of the ICDC data model (`CBIIT/icdc-model-tool`). The split is by **driver, not size**:
 
