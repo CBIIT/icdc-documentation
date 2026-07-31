@@ -2,7 +2,7 @@
 
 > **Status:** **v1 (2026-07-30).** ICDC-original — there is no CTDC equivalent. This is ICDC's pre-load quality gate: before the Data Loading Task ever runs, the loading TSVs are pulled straight from the CRDC Submission Portal and loaded into a **local Neo4j + local OpenSearch**, then viewed through the ICDC Dev frontend to catch submitter-side data-entry errors (spelling mistakes, stray/non-printing characters, DOIs that don't resolve, malformed values) while they are still cheap to fix. Mirrors the Data Loading Task template's four-section shape. **Revision (2026-07-31):** Data Submission Review Tasks are created unassigned (the assignee is set later during sprint triage or when work begins), matching the Data Loading Task standard; the `Data-Concierge` label still applies. **Revision (2026-07-31, table):** the Submission & Artifacts table dropped the separate CRDC Submission Portal row as redundant with the CRDC Submission ID (the Submission ID already identifies the submission in the Portal); the table is now two rows (CRDC Submission ID, Study).
 
-> **Use this template for the pre-load review of every ICDC study submission** — the quality gate that runs **before** the paired Data Loading Task. Canonical example: **TBD** (the first ICDC Data Submission Review task drafted under this template becomes the canonical example). This template covers the **submission-review** work pattern within the loading-data sub-function: it is the prerequisite quality check that clears a submission for loading, not the load itself (use the Data Loading Task template for that) and not IndexD registration. See "When NOT to use this template" at the end.
+> **Use this template for the pre-load review of every ICDC study submission** — the quality gate that runs **before** the paired Data Loading Task. Canonical example: **ICDC-4197** (Data Submission Review: COTC021 v.3). This template covers the **submission-review** work pattern within the loading-data sub-function: it is the prerequisite quality check that clears a submission for loading, not the load itself (use the Data Loading Task template for that) and not IndexD registration. See "When NOT to use this template" at the end.
 
 **Why this template**
 
@@ -111,4 +111,4 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
 
 **Canonical example**
 
-**TBD.** The first ICDC Data Submission Review task drafted under this template will become the canonical example.
+**ICDC-4197 (Data Submission Review: COTC021 v.3).** The first ICDC Data Submission Review task built to this template; use it as the house-style reference. Its paired Data Loading Task is ICDC-4195 and its IndexD Registration Task is ICDC-4193.
