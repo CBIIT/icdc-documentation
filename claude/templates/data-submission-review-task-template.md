@@ -1,6 +1,6 @@
 ### 🔎 Data Submission Review Task Template (v1 — 2026-07-30)
 
-> **Status:** **v1 (2026-07-30).** ICDC-original — there is no CTDC equivalent. This is ICDC's pre-load quality gate: before the Data Loading Task ever runs, the loading TSVs are pulled straight from the CRDC Submission Portal and loaded into a **local Neo4j + local OpenSearch**, then viewed through the ICDC Dev frontend to catch submitter-side data-entry errors (spelling mistakes, stray/non-printing characters, DOIs that don't resolve, malformed values) while they are still cheap to fix. Mirrors the Data Loading Task template's four-section shape. **Revision (2026-07-31):** Data Submission Review Tasks are created unassigned (the assignee is set later during sprint triage or when work begins), matching the Data Loading Task standard; the `Data-Concierge` label still applies.
+> **Status:** **v1 (2026-07-30).** ICDC-original — there is no CTDC equivalent. This is ICDC's pre-load quality gate: before the Data Loading Task ever runs, the loading TSVs are pulled straight from the CRDC Submission Portal and loaded into a **local Neo4j + local OpenSearch**, then viewed through the ICDC Dev frontend to catch submitter-side data-entry errors (spelling mistakes, stray/non-printing characters, DOIs that don't resolve, malformed values) while they are still cheap to fix. Mirrors the Data Loading Task template's four-section shape. **Revision (2026-07-31):** Data Submission Review Tasks are created unassigned (the assignee is set later during sprint triage or when work begins), matching the Data Loading Task standard; the `Data-Concierge` label still applies. **Revision (2026-07-31, table):** the Submission & Artifacts table dropped the separate CRDC Submission Portal row as redundant with the CRDC Submission ID (the Submission ID already identifies the submission in the Portal); the table is now two rows (CRDC Submission ID, Study).
 
 > **Use this template for the pre-load review of every ICDC study submission** — the quality gate that runs **before** the paired Data Loading Task. Canonical example: **TBD** (the first ICDC Data Submission Review task drafted under this template becomes the canonical example). This template covers the **submission-review** work pattern within the loading-data sub-function: it is the prerequisite quality check that clears a submission for loading, not the load itself (use the Data Loading Task template for that) and not IndexD registration. See "When NOT to use this template" at the end.
 
@@ -26,15 +26,14 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
 
 1. `### 🎯 **Review Summary**` — Two to three sentences: which submission is being pre-checked, that this is the quality gate run **before** the paired Data Loading Task, and what a clean result clears.
 
-2. `### 📦 **Submission & Artifacts**` — Required field. A slim three-row table. There is no Release Package or object-files bucket yet, so those rows are intentionally absent; the Submission ID plus the Portal location identify exactly what to review.
+2. `### 📦 **Submission & Artifacts**` — Required field. A slim two-row table. There is no Release Package or object-files bucket yet, so those rows are intentionally absent; the CRDC Submission ID identifies exactly what to review (it is the submission's identity in the CRDC Submission Portal, where the reviewer downloads the loading TSVs).
 
    | Field | Value | Notes |
    |---|---|---|
-   | CRDC Submission ID | *(CRDC Submission Portal ID — one per submission)* | The anchor for the review. The review runs before a Release Package exists, so this is the identifier the reviewer works from. |
+   | CRDC Submission ID | *(CRDC Submission Portal ID; one per submission; link it to the Portal submission if a URL is handy)* | The anchor for the review, and the submission's identity in the CRDC Submission Portal (where the loading TSVs are downloaded from). The review runs before a Release Package exists, so this is the identifier the reviewer works from; nothing is in S3 at review time. |
    | Study (acronym + version) | *(e.g., `COTC030 v.1`)* | New study vs. addition to an existing study. |
-   | CRDC Submission Portal | *(link to this submission in the CRDC Submission Portal)* | Source of the loading TSVs for the review — downloaded directly from the Portal. No Release Package or S3 object-files bucket exists at review time. |
 
-   **Naming discipline**: the Portal row names *where the review's inputs live* (the Portal submission), not a content description.
+   **Naming discipline**: the CRDC Submission ID names the review's input by identity (the submission in the Portal, where the loading TSVs live), not by a content description.
 
 3. `### 🚦 **Review Workflow**` — Numbered list. The entire review is **local**: a local Neo4j + local OpenSearch loaded via `loader.py`, viewed through the ICDC Dev frontend pointed at those local instances. Nothing touches the shared environments.
 
@@ -86,7 +85,7 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
 - **Issue type is Task.** Do not use Story or Subtask.
 - **Created unassigned.** The assignee is left empty at creation; it is set later during sprint triage or when work begins. Apply the **`Data-Concierge`** label; submission review is Data Concierge work. *(If the team later decides to treat this as pure engineering like the load, drop the label.)*
 - **Parent Epic via `customfield_12350`** — ICDC-3342 (ICDC Data). **`Relates` link to the parent Data Submission user story** (owned by Philip Musk). **`Relates` link to the paired Data Loading Task** (this review gates it).
-- **No Release Package / bucket rows in Submission & Artifacts.** At review time there is no Release Package and nothing in S3 — the CRDC Submission Portal is the source. Carry only the three rows shown.
+- **No Release Package / bucket rows in Submission & Artifacts.** At review time there is no Release Package and nothing in S3; the CRDC Submission Portal is the source. Carry only the two rows shown (CRDC Submission ID and Study).
 - **The whole review is local.** Local Neo4j + local OpenSearch + the Dev frontend pointed at them; never the shared Dev / QA / Stage / Prod environments.
 - **Review Findings is the completion record** — there is no separate signoff table. A clean review (no outstanding findings) is the close trigger.
 - **No WBS label and no SOP reference** — ICDC has neither for this task at present.
