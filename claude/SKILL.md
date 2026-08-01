@@ -193,14 +193,6 @@ project = ICDC AND sprint in openSprints() AND assignee is EMPTY AND status != D
 project = ICDC AND sprint in openSprints() AND status in ("In Review", "QA", "Testing")
 ```
 
-### Security / Scan Labels — Use with Caution
-```
--- Label searches are NOT reliable for finding all tickets in ICDC
--- Labels like "invicti-scan" or "security" may miss orphaned tickets
--- Always supplement with a key-range or date-based fallback
-project = ICDC AND labels = "invicti-scan" ORDER BY created ASC
-```
-
 ---
 
 ## 6. Stakeholder Document Standards
@@ -663,7 +655,7 @@ claude/
     *.md                            ← Other scope, architecture, and process decisions.
   conventions/
     workflow.md                     ← Team conventions Claude applies automatically.
-    study-submission-sop.md         ← End-to-end Study Submission SOP: CRDC Submission Portal to ICDC production release.
+    data-operations-study-submission-sop.md  ← Data Operations SOP (supports a study submission).
     slack-communication.md          ← Slack communication reference (moved out of SKILL.md Section 14).
   templates/
     README.md                                       ← Template inventory + canonical tickets; read first to pick a data-management template.
@@ -691,7 +683,7 @@ claude/
 | `claude/templates/data-loading-task-template.md` | Drafting or normalizing an ICDC data-loading ticket |
 | `claude/templates/data-modeling-for-study-submission-template.md` | Drafting a submission-driven data-modeling ticket |
 | `claude/templates/data-model-update-task-template.md` | Drafting an internally-driven data model update ticket |
-| `claude/conventions/study-submission-sop.md` | Running or referencing the end-to-end Study Submission SOP (CRDC Submission Portal through ICDC production release) |
+| `claude/conventions/data-operations-study-submission-sop.md` | Running or referencing the ICDC Data Operations SOP (data-operations work supporting a study submission, CRDC Submission Portal through production release) |
 | `claude/architecture/domain-context.md` | Needing the full ICDC domain reference (moved out of SKILL.md Section 2) |
 | `claude/templates/epic-templates.md` | Drafting or normalizing an epic; the full epic template library (moved out of SKILL.md Section 7e) |
 | `claude/conventions/slack-communication.md` | Composing ICDC Slack posts; channels, audiences, and message conventions (moved out of SKILL.md Section 14) |
