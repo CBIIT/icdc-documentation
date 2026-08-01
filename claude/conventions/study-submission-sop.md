@@ -1,6 +1,6 @@
-# ICDC Study Submission SOP: Portal to Production
+# ICDC Data Operations SOP: Supporting a Study Submission
 
-**Purpose.** The end-to-end path for taking one study's data from a CRDC Submission Portal submission to a live production release in ICDC (`caninecommons.cancer.gov`). Read this first; each stage links to its Jira task template for the detail, so this document stays short.
+**Purpose.** The data-operations work that takes a study submission (a new study, or new data for an existing study) from the CRDC Submission Portal through to a live production release in ICDC (`caninecommons.cancer.gov`). This is the ICDC data-operations view (Data Concierge and engineering); it is not the submitter-facing guide to making a submission. Read this first; each stage links to its Jira task template for the detail, so this document stays short.
 
 **Scope.** The full data-operations lane for one study version (`<Study Name vN>`): the parent submission user story, the optional modeling fork, pre-load review, IndexD registration, and the environment-by-environment load. Software-development work is out of scope.
 
