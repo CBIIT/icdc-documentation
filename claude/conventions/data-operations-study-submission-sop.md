@@ -17,7 +17,7 @@
 | 0 | Submission request + approval | Submitter; CRDC Submission Review Committee | (none on ICDC side yet) | Committee approves (about 4 to 6 weeks) |
 | 1 | Parent user story opened | Data Concierge (Philip Musk) | Data Submission user story | Story open; SharePoint folder created |
 | 2 | Data submission + validation (Portal) | Submitter; Data Concierge supports | (tracked on the user story) | All Portal validations pass |
-| 2a | Modeling fork (only if new terms needed) | Data Concierge; Data Model Author (Mark Jensen) | Data Modeling for Study Submission | New model version live on both DMNs; DM Fed Lead review (Heather Creasy) |
+| 2a | Modeling fork (only if new terms needed) | Data Concierge | Data Modeling for Study Submission | New model version live on both DMNs; DM Fed Lead review (Heather Creasy) |
 | 3 | Pre-load review (submitter TSVs, before Release to DC) | Reviewer (triaged) | Data Submission Review Task | Clean review; study cleared to release |
 | 4 | Release to DC (Portal) | Data Concierge | (tracked on the user story) | Immutable Release Package in metadata bucket |
 | 5a | IndexD registration (parallel, from Release to DC) | Data Concierge; external DCF | IndexD Registration ("Data Indexing") task | Handoff filed; GUIDs resolve once Complete |
