@@ -193,6 +193,14 @@ project = ICDC AND sprint in openSprints() AND assignee is EMPTY AND status != D
 project = ICDC AND sprint in openSprints() AND status in ("In Review", "QA", "Testing")
 ```
 
+### Security / Scan Labels — Use with Caution
+```
+-- Label searches are NOT reliable for finding all tickets in ICDC
+-- Labels like "invicti-scan" or "security" may miss orphaned tickets
+-- Always supplement with a key-range or date-based fallback
+project = ICDC AND labels = "invicti-scan" ORDER BY created ASC
+```
+
 ---
 
 ## 6. Stakeholder Document Standards
