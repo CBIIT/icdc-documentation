@@ -9,7 +9,7 @@ description: "Operational knowledge base for the ICDC Sprint Command Center Clau
 > **Ecosystem:** Cancer Research Data Commons (CRDC)  
 > **Team:** React web application engineers  
 > **Claude Project:** Sprint Command Center  
-> **Last Updated:** 2026-05-28 (§3: Developer field = customfield_23650 for all issue types; data-management ticket dev/label conventions)
+> **Last Updated:** 2026-09-04 (§8/§12: added User Story and Design Task templates under `claude/templates/`)
 
 ---
 
@@ -111,8 +111,7 @@ ICDC data-management work has two sub-functions, and each has its own templates 
 | Developer Legacy | `customfield_18250` | Deprecated; unused — do not read or write |
 
 ### Issue Types
-- **Confirmed working:** `Epic`, `Task`
-- **Use with caution:** `Story` — verify it exists in the project before using
+- **Confirmed working:** `Epic`, `Task`, `User Story` (the type name is `User Story`, not `Story` — confirmed on ICDC-4233 / ICDC-4244)
 - **Bugs:** Use `Task` with a `[BUG]` prefix in the summary if the Bug issue type is unavailable
 
 ### Assignee Format
@@ -409,6 +408,8 @@ The full epic-template library (all groupings and per-section formats) has moved
 
 ## 8. Ticket Writing Standards
 
+> **User stories and design tasks have dedicated templates** — `claude/templates/user-story-template.md` (canonical ICDC-4244) and `claude/templates/design-task-template.md` (canonical ICDC-4242). The generic formats below are for plain Tasks, Bugs, and security findings.
+
 ### Task Format (primary issue type for ICDC)
 ```
 **Summary:** [Brief, actionable description]
@@ -674,6 +675,8 @@ claude/
     data-modeling-for-study-submission-template.md  ← Submission-driven data-modeling ticket.
     data-model-update-task-template.md              ← Internally-driven data model update ticket.
     epic-templates.md                               ← Epic template library (moved out of SKILL.md Section 7e).
+    user-story-template.md                          ← Software-dev user story (5 sections; canonical ICDC-4244).
+    design-task-template.md                         ← Design task (6 sections; canonical ICDC-4242).
 ```
 
 ### Current Files
@@ -694,6 +697,8 @@ claude/
 | `claude/conventions/data-operations-study-submission-sop.md` | Running or referencing the ICDC Data Operations SOP (data-operations work supporting a study submission, CRDC Submission Portal through production release) |
 | `claude/architecture/domain-context.md` | Needing the full ICDC domain reference (moved out of SKILL.md Section 2) |
 | `claude/templates/epic-templates.md` | Drafting or normalizing an epic; the full epic template library (moved out of SKILL.md Section 7e) |
+| `claude/templates/user-story-template.md` | Drafting or normalizing a software-development user story (5 sections; canonical ICDC-4244) |
+| `claude/templates/design-task-template.md` | Drafting or normalizing a design task for Hannah Stogsdill (6 sections; canonical ICDC-4242) |
 | `claude/conventions/slack-communication.md` | Composing ICDC Slack posts; channels, audiences, and message conventions (moved out of SKILL.md Section 14) |
 
 ### Fetch Strategy by Session Type
