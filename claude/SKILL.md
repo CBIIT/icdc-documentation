@@ -111,7 +111,7 @@ ICDC data-management work has two sub-functions, and each has its own templates 
 | Developer Legacy | `customfield_18250` | Deprecated; unused — do not read or write |
 
 ### Issue Types
-- **Confirmed working:** `Epic`, `Task`, `User Story` (the type name is `User Story`, not `Story` — confirmed on ICDC-4233 / ICDC-4244)
+- **Confirmed working:** `Epic`, `Task`, `User Story` (the type name is `User Story`, not `Story`; confirmed on ICDC-4233 / ICDC-4244)
 - **Bugs:** Use `Task` with a `[BUG]` prefix in the summary if the Bug issue type is unavailable
 
 ### Assignee Format
@@ -408,7 +408,7 @@ The full epic-template library (all groupings and per-section formats) has moved
 
 ## 8. Ticket Writing Standards
 
-> **User stories and design tasks have dedicated templates** — `claude/templates/user-story-template.md` (canonical ICDC-4244) and `claude/templates/design-task-template.md` (canonical ICDC-4242). The generic formats below are for plain Tasks, Bugs, and security findings.
+> **User stories and design tasks have dedicated templates**: `claude/templates/user-story-template.md` (canonical ICDC-4244) and `claude/templates/design-task-template.md` (canonical ICDC-4242). The generic formats below are for plain Tasks, Bugs, and security findings. Two rules apply to every ticket body regardless of template: never cite other Jira ticket keys in the description (Jira's Links panel carries them), and never use em dashes (use colons, e.g. `* *Label*: content`).
 
 ### Task Format (primary issue type for ICDC)
 ```
