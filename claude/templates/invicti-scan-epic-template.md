@@ -2,7 +2,7 @@
 
 > **Use this template for the epic that represents one monthly Invicti scan cycle.** One epic per month, covering every environment scanned that month. The epic is the intake record; it owns only the finding tasks that were **first observed** in this cycle plus one verification task. Carryover findings stay on their original tasks and are linked, never cloned. The workflow that surrounds this template is `claude/sops/invicti-monthly-scan-sop.md`. Prior-shape references: ICDC-4120 (February 2026) and ICDC-4210 (August 2026).
 
-**Issue type**: Epic. **Summary**: `ICDC Security Vulnerabilities - <Month YYYY> Invicti Scan Remediation`. **Assignee**: ESI tech lead. **Labels**: `invicti-scan`, `security`, `vulnerability-remediation`, plus `prod-environment` and/or `stage-environment`. **Attachments**: the Invicti PDF for each environment scanned.
+**Issue type**: Epic. **Summary**: `ICDC Security Vulnerabilities - <Month YYYY> Invicti Scan Remediation`. **Assignee**: left Unassigned at creation; the ESI tech lead assigns during triage. **Labels**: `invicti-scan`, `security`, `vulnerability-remediation`, plus `prod-environment` and/or `stage-environment`. **Attachments**: the Invicti PDF for each environment scanned.
 
 **Section order (8 sections, exactly this sequence)**
 
@@ -24,14 +24,13 @@ Each header is `### **Title**` with the emoji shown. Omit a section only when it
 
 3. `### ⏱️ **SLA Due Dates**`
 
-   The dates the team is held to this month, computed from each environment's scan date and the NCI table (Critical 15/30, High 30/60, Medium 60/90, Low 180/180 days, public/internal). State which environments are treated as public-facing. One row per severity present.
+   The dates the team is held to this month, computed from the report delivery date and the NCI table (Critical 15/30, High 30/60, Medium 60/90, Low 180/180 days, public/internal). Prod and Stage are both public-facing. One row per severity present.
 
    ```
-   ||Severity||Environment||Clock start||Window||Due||
-   |High|Prod (public)|2026-09-01|30 days|2026-10-01|
-   |High|Stage (public)|2026-09-08|30 days|2026-10-08|
-   |Medium|Prod (public)|2026-09-01|60 days|2026-10-31|
-   |Low|Prod (public)|2026-09-01|180 days|2027-02-28|
+   ||Severity||Environment||Clock start (report delivered)||Window||Due||
+   |High|Prod, Stage (public)|2026-09-14|30 days|2026-10-14|
+   |Medium|Prod (public)|2026-09-14|60 days|2026-11-13|
+   |Low|Prod, Stage (public)|2026-09-14|180 days|2027-03-13|
    ```
 
 4. `### 🆕 **New Findings**`
@@ -46,7 +45,7 @@ Each header is `### **Title**` with the emoji shown. Omit a section only when it
 
    ```
    ||Task||Finding||Severity||First observed||Due||Status||Tier reached||
-   |ICDC-4213|GraphQL introspection, /api/interoperation/graphql|Medium|2026-08-14 (Stage)|2026-10-13|Ready for Review|Stage|
+   |ICDC-4213|GraphQL introspection, /api/interoperation/graphql|Medium|2026-08-14 (Stage)|2026-10-16|Ready for Review|Stage|
    ```
 
 6. `### ✅ **Resolved Since Last Scan**`
@@ -81,7 +80,7 @@ Each header is `### **Title**` with the emoji shown. Omit a section only when it
 **Writing-and-publishing workflow**
 
 1. Finish intake and reconciliation per the SOP before drafting. The Carryover and Resolved tables need the prior epic's task list.
-2. `jira_create_issue` with `issue_type = "Epic"`, the summary above, a placeholder description, labels, and assignee.
+2. `jira_create_issue` with `issue_type = "Epic"`, the summary above, a placeholder description, and labels. Leave Unassigned.
 3. `jira_update_issue` with the full body.
 4. Attach the PDFs.
 5. Create the finding tasks and the verification task (see the finding template), linking each with `{"customfield_12350": "<epic key>"}` in a separate update call.

@@ -29,20 +29,20 @@ The organizing principle: **the unit of tracking is the finding, not the scan.**
 
 Rules the team applies:
 
-* *Clock start*: the **Scan Time** printed on page 1 of the Invicti report. Not the report generation date, not the delivery date. If NCI Security confirms a different convention, change this section and the project instructions together.
-* *Facing*: `caninecommons.cancer.gov` (Prod) is public-facing. Treat `caninecommons-stage.cancer.gov` as public-facing unless NCI Security states in writing that Stage is classified as internal. DEV and QA are internal.
+* *Clock start*: the **report delivery date**, which is the report generation timestamp printed at the top of page 1 of the Invicti PDF (the date NCI Security produced and sent the report), not the Scan Time. Decided by the TPM 2026-09-15 pending written confirmation from NCI Security; if they specify a different convention, change this section and the project instructions together.
+* *Facing*: `caninecommons.cancer.gov` (Prod) and `caninecommons-stage.cancer.gov` (Stage) are both treated as public-facing (TPM decision 2026-09-15: fixes must reach Stage before Prod anyway, so Stage carries the Prod window). DEV and QA are internal.
 * *Multiple environments*: when the same finding is observed on more than one environment, the due date follows the most restrictive one (Prod).
 * *No reset*: a finding first observed in an earlier scan keeps its original due date when it reappears.
 * *Display*: every status view shows the due date and days remaining. Inside 14 days is **at risk**; past due is **breached**. Both are flagged without being asked.
 
-Worked example (September 2026, Prod scan time 2026-09-01): High due 2026-10-01, Medium due 2026-10-31, Low due 2027-02-28.
+Worked example (September 2026, both reports delivered 2026-09-14): High due 2026-10-14, Medium due 2026-11-13, Low due 2027-03-13. When the delivery date of an older report is not recorded, use the creation date of that cycle's epic as the proxy (August 2026: ICDC-4210 created 2026-08-17, so August Mediums are due 2026-10-16).
 
 ---
 
 ## 3. Roles
 
 * *TPM (Gina Kuffel)*: owns intake, reconciliation, ticket creation, NCI Security communications, and the verification task. Assignee on the verification task.
-* *ESI tech lead (Ambar Rana)*: epic assignee; triages root cause and assigns finding tasks to the engineer who owns the affected layer.
+* *ESI tech lead (Ambar Rana)*: triages root cause and assigns finding tasks to the engineer who owns the affected layer. Epics and tasks are created Unassigned; the tech lead assigns them during triage.
 * *Engineers*: fix in DEV, open one PR per ticket, promote through QA, Stage, Prod via the standard ICDC pipeline and ServiceNow change requests.
 * *QA (Valentina Epishina)*: verifies the fix on each tier and closes the finding task.
 * *NCI Security / ISSO*: delivers the report, adjudicates false-positive and accepted-risk requests, marks dispositions in Invicti.
@@ -55,7 +55,7 @@ Worked example (September 2026, Prod scan time 2026-09-01): High due 2026-10-01,
 
 Read the report PDFs in this order: page 1 (summary card), page 2 (Vulnerability Summary table), then each numbered finding section. Record, per environment:
 
-* Target URL, Scan Time, Scan Duration, Total Requests, Risk Level
+* Target URL, report delivery date (page 1 header timestamp), Scan Time, Scan Duration, Total Requests, Risk Level
 * Counts: Identified, Confirmed, and per severity
 * The **vulnerability database date** printed under each version-based finding (this explains why a version that was current last month is flagged this month)
 * For each finding: name, severity, method and URL, parameter, CVE if any, identified version and latest version, the remedy text, and whether Invicti marked it Confirmed
@@ -87,14 +87,14 @@ For each New finding decide:
 * *Root cause*: which layer (nginx, Tomcat, Spring Boot config, React bundle, third-party script, AWS) and which repo
 * *Remedy*: the concrete change, and whether a durable control exists that stops the finding class from recurring (see Section 7)
 * *Disposition candidate*: whether this is a false positive or a risk to accept rather than a defect to fix. If so, it still gets a task; the task's work is the disposition request.
-* *Due date*: first-observed scan date plus the SLA for severity and facing
+* *Due date*: delivery date of the report that first observed it, plus the SLA for severity and facing
 
 ### Step 4: Create the Jira records
 
 In this order:
 
-1. The **epic**, from `invicti-scan-epic-template.md`. Two-step create (placeholder, then full body). Labels `invicti-scan`, `security`, `vulnerability-remediation`, plus `prod-environment` and/or `stage-environment`. Assignee: ESI tech lead. Attach the report PDFs to the epic.
-2. One **task per New finding**, from `invicti-finding-task-template.md`. Two-step create, then a third `jira_update_issue` with `{"customfield_12350": "<epic key>"}`. Set `duedate`, `priority` (Critical or High severity maps to Jira Critical; Medium to Major; Low to Minor), labels, Assignee, and Developer (`customfield_23650`).
+1. The **epic**, from `invicti-scan-epic-template.md`. Two-step create (placeholder, then full body). Labels `invicti-scan`, `security`, `vulnerability-remediation`, plus `prod-environment` and/or `stage-environment`. Left Unassigned at creation. Attach the report PDFs to the epic.
+2. One **task per New finding**, from `invicti-finding-task-template.md`. Two-step create, then a third `jira_update_issue` with `{"customfield_12350": "<epic key>"}`. Set `duedate`, `priority` (Critical or High severity maps to Jira Critical; Medium to Major; Low to Minor), and labels. Leave Assignee and Developer empty at creation; the tech lead fills both during triage.
 3. `Relates` links from the epic to every Carryover task.
 4. One **verification task**: summary `Confirm <Month YYYY> findings absent from <next month> Invicti scan`, assigned to the TPM, due the expected delivery date of the next report, linked to the epic via `customfield_12350`.
 5. Confirm every task under the epic has a due date before reporting the epic as built.
@@ -157,3 +157,4 @@ Standing disposition candidates as of September 2026:
 | Date | Change |
 |---|---|
 | 2026-09-15 | v1. Written after the September 2026 Prod and Stage reports, alongside the epic and finding templates and the ICDC Security Scans Claude project. |
+| 2026-09-15 | v1.1. Clock start changed from Scan Time to report delivery date; Stage confirmed public-facing; tickets created Unassigned (TPM decisions). |

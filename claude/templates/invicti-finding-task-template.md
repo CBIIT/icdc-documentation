@@ -2,7 +2,7 @@
 
 > **Use this template for every finding that is first observed in a monthly Invicti scan.** One task per finding, where a finding is one vulnerability name on one endpoint (the same finding observed on Prod and Stage is one task listing both environments). The task carries the SLA due date and lives until QA confirms the fix on the tier where it was observed, or until NCI Security accepts a disposition. Surrounding workflow: `claude/sops/invicti-monthly-scan-sop.md`. Parent: the monthly epic from `invicti-scan-epic-template.md`.
 
-**Issue type**: Task. **Summary**: `[SEC-<CRIT|HIGH|MED|LOW|BP>] <plain-language remedy>`; when the finding is a CVE, include the ID: `[SEC-HIGH] CVE-2026-66299: Upgrade Apache Tomcat from 10.1.57 to 10.1.59`. **Priority**: Critical or High severity → Jira Critical; Medium → Major; Low and Best Practice → Minor. **Due date**: mandatory, first-observed scan date plus the SLA window. **Assignee and Developer (`customfield_23650`)**: both set. **Labels**: `invicti-scan`, `security`, one of `critical-severity` / `high-severity` / `medium-severity` / `low-severity` / `best-practice`, plus a component label where useful (`tomcat`, `graphql`, `dependency-upgrade`, `nginx`, `cookies`, `cors`).
+**Issue type**: Task. **Summary**: `[SEC-<CRIT|HIGH|MED|LOW|BP>] <plain-language remedy>`; when the finding is a CVE, include the ID: `[SEC-HIGH] CVE-2026-66299: Upgrade Apache Tomcat from 10.1.57 to 10.1.59`. **Priority**: Critical or High severity → Jira Critical; Medium → Major; Low and Best Practice → Minor. **Due date**: mandatory, delivery date of the report that first observed the finding plus the SLA window. **Assignee and Developer (`customfield_23650`)**: left empty at creation; the ESI tech lead sets both during triage. **Labels**: `invicti-scan`, `security`, one of `critical-severity` / `high-severity` / `medium-severity` / `low-severity` / `best-practice`, plus a component label where useful (`tomcat`, `graphql`, `dependency-upgrade`, `nginx`, `cookies`, `cors`).
 
 **Section order (5 sections, exactly this sequence)**
 
@@ -45,7 +45,7 @@ Each header is `### **Title**` with the emoji shown. All five are required. Bull
 
    The due date and how it was derived, so nobody has to recompute it:
 
-   * *First observed*: environment and scan date
+   * *First observed*: environment, scan date, and report delivery date (the clock start)
    * *Window*: severity, facing, and days (for example High, public-facing, 30 days)
    * *Due*: the date, and days remaining at ticket creation
 
@@ -62,11 +62,11 @@ Each header is `### **Title**` with the emoji shown. All five are required. Bull
 **Writing-and-publishing workflow**
 
 1. Triage per the SOP: severity, environments, root cause, remedy, disposition candidate, due date.
-2. `jira_create_issue` with `issue_type = "Task"`, the summary above, a placeholder description, labels, priority, assignee.
-3. `jira_update_issue` with the full body, `duedate`, and `customfield_23650`.
+2. `jira_create_issue` with `issue_type = "Task"`, the summary above, a placeholder description, labels, priority. Leave Unassigned.
+3. `jira_update_issue` with the full body and `duedate`.
 4. `jira_update_issue` with `{"customfield_12350": "<epic key>"}` to link the parent epic (separate call; the `epicKey` parameter does not work reliably on this instance).
 5. Post the PR link as a plain-text comment when it opens; QA closes the task with resolution Fixed after confirming on the observed tier(s).
 
 **Worked example (September 2026 High)**
 
-Summary: `[SEC-HIGH] CVE-2026-66299: Upgrade Apache Tomcat from 10.1.57 to 10.1.59`. Finding: Out-of-date Version (Tomcat), High, Prod 2026-09-01 and Stage 2026-09-08, `GET /version` with an injected query string, evidence `<h3>Apache Tomcat/10.1.57</h3>` on the error page, affected range 10.1.24 to 10.1.57, Identified. Why it matters: the CVE is an uncontrolled resource consumption flaw in Tomcat's WebSocket chat example; Spring Boot embedded Tomcat does not deploy the examples webapp, so the exploit path is not present, but Invicti and NCI Security evaluate by version. Remedy: bump `tomcat.version` to 10.1.59; durable control: disable `showServerInfo` and `showReport` on the ErrorReportValve and set `server.error.include-stacktrace=never` so the banner no longer fingerprints the version. SLA: first observed Prod 2026-09-01, High, public-facing, 30 days, due 2026-10-01.
+Summary: `[SEC-HIGH] CVE-2026-66299: Upgrade Apache Tomcat from 10.1.57 to 10.1.59`. Finding: Out-of-date Version (Tomcat), High, Prod 2026-09-01 and Stage 2026-09-08, `GET /version` with an injected query string, evidence `<h3>Apache Tomcat/10.1.57</h3>` on the error page, affected range 10.1.24 to 10.1.57, Identified. Why it matters: the CVE is an uncontrolled resource consumption flaw in Tomcat's WebSocket chat example; Spring Boot embedded Tomcat does not deploy the examples webapp, so the exploit path is not present, but Invicti and NCI Security evaluate by version. Remedy: bump `tomcat.version` to 10.1.59; durable control: disable `showServerInfo` and `showReport` on the ErrorReportValve and set `server.error.include-stacktrace=never` so the banner no longer fingerprints the version. SLA: first observed Prod 2026-09-01 and Stage 2026-09-08, reports delivered 2026-09-14, High, public-facing, 30 days, due 2026-10-14.
