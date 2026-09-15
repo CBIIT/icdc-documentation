@@ -2,7 +2,7 @@
 
 > **Use this template for every finding that is first observed in a monthly Invicti scan.** One task per finding, where a finding is one vulnerability name on one endpoint (the same finding observed on Prod and Stage is one task listing both environments). The task carries the SLA due date and lives until QA confirms the fix on the tier where it was observed, or until NCI Security accepts a disposition. Surrounding workflow: `claude/sops/invicti-monthly-scan-sop.md`. Parent: the monthly epic from `invicti-scan-epic-template.md`.
 
-**Issue type**: Task. **Summary**: `[SEC-<CRIT|HIGH|MED|LOW|BP>] <plain-language remedy>`; when the finding is a CVE, include the ID: `[SEC-HIGH] CVE-2026-66299: Upgrade Apache Tomcat from 10.1.57 to 10.1.59`. **Priority**: Critical or High severity → Jira Critical; Medium → Major; Low and Best Practice → Minor. **Due date**: mandatory, delivery date of the report that first observed the finding plus the SLA window. **Assignee and Developer (`customfield_23650`)**: left empty at creation; the ESI tech lead sets both during triage. **Labels**: `invicti-scan`, `security`, one of `critical-severity` / `high-severity` / `medium-severity` / `low-severity` / `best-practice`, plus a component label where useful (`tomcat`, `graphql`, `dependency-upgrade`, `nginx`, `cookies`, `cors`).
+**Issue type**: Task. **Summary**: `[SEC-<CRIT|HIGH|MED|LOW|BP>] <plain-language remedy>`; when the finding is a CVE, include the ID: `[SEC-HIGH] CVE-2026-66299: Upgrade Apache Tomcat from 10.1.57 to 10.1.59`. **Priority**: Critical or High severity → Jira Critical; Medium → Major; Low and Best Practice → Minor. **Due date**: mandatory, delivery date of the report that first observed the finding plus the SLA window. The `duedate` field is not on the ICDC Task screen, so carry it as the label `sla-due-YYYY-MM-DD` and in the SLA section until the screen scheme is changed. **Assignee and Developer (`customfield_23650`)**: left empty at creation; the ESI tech lead sets both during triage. **Labels**: `invicti-scan`, `security`, one of `critical-severity` / `high-severity` / `medium-severity` / `low-severity` / `best-practice`, plus a component label where useful (`tomcat`, `graphql`, `dependency-upgrade`, `nginx`, `cookies`, `cors`).
 
 **Section order (5 sections, exactly this sequence)**
 
@@ -63,7 +63,7 @@ Each header is `### **Title**` with the emoji shown. All five are required. Bull
 
 1. Triage per the SOP: severity, environments, root cause, remedy, disposition candidate, due date.
 2. `jira_create_issue` with `issue_type = "Task"`, the summary above, a placeholder description, labels, priority. Leave Unassigned.
-3. `jira_update_issue` with the full body and `duedate`.
+3. `jira_update_issue` with the full body and the `sla-due-YYYY-MM-DD` label (`duedate` is rejected on this screen scheme).
 4. `jira_update_issue` with `{"customfield_12350": "<epic key>"}` to link the parent epic (separate call; the `epicKey` parameter does not work reliably on this instance).
 5. Post the PR link as a plain-text comment when it opens; QA closes the task with resolution Fixed after confirming on the observed tier(s).
 

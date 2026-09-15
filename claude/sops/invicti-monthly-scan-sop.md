@@ -35,6 +35,10 @@ Rules the team applies:
 * *No reset*: a finding first observed in an earlier scan keeps its original due date when it reappears.
 * *Display*: every status view shows the due date and days remaining. Inside 14 days is **at risk**; past due is **breached**. Both are flagged without being asked.
 
+### Due date field workaround (ICDC screen scheme)
+
+The Jira `duedate` field, and every custom date field, is absent from the ICDC Task and Epic screens (confirmed 2026-09-15 on ICDC-4249, ICDC-4250). Until a Jira admin adds Due Date to the ICDC screen scheme, the SLA date is carried two ways: in the ticket body's SLA section, and as a label `sla-due-YYYY-MM-DD` on every finding task. JQL for at-risk items is therefore by label rather than date, for example `project = ICDC AND labels = invicti-scan AND statusCategory != Done AND labels in (sla-due-2026-10-14, sla-due-2026-10-16)`. When the field is added, backfill `duedate` from the labels and switch the JQL to `duedate <= 14d`.
+
 Worked example (September 2026, both reports delivered 2026-09-14): High due 2026-10-14, Medium due 2026-11-13, Low due 2027-03-13. When the delivery date of an older report is not recorded, use the creation date of that cycle's epic as the proxy (August 2026: ICDC-4210 created 2026-08-17, so August Mediums are due 2026-10-16).
 
 ---
@@ -97,7 +101,7 @@ In this order:
 2. One **task per New finding**, from `invicti-finding-task-template.md`. Two-step create, then a third `jira_update_issue` with `{"customfield_12350": "<epic key>"}`. Set `duedate`, `priority` (Critical or High severity maps to Jira Critical; Medium to Major; Low to Minor), and labels. Leave Assignee and Developer empty at creation; the tech lead fills both during triage.
 3. `Relates` links from the epic to every Carryover task.
 4. One **verification task**: summary `Confirm <Month YYYY> findings absent from <next month> Invicti scan`, assigned to the TPM, due the expected delivery date of the next report, linked to the epic via `customfield_12350`.
-5. Confirm every task under the epic has a due date before reporting the epic as built.
+5. Confirm every task under the epic has an SLA date (body plus `sla-due-YYYY-MM-DD` label; the `duedate` field once the screen scheme allows it) before reporting the epic as built.
 
 ### Step 5: Communicate
 
@@ -157,4 +161,5 @@ Standing disposition candidates as of September 2026:
 | Date | Change |
 |---|---|
 | 2026-09-15 | v1. Written after the September 2026 Prod and Stage reports, alongside the epic and finding templates and the ICDC Security Scans Claude project. |
+| 2026-09-15 | v1.2. Due Date field confirmed absent from ICDC screens; `sla-due-YYYY-MM-DD` label workaround added. |
 | 2026-09-15 | v1.1. Clock start changed from Scan Time to report delivery date; Stage confirmed public-facing; tickets created Unassigned (TPM decisions). |
