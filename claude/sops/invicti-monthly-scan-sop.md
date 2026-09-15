@@ -1,8 +1,10 @@
-# 🛡️ SOP: Monthly Invicti Security Scan Remediation (v1, 2026-09-15)
+# 🛡️ SOP: Monthly Invicti Security Scan Remediation (v1.3, 2026-09-15)
 
 > **Use this SOP every time NCI Security delivers an Invicti Enterprise Detailed Scan Report for an ICDC environment.** It covers intake, reconciliation against the prior month, triage, Jira ticketing, communications, tracking, and verification. The Jira mechanics (two-step create, epic link via `customfield_12350`, Developer field, rendering-safe Markdown) are the standard ICDC rules in `claude/SKILL.md` and are not repeated here except where the security workflow adds a rule on top.
 
-> **Companion templates**: `claude/templates/invicti-scan-epic-template.md` (the monthly epic) and `claude/templates/invicti-finding-task-template.md` (one task per new finding). Canonical examples for the epic shape are ICDC-4120 (February 2026, DEV plus Stage) and ICDC-4210 (August 2026, Stage); the first epic built on this SOP is the September 2026 cycle.
+> **Companion templates**: `claude/templates/invicti-scan-epic-template.md` (the monthly epic) and `claude/templates/invicti-finding-task-template.md` (one task per new finding). Canonical examples for the epic shape are ICDC-4120 (February 2026, DEV plus Stage) and ICDC-4210 (August 2026, Stage); the first epic built on this SOP is the September 2026 cycle (ICDC-4249).
+
+> **Standing register**: false-positive and accepted-risk dispositions live in the ICDC Security Center Claude project, `claude/disposition-register.md`. Consult it at Step 3 before triaging any recurring finding.
 
 ---
 
@@ -15,6 +17,14 @@ NCI Security scans ICDC monthly with Invicti Enterprise and expects every findin
 3. **Perpetual Lows.** Some findings cannot be fixed in code (client-side analytics cookies can never be HttpOnly; Lodash exposes its version by design; Invicti's IP heuristic matches SVG path data). Without a disposition path they reappear every month and make the remediation record look worse than it is.
 
 The organizing principle: **the unit of tracking is the finding, not the scan.** The monthly epic is the intake event; the finding task carries the due date and lives until the finding is verified gone or formally dispositioned.
+
+### Cadence
+
+NCI Security runs the ICDC scans on or about the **20th of each month**, and the Detailed Scan Report PDFs arrive a few days later (expect delivery between the 22nd and the 25th). Plan around it:
+
+* Any fix meant to be verified by the next report must be on the scanned tier (Stage, Prod) **before the 20th**. A Prod release on the 21st is verified a month later than one on the 19th.
+* The verification task for each cycle is dated to the expected delivery of the next report (roughly the 23rd of the following month), not to the 20th.
+* If a report has not arrived by the end of the month, ask NCI Security rather than assuming the scan was skipped.
 
 ---
 
@@ -85,6 +95,8 @@ A finding is "the same finding" when the vulnerability name, the environment, an
 
 ### Step 3: Triage each new finding
 
+Check the disposition register first. A finding with an Approved row is not re-triaged; if it still appears, the Invicti mark was not applied and the action is to raise it with NCI Security. A finding with a Submitted row is awaiting decision; note it in the epic's Dispositions section and move on.
+
 For each New finding decide:
 
 * *Severity and environments affected*
@@ -100,17 +112,18 @@ In this order:
 1. The **epic**, from `invicti-scan-epic-template.md`. Two-step create (placeholder, then full body). Labels `invicti-scan`, `security`, `vulnerability-remediation`, plus `prod-environment` and/or `stage-environment`. Left Unassigned at creation. Attach the report PDFs to the epic.
 2. One **task per New finding**, from `invicti-finding-task-template.md`. Two-step create, then a third `jira_update_issue` with `{"customfield_12350": "<epic key>"}`. Set `duedate`, `priority` (Critical or High severity maps to Jira Critical; Medium to Major; Low to Minor), and labels. Leave Assignee and Developer empty at creation; the tech lead fills both during triage.
 3. `Relates` links from the epic to every Carryover task.
-4. One **verification task**: summary `Confirm <Month YYYY> findings absent from <next month> Invicti scan`, assigned to the TPM, due the expected delivery date of the next report, linked to the epic via `customfield_12350`.
+4. One **verification task**: summary `Confirm <Month YYYY> findings absent from <next month> Invicti scan`, assigned to the TPM, due the expected delivery date of the next report (see Cadence, Section 1), linked to the epic via `customfield_12350`.
 5. Confirm every task under the epic has an SLA date (body plus `sla-due-YYYY-MM-DD` label; the `duedate` field once the screen scheme allows it) before reporting the epic as built.
 
 ### Step 5: Communicate
 
 * *Slack*: post the intake summary to `#icdc-security-vulnerabilities` (format in Section 6). Never to `#icdc`.
-* *NCI Security*: acknowledge receipt, state the plan and target dates against the SLA dates, and submit any disposition requests. Outlook-compatible HTML tables. Status updates follow the same shape with PR links and tier promotion status.
+* *NCI Security*: acknowledge receipt, state the plan and target dates against the SLA dates, and submit any disposition requests. Outlook-compatible HTML tables. Status updates follow the same shape with tier promotion status.
+* **No internal tracking references in NCI Security communications.** Jira is internal to FNL. Emails to the ISSO and NCI Security carry findings, evidence, reasoning, dates, and tier status (DEV / QA / Stage / Prod) only: no Jira keys, epic names, GitHub PR links, or repository names. The Jira comment and the disposition register are the internal cross-walk between what was sent and which ticket owns it. (TPM decision 2026-09-15.)
 
 ### Step 6: Track
 
-On request, or weekly during an open High or Critical, produce the status table: key, finding, severity, environment, due date, days remaining, status, tier reached (DEV / QA / Stage / Prod), PR. At-risk and breached rows first.
+On request, or weekly during an open High or Critical, produce the status table: key, finding, severity, environment, due date, days remaining, status, tier reached (DEV / QA / Stage / Prod), PR. At-risk and breached rows first. This is the internal view; strip keys and PRs before anything goes to NCI Security.
 
 ### Step 7: Verify and close
 
@@ -124,15 +137,15 @@ A finding that will not be fixed in code still needs a closed loop that an audit
 
 1. Create the finding task as normal so the finding has a home and a due date.
 2. The task's work is the disposition request: write the evidence (what Invicti matched, why it is not exploitable or not fixable), the reasoning, and the ask (mark as False Positive or Accepted Risk in Invicti so it stops appearing).
-3. Send the request to NCI Security as part of the acknowledgement or status email.
+3. Send the request to NCI Security as part of the acknowledgement or status email. The email names the finding, the environments, when it was first observed and when it was previously investigated (by month), the evidence, the reasoning, and the ask. It does not name the Jira ticket.
 4. When NCI Security agrees, close the task with resolution **Won't Fix**, add the label `false-positive` or `risk-accepted`, and paste the justification exactly as sent into a comment. That comment is the audit trail.
-5. Record the disposition in the epic's Dispositions section and in the project's standing register so the next intake does not re-triage it.
+5. Record the disposition in the epic's Dispositions section and in the project's standing register (`claude/disposition-register.md` in the ICDC Security Center project) so the next intake does not re-triage it.
 
-Standing disposition candidates as of September 2026:
+Standing disposition candidates as of September 2026 (submitted to NCI Security 2026-09-15 as D-01 through D-04 in the register):
 
 * *Cookie not marked HttpOnly (`s_ac`, `s_fid`, `gpv_pn`, `s_ppv`, `s_tp`)*: Adobe Analytics cookies are set client-side by JavaScript and cannot carry the HttpOnly flag. The server-set cookie already carries `HttpOnly; Secure`.
 * *Version disclosure (Lodash)*: `_.VERSION` is exposed in the DOM by design. The control is keeping Lodash current.
-* *Possible internal IP address disclosure (`10.33.63.23` in the JS bundle)*: the match sits inside SVG path coordinate data in the compiled bundle. Verify the surrounding characters before submitting; the pattern has recurred on both Prod and Stage.
+* *Possible internal IP address disclosure (`10.33.63.23` in the JS bundle)*: the match sits inside SVG path coordinate data in the compiled bundle (verified September 2026: the `d` attribute of the MUI `SpaRounded` icon, where `10.33.63.23` is the coordinates `10.33`, `.63`, `.23` with separators omitted). Verify the surrounding characters before submitting; the pattern has recurred on both Prod and Stage under a different chunk filename each build.
 * *Misconfigured Access-Control-Allow-Origin on `/version`*: wildcard CORS on an unauthenticated public JSON version string. Accept, or scope the header to the ICDC origin if the endpoint is only consumed by the frontend.
 
 ---
@@ -161,5 +174,6 @@ Standing disposition candidates as of September 2026:
 | Date | Change |
 |---|---|
 | 2026-09-15 | v1. Written after the September 2026 Prod and Stage reports, alongside the epic and finding templates and the ICDC Security Scans Claude project. |
-| 2026-09-15 | v1.2. Due Date field confirmed absent from ICDC screens; `sla-due-YYYY-MM-DD` label workaround added. |
 | 2026-09-15 | v1.1. Clock start changed from Scan Time to report delivery date; Stage confirmed public-facing; tickets created Unassigned (TPM decisions). |
+| 2026-09-15 | v1.2. Due Date field confirmed absent from ICDC screens; `sla-due-YYYY-MM-DD` label workaround added. |
+| 2026-09-15 | v1.3. Cadence section added (scans on the 20th, reports a few days later; verification task dated to expected delivery). Rule added: no Jira keys, epic names, or PR links in NCI Security communications. Register location and Step 3 register check added. IP disclosure evidence recorded. |
