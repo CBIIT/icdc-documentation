@@ -25,23 +25,25 @@ node build-deck.js config.sprintNN.json      # writes ICDC_SprintNN_Review_Retro
 ## tickets.sprintNN.json schema
 
 One object per ticket from `jira_search` with `jql = "sprint = <sprintId>"` and fields
-`summary,status,issuetype,assignee,priority,labels,resolutiondate,customfield_23650,customfield_12350`:
+`summary,status,issuetype,assignee,priority,labels,resolutiondate,customfield_23650,customfield_12350,customfield_10042`:
 
 ```json
 { "key": "ICDC-4203", "summary": "...", "status": "Closed", "category": "Done", "type": "Task",
   "priority": "Major", "assignee": "Eric Miller", "dev": ["millerer"], "epic": "ICDC-35",
-  "resolved": "2026-08-27T22:08:56-0400" }
+  "resolved": "2026-08-27T22:08:56-0400", "points": 2 }
 ```
 
-`category` is Jira's status category (`To Do` / `In Progress` / `Done`). `dev` is the Developer field
+`points` is `customfield_10042` ("Story Points" in the Jira UI; `null` when unpointed). `category` is Jira's status category (`To Do` / `In Progress` / `Done`). `dev` is the Developer field
 (`customfield_23650`, array of Jira usernames), mapped to display names via `developerNames` in the config.
 
 ## Before you write the narrative (lessons from Sprint 50)
 
 1. **Verify sprint identity** by `(id, date range)` on board 574. The sprint being reviewed is the closed
    one; the active sprint is the next one.
-2. **Compute, do not count.** Run `tally.js`. Check how many "closed" tickets were resolved before the
-   window opened or after it closed; say so on the Numbers slide.
+2. **Compute, do not count.** Run `tally.js`. Velocity is story points (committed / delivered / carried) with
+   ticket count alongside; the slide prints pointed coverage so a low points figure is not misread when tickets are
+   unpointed. Check how many "closed" tickets were resolved before the window opened or after it closed; say so on
+   the Numbers slide.
 3. **Confirm delivery status with Gina or Philip before scoring a study workstream.** Study release
    tickets (Data Loading, Data Indexing, Data Submission Review, resubmissions) routinely stay open in
    Ready for Review / Ready for QA after the study is already released, while Philip finalizes details.
