@@ -337,7 +337,9 @@ Run these checks before each standup:
 [X] of [Y] goals delivered. Each goal scored: ✓ DELIVERED / ▲ PARTIAL / ✗ NOT STARTED.
 Score against the Jira-recorded sprint goal, not raw ticket completion.
 
-### 📊 Velocity (by ticket count — team does not track story points)
+### 📊 Velocity (story points, from `customfield_10042` "Story Points"; ticket count alongside)
+- Points committed / delivered / carried: P / Q / R (Q/P %)
+- Pointed coverage: N of X tickets carry points (name the unpointed closed tickets in the summary, not on the deck)
 - Total tickets: X
 - Done / Closed: Y (Z%)
 - In Motion (In Progress + Ready for Review + Ready for QA + Testing): A
@@ -515,7 +517,7 @@ Combined Sprint Review + Release Demo + Retro decks follow this standard. Built 
 
 1. **Cover** (dark bg, red left edge stripe): eyebrow `CANCER RESEARCH DATA COMMONS · ICDC`, "Sprint N", "Sprint Review & Retrospective", short red rule, three label/value rows (Sprint dates · Meeting · Reviewing: Sprint N (closed) · Sprint N+1 is now active), **prepared-by card** bottom-right (name, title, FNL, Supporting NCI / CBIIT)
 2. **Today's Agenda**: six alternating light/white rows: Georgia number in NIH blue, title, muted detail, minutes right-aligned; "Total: NN minutes"
-3. **Sprint N by the Numbers**: big "N of M" stat card + three left-stripe stat cards (carry-over; closed before the window; closed inside the window) + "How the M tickets break down" panel with the `Carry-over = total − closed` formula + 4-segment doughnut (Closed / In motion / On hold / Open)
+3. **Sprint N by the Numbers**: big "P of Q pts" story-points stat card (ticket count underneath) + three left-stripe stat cards (carry-over; closed before the window; closed inside the window) + "How the M tickets break down" panel with the `Carry-over = total − closed` formula + 4-segment doughnut (Closed / In motion / On hold / Open)
 4. **Sprint N Goal Scorecard**: banner naming the workstreams + green/amber "X OF Y DELIVERED" pill, one left-stripe row per goal (✓ DELIVERED / ▲ PARTIAL, title, detail, ticket refs right), red rule + one-line bottom summary
 5. **Breakdown by Work Type**: horizontal stacked bar (Closed vs Carried over) by issue type + "What the shape tells us" panel with left-stripe points
 6. **Who Closed What**: **two charts**: "Closed by (Assignee at close)" and "Built by (Developer field)" + 🏆 Shout-out card + red-stripe "Why the two charts disagree" card
@@ -553,6 +555,7 @@ Each demo slot gets one intro slide with this layout:
 
 - **Confirm delivery before scoring.** Study-release tickets (Data Loading, Data Indexing, Data Submission Review, resubmissions) routinely sit in Ready for Review / Ready for QA after the study is already released, while Philip finalizes details. Open tickets are not evidence a study did not ship: ask Gina or Philip, then score DELIVERED with "N tickets in close-out".
 - **Terminology:** studies are "loaded and released through the ICDC". Never call this a "data pipeline".
+- **Velocity is story points.** ICDC has always sized tickets in story points (`customfield_10042`, shown as "Story Points" in the Jira UI; the time-tracking Estimate fields and the Dev/QA Story Points fields are unused). The deck headline is points delivered of points committed, with ticket count alongside and the pointed-coverage figure printed on the slide. Never write "the team does not track story points".
 - **Say when things closed.** Split closed tickets into before / inside / after the sprint window on the Numbers slide (resolution date vs sprint dates). A high closed count made of pre-resolved rollovers must be caveated on the slide itself.
 - **Cross-check carry-over** against the next sprint's membership (`jql: sprint = <nextId>`) so "X of Y are in Sprint N+1" and "% inherited" are verified, not assumed.
 - **Risks slide:** four rows is the target; every row has a severity pill and a "Next step" naming a decision, owner or date; HIGH rows before MEDIUM.
@@ -780,7 +783,7 @@ When building or extending anything in this `icdc-documentation` repo — templa
 - When new files are added to `claude/`, update Section 12 (Knowledge Base) so they remain discoverable
 - When a new architecture leadership `.docx` is published, update the Document Storage Convention table in Section 12 if applicable
 - When deck standards or demo-day workflows change, update Sections 9 and 10 (Deck Standards and Demo Day Workflow) AND `claude/templates/sprint-review-deck/build-deck.js`; mirror the change in `ctdc-documentation` so the two decks stay in lockstep
-- Update the Sprint Review Summary template (Section 7c) when Jira workflow statuses change so the velocity buckets stay accurate
+- Update the Sprint Review Summary template (Section 7c) when Jira workflow statuses change so the velocity buckets stay accurate; velocity is story points (`customfield_10042`), never ticket count alone
 - When a new ICDC Slack channel is created or an existing channel's purpose changes, update Section 14a (Channel Routing)
 - When a team member joins, leaves, or changes role, pull their Slack User ID via `slack_search_users` and update both Section 11 (Team Roster) AND any Section 14 references
 - If a new Slack formatting failure mode is discovered (e.g., a syntax that triggers `invalid_blocks`), add it to Section 14d (Known Failures) so the next session avoids it
