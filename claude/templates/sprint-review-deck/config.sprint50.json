@@ -1,0 +1,211 @@
+{
+  "project": "ICDC",
+  "ticketsFile": "tickets.sprint50.json",
+  "sprint": {
+    "number": 50,
+    "jiraId": 8838,
+    "dateRange": "August 20 – September 9, 2026",
+    "dateRangeShort": "August 20 – September 9",
+    "startLong": "August 20",
+    "window": {
+      "start": "2026-08-20T09:00:00-04:00",
+      "end": "2026-09-09T17:00:00-04:00"
+    }
+  },
+  "nextSprint": {
+    "number": 51,
+    "jiraId": 8911,
+    "dateRange": "September 10 to September 23, 2026",
+    "total": 40,
+    "inherited": 29
+  },
+  "meeting": {
+    "dayLong": "Friday, September 18, 2026",
+    "dateLong": "September 18, 2026",
+    "dateISO": "2026-09-18",
+    "time": "3:00 PM ET"
+  },
+  "preparedBy": {
+    "name": "Gina Kuffel",
+    "title": "Senior Technical Project Manager",
+    "org": "Frederick National Laboratory for Cancer Research (FNL)",
+    "supporting": "Supporting NCI / CBIIT"
+  },
+  "developerNames": {
+    "ranaab": "Ambar Rana",
+    "millerer": "Eric Miller",
+    "udosent2": "Toyo Udosen",
+    "nguca": "Charles Ngu",
+    "kuffelgr": "Gina Kuffel",
+    "epishinavv": "Valentina Epishina",
+    "scrufaripp": "Peter Scrufari",
+    "stogsdillhh": "Hannah Stogsdill",
+    "flemingme": "Michael Fleming"
+  },
+  "qaNames": [
+    "Valentina Epishina"
+  ],
+  "agenda": {
+    "subtitle": "55 minutes · review first, retro second · no demos this sprint",
+    "total": "55 minutes",
+    "rows": [
+      {
+        "title": "Sprint 50 by the Numbers",
+        "detail": "Where the 38 tickets landed, and when they actually closed",
+        "minutes": "5 min"
+      },
+      {
+        "title": "Goal Scorecard",
+        "detail": "Four workstreams scored on what shipped",
+        "minutes": "8 min"
+      },
+      {
+        "title": "Work Type & Team Throughput",
+        "detail": "What got closed, and by whom",
+        "minutes": "7 min"
+      },
+      {
+        "title": "Carry-Over into Sprint 51",
+        "detail": "29 unfinished tickets are already in motion",
+        "minutes": "8 min"
+      },
+      {
+        "title": "Risks & Flags",
+        "detail": "What needs a decision today",
+        "minutes": "7 min"
+      },
+      {
+        "title": "Retrospective: Liked · Lacked · Learned",
+        "detail": "10 min silent brainstorm, then group and vote",
+        "minutes": "20 min"
+      }
+    ]
+  },
+  "numbers": {
+    "carryNote": "All 29 pulled into Sprint 51; 1 closed ticket also rolled",
+    "extraStats": [
+      {
+        "value": "6 of 9",
+        "label": "Closed before the sprint opened",
+        "note": "August CVE hotfix batch and two data items, resolved Aug 3 and Aug 19",
+        "tone": "HIGH"
+      },
+      {
+        "value": "2",
+        "label": "Closed inside the window",
+        "note": "ICDC-4203 Prefect loading alternative · ICDC-4231 Stage hotfix deploy",
+        "tone": "green"
+      }
+    ],
+    "closedNote": "(accepted and done at sprint close; 1 closed after, on Sep 16)",
+    "motionNote": "11 are released studies awaiting close-out",
+    "holdNote": "(both Prefect items)",
+    "openNote": "(never started; includes one user story from 2022)",
+    "speakerNote": "Resolution dates: 4196 Aug 3; 4191/4211/4212/4216/4217 Aug 19; 4231 Aug 26; 4203 Aug 27; 4232 Sep 16."
+  },
+  "scorecard": {
+    "subtitle": "Scored against the four workstreams the sprint carried, not against raw ticket completion",
+    "bannerEyebrow": "Sprint 50 workstreams",
+    "bannerText": "Security hotfix  ·  Study releases  ·  Prefect migration  ·  Human Relevance",
+    "bottomLine": "Security hotfix and five study releases both landed. Ten study-release tickets are still open for detail updates, so the 9-closed headline undercounts what shipped. Prefect and Human Relevance are the real carry."
+  },
+  "goals": [
+    {
+      "delivered": true,
+      "title": "Remediate the August Invicti critical CVEs",
+      "detail": "Tomcat 10.1.57 and Lodash 4.18.1 upgrades closed; hotfix deployed to Stage Aug 26 and Production Sep 16. Two medium-severity GraphQL introspection fixes remain in review and QA, SLA Oct 16.",
+      "refs": "ICDC-4211 · 4212 · 4216 · 4217 · 4231 · 4232"
+    },
+    {
+      "delivered": true,
+      "title": "Release the COTC and PRECINCT02 studies",
+      "detail": "Five studies loaded and released through the ICDC: COTC021 v.3, COTC022 v.3, COTC026, COTC030 and PRECINCT02. The 10 open tickets stay in Ready for Review or Ready for QA only while Philip finalizes study details; they close as a batch when he is done.",
+      "refs": "Released · ICDC-4196 closed · 10 in close-out"
+    },
+    {
+      "delivered": false,
+      "title": "Advance the Jenkins to Prefect migration",
+      "detail": "Prefect-based data loading alternative delivered by Eric. The three job migrations, the lower-tier bucket and the Critical worker-permissions ticket, open since May, all carry.",
+      "refs": "ICDC-4203 closed · 4172 · 4082 · 4083 · 4084"
+    },
+    {
+      "delivered": false,
+      "title": "Human Relevance review and C3DC interoperability",
+      "detail": "Investigator review and the initial C3DC interop requirements are both In Progress with Gina. The data-model string-type fix closed as an adjacent win.",
+      "refs": "ICDC-4183 · 4241 · 4191 closed"
+    }
+  ],
+  "workType": {
+    "points": [
+      {
+        "tone": "green",
+        "title": "Tasks carried the sprint: 7 of 32 (22%)",
+        "detail": "Four were the August security hotfix; the rest were the Prefect loading alternative, one data load and a data-model fix. Eleven of the 25 carried Tasks belong to studies already released through the ICDC; they stay open while study details are finalized."
+      },
+      {
+        "tone": "MEDIUM",
+        "title": "Bugs: 2 of 4 closed",
+        "detail": "Both Critical CVE bugs (Lodash, Tomcat) closed on Aug 19. The two file download bugs opened Aug 27 and are In Progress with Charles."
+      },
+      {
+        "tone": "MEDIUM",
+        "title": "No user stories closed: 0 of 2",
+        "detail": "Study-page query error handling is Ready for QA. The DMN sidebar story dates from October 2022 and is unassigned; re-scope it or pull it from the sprint."
+      }
+    ]
+  },
+  "team": {
+    "shoutout": "Ambar Rana built 4 of the 9 closed tickets: both Critical CVE remediations (Tomcat, Lodash bug), the COTC022 v.3 load and the data-model string-type fix. Eric Miller delivered the Prefect-based loading alternative, the only net-new engineering closure inside the window. Valentina Epishina gated 7 of the 9 through QA acceptance.",
+    "whyDisagree": "The Assignee on a closed ICDC ticket is whoever moved it to Closed, which is QA for nearly everything. Credit comes from the Developer field (customfield_23650). All 9 closed tickets carry a Developer. Counts are as of today: ICDC-4232 (Production deploy) closed Sep 16, after the sprint was completed."
+  },
+  "carry": {
+    "bigNote": "Eleven of them are studies already released through the ICDC and just need closing out.",
+    "facts": [
+      {
+        "title": "11 released studies in close-out",
+        "detail": "COTC021 v.3, COTC022 v.3, COTC026, COTC030 and PRECINCT02 are live; tickets close once Philip finishes the detail updates. Only 5 tickets are truly waiting on review or QA."
+      },
+      {
+        "title": "ICDC-4172 is in its fourth sprint",
+        "detail": "Critical Prefect worker permissions, created May 20, still gates the three job migrations."
+      },
+      {
+        "title": "2 production-facing file download bugs",
+        "detail": "Download returns HTML (4238) and View in Browser opens blank (4239), both In Progress with Charles."
+      }
+    ]
+  },
+  "risks": [
+    {
+      "severity": "HIGH",
+      "title": "ICDC-4172 (Critical) Prefect worker permissions, open since May",
+      "detail": "Gates all three Jenkins-to-Prefect job migrations (4082, 4083, 4084). This is the fourth sprint it has carried.",
+      "nextStep": "decide today: an unblock plan with a named owner outside the team, or descope the migrations from Q4."
+    },
+    {
+      "severity": "HIGH",
+      "title": "Two production-facing file download bugs opened Aug 27",
+      "detail": "ICDC-4238 and 4239 touch the GUID to IndexD to S3 pre-signed URL path. Both sit with Charles alongside 4172 and the Jenkins teardown.",
+      "nextStep": "confirm root cause and a target fix date; pair a second engineer with Charles on the download path."
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "11 released-study tickets still open: the board understates delivery",
+      "detail": "COTC021 v.3, COTC022 v.3, COTC026, COTC030 and PRECINCT02 are released through the ICDC but their 11 tickets sit in Ready for Review or Ready for QA while Philip updates study details, so the sprint reads as 24% done.",
+      "nextStep": "agree a close-out date with Philip for the detail updates, then close the 11 as a batch so Sprint 51 reporting reflects what shipped."
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Net-new engineering closures inside the window were 2 tickets",
+      "detail": "Six of nine closures were already resolved when the sprint opened. Real delivery was higher (the data releases), but the Jira record does not show it yet.",
+      "nextStep": "size Sprint 52 on closures that happen inside the window, and pull ICDC-2808 (2022 story) from the active sprint."
+    }
+  ],
+  "retro": {
+    "boardUrl": "https://retrotool.io/1n_WLWqaV2rlN_KcmHNUA",
+    "timingNote": "Sprint 51 started September 10 and planning is already done. Action items from today either get inserted into the sprint already in flight, or deferred to Sprint 52 planning. Decide which as we assign each one.",
+    "liked": "The CVE hotfix went from scan to Production, and five studies were released through the ICDC. Say what made those go well.",
+    "lacked": "One Critical ticket is in its fourth sprint and two production bugs landed on one person. Name the real cause.",
+    "learned": "Anything about the hotfix deploy path, the Prefect permissions blocker, or the study release close-out."
+  }
+}
