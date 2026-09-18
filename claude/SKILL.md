@@ -9,7 +9,7 @@ description: "Operational knowledge base for the ICDC Sprint Command Center Clau
 > **Ecosystem:** Cancer Research Data Commons (CRDC)  
 > **Team:** React web application engineers  
 > **Claude Project:** Sprint Command Center  
-> **Last Updated:** 2026-09-04 (§8/§12: added User Story and Design Task templates under `claude/templates/`)
+> **Last Updated:** 2026-09-18 (§7c/§9/§12/§13: Sprint Review deck standard aligned with CTDC; config-driven deck generator added under `claude/templates/sprint-review-deck/`)
 
 ---
 
@@ -376,6 +376,8 @@ Liked · Lacked · Learned (not Start/Stop/Continue). 10-min silent brainstorm.
 Retro board URL: [varies per sprint — confirm with TPM]
 ```
 
+**Deck:** build from `claude/templates/sprint-review-deck/` (config-driven pptxgenjs generator; see its README for the pre-write checklist). Rules for what goes on slides, and what stays in the summary only, are in Section 9d/9f.
+
 ---
 
 ### 7d. 🔄 Retrospective Format
@@ -507,26 +509,33 @@ Combined Sprint Review + Release Demo + Retro decks follow this standard. Built 
 | **Header font** | Georgia (bold) |
 | **Body font** | Calibri |
 
-### 9c. Standard Slide Order (Combined Review + Release + Retro)
+### 9c. Standard Slide Order (Sprint Review + Retro; add Release/Demo slides only when real)
 
-1. **Cover** (dark bg) — Sprint number, release tag, meeting date/time, sprint dates, preparer block
-2. **Agenda** (light bg) — Numbered card rows, duration per block, total
-3. **Sprint [N] by the Numbers** — Big stat callout + status doughnut chart
-4. **Sprint [N] Goal Scorecard** — "X of Y goals delivered" + one card per goal (✓/▲/✗)
-5. **Breakdown by Work Type** — Stacked bar (Done vs Carry-over) by Task / Bug / Story + takeaways panel
-6. **Who Closed What** — Horizontal bar by Developer (not Assignee — see Section 3) + shout-out callout
-7. **Release [version] Overview** (dark bg, section break) — 4 stat cards
-8. **Demo Schedule** — Table: slot | time | feature | presenter(s) | tickets
-9–12. **Presenter Intro Slides** — One per demo slot: role eyebrow, presenter card(s), "What you'll see" bullets, ticket refs
-13. **Looking Ahead: Sprint [N+1]** — Carry-over chart + key flags panel
-14. **Up Next: Retrospective** (dark bg, section break) — Title + format + timebox
-15. **Retro Board Link** — Call to action with clickable retrotool URL + ground rules strip
+**Baseline (adopted 2026-09-18, ICDC Sprint 50):** the ICDC deck uses the same 10-slide structure and visual grammar as the CTDC deck (`CTDC_Sprint32_Review_Retro_2026-09-18.pptx`). **Keep ICDC and CTDC in lockstep**: a format change on one side is mirrored on the other. The deck is generated from `claude/templates/sprint-review-deck/build-deck.js` + a per-sprint `config.sprintNN.json` (see that folder's README); do not hand-build slides.
+
+1. **Cover** (dark bg, red left edge stripe): eyebrow `CANCER RESEARCH DATA COMMONS · ICDC`, "Sprint N", "Sprint Review & Retrospective", short red rule, three label/value rows (Sprint dates · Meeting · Reviewing: Sprint N (closed) · Sprint N+1 is now active), **prepared-by card** bottom-right (name, title, FNL, Supporting NCI / CBIIT)
+2. **Today's Agenda**: six alternating light/white rows: Georgia number in NIH blue, title, muted detail, minutes right-aligned; "Total: NN minutes"
+3. **Sprint N by the Numbers**: big "N of M" stat card + three left-stripe stat cards (carry-over; closed before the window; closed inside the window) + "How the M tickets break down" panel with the `Carry-over = total − closed` formula + 4-segment doughnut (Closed / In motion / On hold / Open)
+4. **Sprint N Goal Scorecard**: banner naming the workstreams + green/amber "X OF Y DELIVERED" pill, one left-stripe row per goal (✓ DELIVERED / ▲ PARTIAL, title, detail, ticket refs right), red rule + one-line bottom summary
+5. **Breakdown by Work Type**: horizontal stacked bar (Closed vs Carried over) by issue type + "What the shape tells us" panel with left-stripe points
+6. **Who Closed What**: **two charts**: "Closed by (Assignee at close)" and "Built by (Developer field)" + 🏆 Shout-out card + red-stripe "Why the two charts disagree" card
+7. **Carry-Over into Sprint N+1**: horizontal bar of unfinished tickets by status + big amber "X of Y are in Sprint N+1" card + four fact cards (first is always "Sprint N+1 is NN% inherited")
+8. **What Needs a Decision Today** (Risks & Flags): four left-stripe rows: HIGH/MEDIUM pill, Georgia title, muted detail, bold blue "Next step:" column
+9. **Retrospective** (dark bg, red edge stripe): "Liked · Lacked · Learned", five numbered steps (red numerals), "10 min" on step 1, "20 minute block", ⚠ "A note on timing" card (sprint-in-motion caveat)
+10. **Open the Board and Start Dropping Cards**: eyebrow `RETROTOOL.IO · SPRINT N BOARD`, clickable URL in Georgia, three color-topped LIKED/LACKED/LEARNED cards with sprint-specific prompts, dark ground-rules bar
+
+Optional, inserted after slide 6 only when applicable: **Release [version] Overview** (dark section break, 4 stat cards), **Demo Schedule** table, and one **Presenter Intro** slide per slot (9e). No demo slot unless the item is confirmed deployed to QA/Stage; no release overview unless a tagged release shipped in the sprint.
+
+Every slide except cover and section break carries: red eyebrow label above the title (`AGENDA`, `THROUGHPUT`, `TEAM`, `LOOKING AHEAD`, `RISKS & FLAGS`, `RETRO BOARD`), Georgia 32pt title, italic muted subtitle, thin footer rule with `ICDC · Sprint N Review & Retrospective · Month D, YYYY` and the page number.
 
 ### 9d. Design Rules (what NOT to do)
 
 - **Never put red accent bars under slide titles.** Accent lines under titles read as AI-generated slop. Use whitespace or a dark background instead. A red motif line elsewhere on the slide (between content blocks, not attached to a heading) is OK.
 - **Never let big stat numbers overflow their text box.** `fontSize: 72` in an `h: 1.2` box with `valign: "middle"` will clip the top of the glyph. Use `fontSize: 64` in `h: 1.3` with valign middle, or size the box generously.
 - **Multi-presenter slots** get a single slide with two presenter cards stacked vertically on the left, "What you'll see" bullets on the right. Allocate 8 min instead of 5–6 for two-presenter demos.
+- **Georgia titles need slack.** LibreOffice QA renders Georgia with a wider substitute, so a title that wraps in QA usually wraps in PowerPoint too. Keep goal titles, fact-card titles and risk titles short enough for one line at the sizes the generator uses; shorten the text rather than the font.
+- **Never use em dashes** anywhere on a slide (or in Slack, or in docs). Use colons, middle dots (`·`) or a comma. En dashes in date ranges (`August 20 – September 9`) are fine.
+- **No Jira hygiene on slides.** Missing sprint goal, missing epic links, resolution-date quirks and similar record-keeping observations do not go on the deck, in the Slack post or in retro prompts. Keep them as analyst notes in the sprint summary. When Jira has no sprint goal, the scorecard banner names the workstreams and the subtitle says "Scored against the N workstreams the sprint carried"; never print "(none recorded)".
 
 ### 9e. Presenter Intro Slide Structure
 
@@ -539,6 +548,15 @@ Each demo slot gets one intro slide with this layout:
 - **Left column (1 or 2 cards):** Role eyebrow + Name in Georgia + focus sentence in muted Calibri
 - **Right column:** "What you'll see" bullets (use square bullets, `bullet: { code: "25A0" }`)
 - **Bottom-right:** Ticket references in muted + bold NIH Blue
+
+### 9f. Content Rules Learned in Practice
+
+- **Confirm delivery before scoring.** Study-release tickets (Data Loading, Data Indexing, Data Submission Review, resubmissions) routinely sit in Ready for Review / Ready for QA after the study is already released, while Philip finalizes details. Open tickets are not evidence a study did not ship: ask Gina or Philip, then score DELIVERED with "N tickets in close-out".
+- **Terminology:** studies are "loaded and released through the ICDC". Never call this a "data pipeline".
+- **Say when things closed.** Split closed tickets into before / inside / after the sprint window on the Numbers slide (resolution date vs sprint dates). A high closed count made of pre-resolved rollovers must be caveated on the slide itself.
+- **Cross-check carry-over** against the next sprint's membership (`jql: sprint = <nextId>`) so "X of Y are in Sprint N+1" and "% inherited" are verified, not assumed.
+- **Risks slide:** four rows is the target; every row has a severity pill and a "Next step" naming a decision, owner or date; HIGH rows before MEDIUM.
+- **Retro prompts are sprint-specific:** each LIKED/LACKED/LEARNED card carries one or two sentences pointing at what actually happened this sprint.
 
 ---
 
@@ -677,6 +695,10 @@ claude/
     epic-templates.md                               ← Epic template library (moved out of SKILL.md Section 7e).
     user-story-template.md                          ← Software-dev user story (5 sections; canonical ICDC-4244).
     design-task-template.md                         ← Design task (6 sections; canonical ICDC-4242).
+    sprint-review-deck/                             ← Config-driven Sprint Review + Retro deck generator (pptxgenjs).
+      README.md                                     ← How to run it + the pre-write checklist (lessons from Sprint 50).
+      build-deck.js · tally.js                      ← Generator and count-verification script.
+      config.sprint50.json · tickets.sprint50.json  ← Worked example (ICDC Sprint 50, Jira 8838).
 ```
 
 ### Current Files
@@ -700,6 +722,7 @@ claude/
 | `claude/templates/user-story-template.md` | Drafting or normalizing a software-development user story (5 sections; canonical ICDC-4244) |
 | `claude/templates/design-task-template.md` | Drafting or normalizing a design task for Hannah Stogsdill (6 sections; canonical ICDC-4242) |
 | `claude/conventions/slack-communication.md` | Composing ICDC Slack posts; channels, audiences, and message conventions (moved out of SKILL.md Section 14) |
+| `claude/templates/sprint-review-deck/README.md` | Building a Sprint Review + Retro deck; read first, then copy the previous `config.sprintNN.json` |
 
 ### Fetch Strategy by Session Type
 
@@ -708,6 +731,7 @@ claude/
 | Epic-specific work (tickets, updates, doc generation) | `claude/epics/ICDC-XXXX.md` for that epic |
 | Architecture leadership doc generation or update | `claude/architecture/file-download-and-auth-stack.md` |
 | Sprint planning or retrospective | `claude/conventions/workflow.md` |
+| Sprint review deck build | `claude/templates/sprint-review-deck/README.md` (+ previous sprint's config as the starting point) |
 | New session after a long gap | `claude/conventions/workflow.md` |
 | Scope or deferral question | `claude/decisions/` — the relevant decision file |
 | Data-management ticket drafting (load / IndexD) | the relevant `claude/templates/` file |
@@ -755,7 +779,7 @@ When building or extending anything in this `icdc-documentation` repo — templa
 - New SOPs or workflow patterns discovered in Claude conversations should be added here via PR
 - When new files are added to `claude/`, update Section 12 (Knowledge Base) so they remain discoverable
 - When a new architecture leadership `.docx` is published, update the Document Storage Convention table in Section 12 if applicable
-- When deck standards or demo-day workflows change, update Sections 9 and 10 (Deck Standards and Demo Day Workflow)
+- When deck standards or demo-day workflows change, update Sections 9 and 10 (Deck Standards and Demo Day Workflow) AND `claude/templates/sprint-review-deck/build-deck.js`; mirror the change in `ctdc-documentation` so the two decks stay in lockstep
 - Update the Sprint Review Summary template (Section 7c) when Jira workflow statuses change so the velocity buckets stay accurate
 - When a new ICDC Slack channel is created or an existing channel's purpose changes, update Section 14a (Channel Routing)
 - When a team member joins, leaves, or changes role, pull their Slack User ID via `slack_search_users` and update both Section 11 (Team Roster) AND any Section 14 references
