@@ -51,7 +51,7 @@
     "rows": [
       {
         "title": "Sprint 50 by the Numbers",
-        "detail": "Where the 38 tickets landed, and when they actually closed",
+        "detail": "Points and tickets: where the 38 tickets landed, and when they actually closed",
         "minutes": "5 min"
       },
       {
@@ -97,7 +97,7 @@
         "tone": "green"
       }
     ],
-    "closedNote": "(accepted and done at sprint close; 1 closed after, on Sep 16)",
+    "closedNote": "(5 of the 9 closed, incl. the four hotfix tickets, carry no points)",
     "motionNote": "11 are released studies awaiting close-out",
     "holdNote": "(both Prefect items)",
     "openNote": "(never started; includes one user story from 2022)",

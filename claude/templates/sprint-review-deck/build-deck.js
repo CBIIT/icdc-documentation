@@ -38,6 +38,9 @@ const cnt = (arr, f) => arr.reduce((m, x) => { const k = f(x); m[k] = (m[k] || 0
 const devC = Object.entries(cnt(done.flatMap(x => x.dev), u => cfg.developerNames[u] || u)).sort((a, b) => b[1] - a[1]);
 const asgC = Object.entries(cnt(done, x => (cfg.qaNames || []).includes(x.assignee) ? `${x.assignee} (QA)` : x.assignee)).sort((a, b) => b[1] - a[1]);
 const carryByStatus = Object.entries(cnt(d.filter(x => x.category !== 'Done'), x => x.status.replace(' Testing', ''))).sort((a, b) => b[1] - a[1]);
+const pts = x => (typeof x.points === 'number' ? x.points : null);
+const P = { committed: d.reduce((a, x) => a + (pts(x) || 0), 0), done: done.reduce((a, x) => a + (pts(x) || 0), 0), pointed: d.filter(x => pts(x) !== null).length, pointedDone: done.filter(x => pts(x) !== null).length };
+P.carry = P.committed - P.done; P.pct = P.committed ? (100 * P.done / P.committed).toFixed(1) : '0.0';
 const S = cfg.sprint, N1 = cfg.nextSprint;
 const goalsDelivered = cfg.goals.filter(g => g.delivered).length;
 
@@ -93,11 +96,11 @@ const niceMax = v => Math.ceil(v * 1.15 / (v > 10 ? 2 : 1)) * (v > 10 ? 2 : 1) +
 
 // ================= 3. BY THE NUMBERS =================
 {
-  const s = pres.addSlide(); header(s, `Sprint ${S.number} · ${S.dateRangeShort}`, `Sprint ${S.number} by the Numbers`, 'Velocity measured by ticket count: this team does not track story points'); footer(s, 3);
+  const s = pres.addSlide(); header(s, `Sprint ${S.number} · ${S.dateRangeShort}`, `Sprint ${S.number} by the Numbers`, `Velocity in story points (Jira Story Points field); ticket count shown alongside`); footer(s, 3);
   box(s, 0.6, 1.95, 3.5, 2.05, C.light, C.light);
-  s.addText([{ text: String(M.done), options: { fontFace: H, fontSize: 60, bold: true, color: C.blue } }, { text: '  of ' + total, options: { fontFace: H, fontSize: 22, color: C.muted } }], { x: 0.8, y: 2.05, w: 3.2, h: 1.15, isTextBox: true, margin: 0, valign: 'middle' });
-  eyebrow(s, 'Tickets closed', 0.8, 3.3, C.ink, 3);
-  tb(s, `${M.pct}% completion rate`, { x: 0.8, y: 3.55, w: 3.2, h: 0.25, fontSize: 10, color: C.muted });
+  s.addText([{ text: String(P.done), options: { fontFace: H, fontSize: 60, bold: true, color: C.blue } }, { text: '  of ' + P.committed + ' pts', options: { fontFace: H, fontSize: 22, color: C.muted } }], { x: 0.8, y: 2.05, w: 3.2, h: 1.15, isTextBox: true, margin: 0, valign: 'middle' });
+  eyebrow(s, 'Story points delivered', 0.8, 3.3, C.ink, 3);
+  tb(s, `${P.pct}% of committed points · ${M.done} of ${total} tickets (${M.pct}%)`, { x: 0.8, y: 3.55, w: 3.2, h: 0.25, fontSize: 10, color: C.muted });
   const stats = [[String(M.carry), 'Carry-over tickets', cfg.numbers.carryNote, C.amber], ...cfg.numbers.extraStats.map(x => [x.value, x.label, x.note, SEV[x.tone] || C[x.tone] || C.green])];
   stats.slice(0, 3).forEach((k, i) => {
     const y = 1.95 + i * 0.72;
@@ -108,18 +111,18 @@ const niceMax = v => Math.ceil(v * 1.15 / (v > 10 ? 2 : 1)) * (v > 10 ? 2 : 1) +
   box(s, 0.6, 4.25, 7.3, 2.45, C.light, C.light);
   tb(s, `How the ${total} tickets break down`, { x: 0.8, y: 4.38, w: 6.9, h: 0.3, fontFace: H, fontSize: 14, bold: true, color: C.blue });
   const brk = [
-    [`Closed: ${M.done}`, cfg.numbers.closedNote || '(accepted and done at sprint close)'],
+    [`Closed: ${M.done} tickets · ${P.done} pts`, cfg.numbers.closedNote || '(accepted and done at sprint close)'],
     [`In motion: ${M.motion}`, `(Ready for Review ${M.rfr} · In Progress ${M.inProg} · Ready for QA ${M.rfqa}${cfg.numbers.motionNote ? '; ' + cfg.numbers.motionNote : ''})`],
     [`On hold: ${M.hold}`, cfg.numbers.holdNote || ''],
     [`Open: ${M.open}`, cfg.numbers.openNote || '(never started)'],
   ];
   brk.forEach((r, i) => s.addText([{ text: r[0] + '   ', options: { bold: true, color: C.ink } }, { text: r[1], options: { color: C.muted } }], { x: 0.8, y: 4.75 + i * 0.3, w: 6.9, h: 0.28, fontFace: B, fontSize: 10.5, isTextBox: true, margin: 0 }));
-  tb(s, `Carry-over = total − closed = ${total} − ${M.done} = ${M.carry}`, { x: 0.8, y: 6.3, w: 6.9, h: 0.28, fontSize: 10, bold: true, color: C.amber });
+  tb(s, `Carry-over = ${total} − ${M.done} = ${M.carry} tickets · ${P.carry} pts   |   pointed: ${P.pointed} of ${total} tickets, ${P.pointedDone} of ${M.done} closed`, { x: 0.8, y: 6.3, w: 6.9, h: 0.28, fontSize: 10, bold: true, color: C.amber });
   s.addChart(pres.ChartType.doughnut, [{ name: `Sprint ${S.number} status`, labels: ['Closed', 'In motion', 'On hold', 'Open'], values: [M.done, M.motion, M.hold, M.open] }], {
     x: 8.3, y: 1.9, w: 4.4, h: 4.8, holeSize: 55, chartColors: [C.green, C.blue, C.amber, C.muted], showLegend: true, legendPos: 'b', legendFontFace: B, legendFontSize: 9, legendColor: C.ink,
     showValue: true, showPercent: false, dataLabelColor: C.white, dataLabelFontFace: B, dataLabelFontSize: 11, dataLabelFontBold: true,
   });
-  s.addNotes(`Computed from ${cfg.ticketsFile}: Closed ${M.done}, Ready for Review ${M.rfr}, In Progress ${M.inProg}, Ready for QA ${M.rfqa}, On Hold ${M.hold}, Open ${M.open} = ${total}. ${cfg.numbers.speakerNote || ''}`);
+  s.addNotes(`Story points from customfield_10042: committed ${P.committed}, delivered ${P.done}, carried ${P.carry}; ${P.pointed}/${total} tickets pointed. Computed from ${cfg.ticketsFile}: Closed ${M.done}, Ready for Review ${M.rfr}, In Progress ${M.inProg}, Ready for QA ${M.rfqa}, On Hold ${M.hold}, Open ${M.open} = ${total}. ${cfg.numbers.speakerNote || ''}`);
 }
 
 // ================= 4. GOAL SCORECARD =================
