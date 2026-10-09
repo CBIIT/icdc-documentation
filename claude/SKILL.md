@@ -9,7 +9,7 @@ description: "Operational knowledge base for the ICDC Sprint Command Center Clau
 > **Ecosystem:** Cancer Research Data Commons (CRDC)  
 > **Team:** React web application engineers  
 > **Claude Project:** Sprint Command Center  
-> **Last Updated:** 2026-10-09 (deck standard aligned across ICDC and CTDC: shared generator, story-point charts, goal and risk levels)
+> **Last Updated:** 2026-10-09 (Jira ticket templates synced across ICDC and CTDC: Jira wiki authoring everywhere, design task and IndexD shapes aligned; earlier the same day: deck standard aligned)
 
 ---
 
@@ -412,76 +412,72 @@ The full epic-template library (all groupings and per-section formats) has moved
 
 ## 8. Ticket Writing Standards
 
-> **User stories and design tasks have dedicated templates**: `claude/templates/user-story-template.md` (canonical ICDC-4244) and `claude/templates/design-task-template.md` (canonical ICDC-4242). The generic formats below are for plain Tasks, Bugs, and security findings. Two rules apply to every ticket body regardless of template: never cite other Jira ticket keys in the description (Jira's Links panel carries them), and never use em dashes (use colons, e.g. `* *Label*: content`).
+> **User stories and design tasks have dedicated templates**: `claude/templates/user-story-template.md` (canonical ICDC-4244) and `claude/templates/design-task-template.md` (canonical ICDC-4242). The generic formats below are for plain Tasks, Bugs, and security findings. Two rules apply to every ticket body regardless of template: never cite other Jira ticket keys in the description (Jira's Links panel carries them), and never use em dashes (use colons, e.g. `* *Label*: content`). Every description and comment is authored in Jira wiki markup (`h3. 🎯 *Title*` headers, `*bold*`, `#` numbered lists, `||h||` tables), because the Jira connector stores exactly what it is sent; see `claude/templates/README.md`, "Universal patterns."
 
 ### Task Format (primary issue type for ICDC)
 ```
-**Summary:** [Brief, actionable description]
+*Summary*: [Brief, actionable description]
 
-**Context:**
-[1–2 sentences on why this work is needed and what system/component it affects]
+*Context*
+[1 to 2 sentences on why this work is needed and what system or component it affects]
 
-**Acceptance Criteria:**
-- [ ] Criterion 1
-- [ ] Criterion 2
-- [ ] Criterion 3
+*Acceptance Criteria*
+# Criterion 1
+# Criterion 2
+# Criterion 3
 
-**Technical Notes:**
+*Technical Notes*
 [Any relevant implementation context, environment details, or dependencies]
-
-**Related:**
-- Epic: ICDC-XXXX
-- Design: [link if applicable]
-- Security scan reference: [if applicable]
 ```
+
+The epic goes in the Epic Link field (`customfield_12350`) and related tickets in Jira's Links panel; neither is written in the body. Design references (Figma, specs) go in as external links.
 
 ### Bug Format
 ```
-**Environment:** [dev / qa / stage / prod]
-**Severity:** [Critical / High / Medium / Low]
+*Environment*: [Dev / QA / Stage / Prod]
+*Severity*: [Critical / High / Medium / Low]
 
-**Steps to Reproduce:**
-1. 
-2. 
-3. 
+*Steps to Reproduce*
+# 
+# 
+# 
 
-**Expected Behavior:**
+*Expected Behavior*
 [What should happen]
 
-**Actual Behavior:**
+*Actual Behavior*
 [What actually happens]
 
-**Screenshots/Logs:**
+*Screenshots/Logs*
 [Attach or paste]
-
-**Related Epic:** ICDC-XXXX
 ```
+
+Authored in Jira wiki markup (stored exactly as sent). The epic is set through the Epic Link field (`customfield_12350`), never written in the body. ICDC and CTDC use this identical bug format.
 
 ### Security Finding Format
-When creating tickets from Invicti or other security scan reports:
+Invicti findings use the dedicated template, `claude/templates/invicti-finding-task-template.md`. For other sources (manual review, dependency scan):
 ```
-**Source:** [Invicti / Manual / Dependency scan]
-**Severity:** [High / Medium / Low / Best Practice]
-**Environment Scanned:** [dev / qa / stage / prod]
-**Scan Date:** [YYYY-MM-DD]
+*Source*: [Manual / Dependency scan]
+*Severity*: [High / Medium / Low / Best Practice]
+*Environment Scanned*: [Dev / QA / Stage / Prod]
+*Scan Date*: [YYYY-MM-DD]
 
-**Finding:**
+*Finding*
 [Plain-English description of the vulnerability]
 
-**Technical Detail:**
+*Technical Detail*
 [CVE number, affected library/version, endpoint, header name, etc.]
 
-**Remediation:**
-[What needs to change — upgrade version, set header, disable feature, etc.]
+*Remediation*
+[What needs to change: upgrade version, set header, disable feature, etc.]
 
-**Acceptance Criteria:**
-- [ ] Fix implemented in [component]
-- [ ] Verified clean in [environment]
-- [ ] No regression in related functionality
-
-**Related Epic:** ICDC-XXXX
-**Labels:** invicti-scan, security
+*Acceptance Criteria*
+# Fix implemented in [component]
+# Verified clean in [environment]
+# No regression in related functionality
 ```
+
+Labels `invicti-scan` / `security` are set in the labels field, and the epic in the Epic Link field.
 
 ---
 

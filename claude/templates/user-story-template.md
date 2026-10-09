@@ -2,7 +2,7 @@
 
 > **Use this template for every ICDC software-development user story.** The canonical example is **ICDC-4244 (Surface matching C3DC human cancer data on the ICDC Human Relevance tab)**: drafted 2026-09-04 as the first application of this template, epic-linked to ICDC-3882 (ICDC Human Relevance) and paired with design task ICDC-4242. Data-submission user stories (the Data Concierge's parent ticket for a study submission) use `data-submission-user-story-template.md` instead.
 >
-> **Status:** v1 (2026-09-04): ported from CTDC's §7a User Story Template and **slimmed from 7 to 5 sections**: the 🔗 Parent Epic & Context section was dropped (the Epic Link field is the canonical link; restating it in the body is noise) and the 📝 Notes section was dropped (predecessor tickets, design tasks, and decisions are carried by native Jira links and comments). CTDC's §7a was slimmed to the same 5-section shape on the same day so the two projects stay aligned.
+> **Status:** v2 (2026-10-09): section headers and authoring moved to Jira wiki markup; the Performance & Quality bar is now identical in CTDC (CTDC dropped its cross-browser item). v1 (2026-09-04): ported from CTDC's §7a User Story Template and **slimmed from 7 to 5 sections**: the 🔗 Parent Epic & Context section was dropped (the Epic Link field is the canonical link; restating it in the body is noise) and the 📝 Notes section was dropped (predecessor tickets, design tasks, and decisions are carried by native Jira links and comments). CTDC's §7a was slimmed to the same 5-section shape on the same day so the two projects stay aligned.
 
 ## Why this template
 
@@ -12,22 +12,22 @@ Testing Requirements is a first-class section because Valentina Epishina is QA-o
 
 ## Section order (5 sections, exactly this sequence)
 
-Each section header is an `h3` Markdown heading using the emoji + bold title format shown. Do not omit, reorder, or merge sections. If a section genuinely has no content, state so explicitly ("None at this time") rather than dropping the header.
+Each section header is a Jira wiki `h3.` heading using the emoji + bold title format shown. Do not omit, reorder, or merge sections. If a section genuinely has no content, state so explicitly ("None at this time") rather than dropping the header.
 
-1. `### 🎯 **Story Summary**`: One sentence: what this story delivers, who consumes it, on which surface. Example: *"This story delivers a C3DC card on the Human Relevance tab of the Study Details page, letting visitors see which C3DC studies contain the same cancer type as the canine study they are viewing."*
+1. `h3. 🎯 *Story Summary*`: One sentence: what this story delivers, who consumes it, on which surface. Example: *"This story delivers a C3DC card on the Human Relevance tab of the Study Details page, letting visitors see which C3DC studies contain the same cancer type as the canine study they are viewing."*
 
-2. `### 👤 **User Story**`: As-a / I-want / So-that as one flowing paragraph, not three bullet lines.
+2. `h3. 👤 *User Story*`: As-a / I-want / So-that as one flowing paragraph, not three bullet lines.
 
-3. `### 🗺️ **Scope**`: Two sub-blocks, **In Scope** and **Out of Scope**, each a bullet list. Out of Scope items describe the excluded work in words; do not cite the Jira key of the ticket that covers it (add a `Relates` link instead).
+3. `h3. 🗺️ *Scope*`: Two sub-blocks, **In Scope** and **Out of Scope**, each a bullet list. Out of Scope items describe the excluded work in words; do not cite the Jira key of the ticket that covers it (add a `Relates` link instead).
 
-4. `### ✅ **Acceptance Criteria**`: Two sub-blocks:
-   - **Functional**: Numbered list. Each item is a single observable behavior QA can pass/fail in one check on a deployed environment. If an item has two clauses joined by "and," split it. `**Bold**` key UI labels and component names. Escape curly braces as `\{...\}`.
+4. `h3. ✅ *Acceptance Criteria*`: Two sub-blocks:
+   - **Functional**: Numbered list. Each item is a single observable behavior QA can pass/fail in one check on a deployed environment. If an item has two clauses joined by "and," split it. `*Bold*` key UI labels and component names. Escape curly braces as `\{...\}`.
    - **Performance & Quality**: Numbered list. The ICDC quality bar:
      1. Section 508 / WCAG 2.1 AA accessibility on all new UI elements
      2. ICDC design system conformance (colors, typography, spacing)
      3. Performance baseline of the affected page maintained
 
-5. `### 🧪 **Testing Requirements**`: Three sub-blocks, each a numbered list:
+5. `h3. 🧪 *Testing Requirements*`: Three sub-blocks, each a numbered list:
    - **Unit Tests**: isolated behaviors (parsers, URL builders, reducers, utilities)
    - **Integration Tests**: end-to-end flows across components (render paths, error paths, empty paths)
    - **Manual QA Scenarios**: things that are hard to automate: outbound-link destinations, keyboard and screen-reader passes, visual conformance against the Figma design on the linked design task
@@ -51,12 +51,12 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
 - **Acceptance Criteria are testable**: one observable behavior per item.
 - **Testing Requirements is the developer's checklist before "Ready for QA."** Not optional, not a duplicate of P&Q.
 - **Assignee at creation is the author (TPM)** until the story is pulled into a sprint; then the engineer. Populate the Developer field (`customfield_23650`) with the implementing engineer when known.
-- **Markdown authoring**: `### {emoji} **Title**` headers, `-` bullets, `1.` numbered lists, `**bold**`; Jira-wiki tables (`||h||` / `|c|`) if a table is needed; curly braces escaped as `\{...\}`.
+- **Jira wiki authoring** (connector Markdown translation is off, so what is sent is stored exactly; see `claude/templates/README.md`, "Universal patterns"): `h3. {emoji} *Title*` headers; `* *Label*: content` labeled lines; `*` bullets and `#` numbered lists at column 0; `*bold*`; `{{monospace}}`; tables `||header||` / `|cell|`; links `[text|url]`; curly braces escaped as `\{...\}`. Blank line after every heading. After pushing, read the description back and confirm it starts with `h3.`, not `###`.
 
 ## Writing-and-publishing workflow
 
 1. Pull the source requirements (a requirements task, a clone, a meeting note) via `jira_get_issue`: preserve the substance, restructure the form; tighten wording, drop nothing.
-2. Create via `jira_create_issue` with `issue_type = "User Story"` and a placeholder description; then `jira_update_issue` with the full Markdown body and `{"customfield_12350": "ICDC-XXXX"}` in `additional_fields`.
+2. Create via `jira_create_issue` with `issue_type = "User Story"` and a placeholder description; then `jira_update_issue` with the full Jira wiki body and `{"customfield_12350": "ICDC-XXXX"}` in `additional_fields`.
 3. Add `Relates` links to the design task and requirements task via `jira_create_issue_link`.
 4. Verify the rendered description with a UI screenshot from the user.
 

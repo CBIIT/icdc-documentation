@@ -6,9 +6,9 @@
 
 **Section order (5 sections, exactly this sequence)**
 
-Each header is `### **Title**` with the emoji shown. All five are required. Bullets use `* *Label*: content`. No em dashes. No Jira keys in the body; the epic link and any `Relates` links live in Jira's Links panel.
+Each header is `h3. {emoji} *Title*` with the emoji shown. All five are required. Bullets use `* *Label*: content`. No em dashes. No Jira keys in the body; the epic link and any `Relates` links live in Jira's Links panel.
 
-1. `### 🎯 **Finding**`
+1. `h3. 🎯 *Finding*`
 
    What Invicti reported, in the assignee's terms. Bullets:
 
@@ -19,11 +19,11 @@ Each header is `### **Title**` with the emoji shown. All five are required. Bull
    * *Reference*: CVE ID and affected version range, or the CWE, when present
    * *Certainty*: Confirmed or Identified, as Invicti marked it
 
-2. `### 🧠 **Why It Matters**`
+2. `h3. 🧠 *Why It Matters*`
 
    Two to four sentences explaining the risk in plain language: what an attacker could do with it, and any context that changes the real exposure (for example a CVE scoped to a Tomcat examples webapp that embedded Tomcat never deploys). This is where a disposition candidate states the case that the finding is a false positive or an accepted risk.
 
-3. `### 🔧 **Remedy**`
+3. `h3. 🔧 *Remedy*`
 
    The concrete change, which repo and layer, and the durable control if one exists. Bullets:
 
@@ -32,7 +32,7 @@ Each header is `### **Title**` with the emoji shown. All five are required. Bull
    * *Durable control*: the change that stops this class of finding from recurring, when different from the fix (for example suppress the Tomcat error-page banner so version fingerprinting stops)
    * *Disposition* (only for false-positive or accepted-risk tasks): the request wording to send NCI Security and the ask (mark in Invicti)
 
-4. `### ✅ **Acceptance Criteria**`
+4. `h3. ✅ *Acceptance Criteria*`
 
    Testable statements, one per bullet, that QA can verify on each tier:
 
@@ -41,7 +41,7 @@ Each header is `### **Title**` with the emoji shown. All five are required. Bull
    * Application behavior that depends on the changed component is unaffected (name the specific check, for example the GraphQL queries the frontend issues still succeed)
    * For a disposition task: NCI Security has confirmed the disposition in writing and the finding is marked in Invicti
 
-5. `### ⏱️ **SLA**`
+5. `h3. ⏱️ *SLA*`
 
    The due date and how it was derived, so nobody has to recompute it:
 
@@ -57,7 +57,7 @@ Each header is `### **Title**` with the emoji shown. All five are required. Bull
 * *Disposition tasks close as Won't Fix*: with the label `false-positive` or `risk-accepted` and a comment containing the justification exactly as sent to NCI Security.
 * *Regressions reopen, never clone*: if a Closed task's finding reappears, transition it back to Open, add a comment naming the report and environment that re-observed it, and keep the original due date unless NCI Security resets it.
 * *One PR per task*: standard ICDC convention. The PR link goes in a comment, not the body.
-* *Rendering-safe patterns*: `### **Title**` headers, `* *Label*: content` bullets, blank line after every heading, no in-cell line breaks. Comments are plain text with real line breaks; no Markdown.
+* *Jira wiki authoring* (connector Markdown translation is off, so what is sent is stored exactly; see `claude/templates/README.md`, "Universal patterns"): `h3. {emoji} *Title*` headers; `* *Label*: content` labeled lines; `*` bullets and `#` numbered lists at column 0; `*bold*`; `{{monospace}}`; tables `||header||` / `|cell|`; links `[text|url]`; curly braces escaped as `\{...\}`. Blank line after every heading. After pushing, read the description back and confirm it starts with `h3.`, not `###`.
 
 **Writing-and-publishing workflow**
 

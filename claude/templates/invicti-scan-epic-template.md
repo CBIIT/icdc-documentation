@@ -6,13 +6,13 @@
 
 **Section order (8 sections, exactly this sequence)**
 
-Each header is `### **Title**` with the emoji shown. Omit a section only when it has no content for the month (for example no Dispositions); keep the rest in order. Tables use Jira-wiki `||header||` syntax. Bullets use `* *Label*: content`. No em dashes. No Jira keys in the body except in the Carryover and Resolved tables, where the key is the data.
+Each header is `h3. {emoji} *Title*` with the emoji shown. Omit a section only when it has no content for the month (for example no Dispositions); keep the rest in order. Tables use Jira-wiki `||header||` syntax. Bullets use `* *Label*: content`. No em dashes. No Jira keys in the body except in the Carryover and Resolved tables, where the key is the data.
 
-1. `### 🎯 **Overview**`
+1. `h3. 🎯 *Overview*`
 
    Two or three sentences. Which environments were scanned, on which dates, by which scanner, and the overall risk level per environment. Then the headline: how many findings are new this month, how many carry over, how many were confirmed resolved. Example: *"Tracks remediation of findings from the Invicti Enterprise scans of caninecommons.cancer.gov (Prod, scanned 2026-09-01, risk level High) and caninecommons-stage.cancer.gov (Stage, scanned 2026-09-08, risk level High). One new High finding this cycle; nine findings carry over from August; both August Criticals are confirmed resolved."*
 
-2. `### 📊 **Severity Breakdown**`
+2. `h3. 📊 *Severity Breakdown*`
 
    One row per environment scanned.
 
@@ -22,7 +22,7 @@ Each header is `### **Title**` with the emoji shown. Omit a section only when it
    |Stage|2026-09-08|112,362|High|0|1|0|7|0|8|3|
    ```
 
-3. `### ⏱️ **SLA Due Dates**`
+3. `h3. ⏱️ *SLA Due Dates*`
 
    The dates the team is held to this month, computed from the report delivery date and the NCI table (Critical 15/30, High 30/60, Medium 60/90, Low 180/180 days, public/internal). Prod and Stage are both public-facing. One row per severity present.
 
@@ -33,13 +33,13 @@ Each header is `### **Title**` with the emoji shown. Omit a section only when it
    |Low|Prod, Stage (public)|2026-09-14|180 days|2027-03-13|
    ```
 
-4. `### 🆕 **New Findings**`
+4. `h3. 🆕 *New Findings*`
 
    Findings first observed this cycle. Each one has a task under this epic. Bulleted, one per finding, severity prefix first, then name, environments, endpoint, CVE if any, and the one-line remedy. Regressions (a finding whose earlier task was Closed) are listed here with the marker **Regression** and the reopened task is linked rather than a new one created.
 
    * *[SEC-HIGH]*: Out-of-date Apache Tomcat 10.1.57, CVE-2026-66299, Prod and Stage, fingerprinted on the `/version` error page. Remedy: upgrade to 10.1.59 and suppress the error-page version banner.
 
-5. `### 🔁 **Carryover Findings**`
+5. `h3. 🔁 *Carryover Findings*`
 
    Findings observed this cycle that already have an open task from an earlier cycle. The due date shown is the original one; it does not move. Link each task to this epic with `Relates`.
 
@@ -48,7 +48,7 @@ Each header is `### **Title**` with the emoji shown. Omit a section only when it
    |ICDC-4213|GraphQL introspection, /api/interoperation/graphql|Medium|2026-08-14 (Stage)|2026-10-16|Ready for Review|Stage|
    ```
 
-6. `### ✅ **Resolved Since Last Scan**`
+6. `h3. ✅ *Resolved Since Last Scan*`
 
    Findings from the prior cycle that are absent from this month's report. This is the evidence that closes the prior month's verification task.
 
@@ -57,13 +57,13 @@ Each header is `### **Title**` with the emoji shown. Omit a section only when it
    |ICDC-4211|Out-of-date Tomcat 10.1.52, CVE-2026-53434|Critical|Upgraded to 10.1.57|Prod 2026-09-01; Stage 2026-09-08|
    ```
 
-7. `### 🚫 **Dispositions**`
+7. `h3. 🚫 *Dispositions*`
 
    Findings submitted to NCI Security as false positive or accepted risk this cycle, with the one-line reason and the request status (Submitted / Accepted / Declined). Full justification lives on the task.
 
    * *Cookie not marked HttpOnly*: Adobe Analytics cookies are set client-side and cannot be HttpOnly. Submitted 2026-09-16.
 
-8. `### 🚀 **Promotion Strategy**`
+8. `h3. 🚀 *Promotion Strategy*`
 
    Standing text, kept short: *"Fixes are developed and tested in DEV and QA, then promoted Stage → Prod through the standard ICDC pipeline and ServiceNow change requests. A finding is closed when QA confirms the fix on the tier where it was observed; the epic closes when the following month's report confirms every new finding is absent."*
 
@@ -75,7 +75,7 @@ Each header is `### **Title**` with the emoji shown. Omit a section only when it
 * *Verification task is mandatory*: one per epic, assigned to the TPM, summary `Confirm <Month YYYY> findings absent from <next month> Invicti scan`.
 * *Regressions are named as such*: a re-observed finding with a Closed task is a regression, listed in New Findings with the marker, and its task reopened with a comment.
 * *No evidence in the epic*: request and response bodies, payloads, cookie values, and internal IPs belong on the finding task. The epic carries names, counts, dates, and keys.
-* *Rendering-safe patterns*: `### **Title**` headers, `* *Label*: content` bullets, Jira-wiki tables, blank line after every heading and between sections, no in-cell line breaks.
+* *Jira wiki authoring* (connector Markdown translation is off, so what is sent is stored exactly; see `claude/templates/README.md`, "Universal patterns"): `h3. {emoji} *Title*` headers; `* *Label*: content` labeled lines; `*` bullets and `#` numbered lists at column 0; `*bold*`; `{{monospace}}`; tables `||header||` / `|cell|`; links `[text|url]`; curly braces escaped as `\{...\}`. Blank line after every heading. After pushing, read the description back and confirm it starts with `h3.`, not `###`.
 
 **Writing-and-publishing workflow**
 

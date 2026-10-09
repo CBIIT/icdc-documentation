@@ -1,6 +1,6 @@
 # 🛡️ SOP: Monthly Invicti Security Scan Remediation (v1.3, 2026-09-15)
 
-> **Use this SOP every time NCI Security delivers an Invicti Enterprise Detailed Scan Report for an ICDC environment.** It covers intake, reconciliation against the prior month, triage, Jira ticketing, communications, tracking, and verification. The Jira mechanics (two-step create, epic link via `customfield_12350`, Developer field, rendering-safe Markdown) are the standard ICDC rules in `claude/SKILL.md` and are not repeated here except where the security workflow adds a rule on top.
+> **Use this SOP every time NCI Security delivers an Invicti Enterprise Detailed Scan Report for an ICDC environment.** It covers intake, reconciliation against the prior month, triage, Jira ticketing, communications, tracking, and verification. The Jira mechanics (two-step create, epic link via `customfield_12350`, Developer field, Jira wiki authoring) are the standard ICDC rules in `claude/SKILL.md` and are not repeated here except where the security workflow adds a rule on top.
 
 > **Companion templates**: `claude/templates/invicti-scan-epic-template.md` (the monthly epic) and `claude/templates/invicti-finding-task-template.md` (one task per new finding). Canonical examples for the epic shape are ICDC-4120 (February 2026, DEV plus Stage) and ICDC-4210 (August 2026, Stage); the first epic built on this SOP is the September 2026 cycle (ICDC-4249).
 

@@ -44,13 +44,13 @@ The template walks all of this in order: payload → pipeline run per environmen
 
 **Section order (4 sections, exactly this sequence)**
 
-Each section header is an `h3` Markdown heading using the emoji + bold title format shown. Don't omit, reorder, or merge sections. If a section genuinely has no content, state so explicitly ("None at this time") rather than dropping the header. Per-environment verification is carried out within the Loading Workflow steps and recorded in the Testing Signoff table; there is no separate verification section.
+Each section header is a Jira wiki `h3.` heading using the emoji + bold title format shown. Don't omit, reorder, or merge sections. If a section genuinely has no content, state so explicitly ("None at this time") rather than dropping the header. Per-environment verification is carried out within the Loading Workflow steps and recorded in the Testing Signoff table; there is no separate verification section.
 
-1. `### 🎯 **Load Summary**`: Two to three sentences. What's being loaded, which study or release it belongs to, whether this is a new study or an addition to an existing study, and what application surfaces it lights up.
+1. `h3. 🎯 *Load Summary*`: Two to three sentences. What's being loaded, which study or release it belongs to, whether this is a new study or an addition to an existing study, and what application surfaces it lights up.
 
    **Canonical example:** the COTC030 load (**ICDC-4176**), the first ICDC ticket built to this template; use it as the house-style reference for the Load Summary and the sections below.
 
-2. `### 📦 **Submission & Artifacts**`: Required field. A four-row table holding the artifacts the load consumes, mirroring CTDC's canonical load ticket (CTDC-2093). Study identity (program, study name, submitter, chronology) lives on the parent data epic / submission Story and the study record linked via the native Links panel, not in this table. The four rows:
+2. `h3. 📦 *Submission & Artifacts*`: Required field. A four-row table holding the artifacts the load consumes, mirroring CTDC's canonical load ticket (CTDC-2093). Study identity (program, study name, submitter, chronology) lives on the parent data epic / submission Story and the study record linked via the native Links panel, not in this table. The four rows:
 
    | Field | Value | Notes |
    |---|---|---|
@@ -61,7 +61,7 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
 
    **Naming discipline**: rows that point at *where artifacts live* carry an address, not a content description: the "AWS S3 Bucket" row names the bucket and the "Release Package" row names the directory within it. Keep the value an address.
 
-3. `### 🚦 **Loading Workflow**`: Numbered list of the end-to-end promotion steps. ICDC uses a **hybrid pipeline**: **Dev runs locally** (local Neo4j instance + `loader.py`), and **QA / Stage / Prod run through Jenkins** with a two-tier split: *lower tier* targets QA, *upper tier* targets Stage and Prod. (This differs from CTDC, where all four environments use Jenkins.) Per-environment verification is part of these steps; record the outcome in the Testing Signoff table (Section 4).
+3. `h3. 🚦 *Loading Workflow*`: Numbered list of the end-to-end promotion steps. ICDC uses a **hybrid pipeline**: **Dev runs locally** (local Neo4j instance + `loader.py`), and **QA / Stage / Prod run through Jenkins** with a two-tier split: *lower tier* targets QA, *upper tier* targets Stage and Prod. (This differs from CTDC, where all four environments use Jenkins.) Per-environment verification is part of these steps; record the outcome in the Testing Signoff table (Section 4).
 
    **Pre-load**
    1. Confirm the Release Package exists in S3 and the loading files inside it are the expected ones. Confirm the IndexD manifest inside the Release Package matches the paired IndexD Registration Task's spot-check verification (GUIDs minted and resolving correctly). If IndexD registration is incomplete, do not proceed.
@@ -91,7 +91,7 @@ Each section header is an `h3` Markdown heading using the emoji + bold title for
 
    **Verification checklist per environment** (Neo4j and OpenSearch are both required checks; a Neo4j write without an OpenSearch reindex leaves the frontend stale): Neo4j node and relationship counts post-load; OpenSearch reindex completed and doc counts align with Neo4j; Cases / Studies / Samples pages render the new records; Files surface renders new file records and download links resolve; Explore Dashboard counts reflect the load; no spike in 4xx / 5xx application errors; no exceptions in the logs (CloudWatch or equivalent).
 
-4. `### ✅ **Testing Signoff**`: The completion record. Tester fills in date and initials per environment as work progresses. **Prod signoff is the trigger to transition the ticket to Closed.**
+4. `h3. ✅ *Testing Signoff*`: The completion record. Tester fills in date and initials per environment as work progresses. **Prod signoff is the trigger to transition the ticket to Closed.**
 
    | Environment | Testing Completion Date | Tester Initials |
    |---|---|---|
@@ -140,7 +140,7 @@ Additionally removed in the 2026-07-28 revision (were Sections 4, 5, and 7 in th
 - **Dev-local command block included.** The Loading Workflow Dev step carries the runnable `loader.py` invocation (dry-run to validate, then load) so every downstream load ticket shows the exact local command. Replace the `<path-to-release-package-loading-files>` placeholder with the study's data path. The flag is `--dataset` (not `--data`); the dataset may alternatively be set in the config file's `dataset:` key.
 - **Neo4j write and OpenSearch reindex are both verified.** A successful Neo4j write without an OpenSearch reindex means the frontend won't show the new data; a successful reindex against an incomplete Neo4j write means stale or partial results. Both checks are called out in the Loading Workflow per-environment verification steps.
 - **Submission & Artifacts table is mandatory and complete.** All four rows present. Use an explicit placeholder when a value is pending upstream; never silently omit a row.
-- **Rendering-safe authoring patterns**: section headers use `### **Title**` Markdown form; tables use Jira-wiki `||header||` syntax, NOT GitHub-flavored Markdown `|h|h|`. Verified on CTDC's tracker; assumed to apply to ICDC since both use the same Jira instance.
+- **Jira wiki authoring** (connector Markdown translation is off, so what is sent is stored exactly; see `claude/templates/README.md`, "Universal patterns"): `h3. {emoji} *Title*` headers; `* *Label*: content` labeled lines; `*` bullets and `#` numbered lists at column 0; `*bold*`; `{{monospace}}`; tables `||header||` / `|cell|`; links `[text|url]`; curly braces escaped as `\{...\}`. Blank line after every heading. After pushing, read the description back and confirm it starts with `h3.`, not `###`.
 
 **Writing-and-publishing workflow**
 
@@ -149,7 +149,7 @@ Additionally removed in the 2026-07-28 revision (were Sections 4, 5, and 7 in th
 3. Confirm the data model version associated with the Submission ID matches what's deployed in each environment. If the load needs a newer model version, file a modeling Task first.
 4. **Identify the parent data epic and the paired IndexD Registration Task.** Link via Jira native links after creation: Epic Link (`customfield_12350`) for the epic, and `Relates` for the paired IndexD ticket (registration does not technically block the load).
 5. Create the data loading ticket via `jira_create_issue` with `issue_type = "Task"`, a short placeholder description, and the parent epic linked via `customfield_12350`. Leave it **unassigned at creation**; the assignee is set later during sprint triage or when work begins. Still set the Developer field (`customfield_23650`) to the engineer expected to run the load.
-6. Push the description in two steps: create with the placeholder, then `jira_update_issue` with the full Markdown body.
+6. Push the description in two steps: create with the placeholder, then `jira_update_issue` with the full Jira wiki body.
 7. Add `Relates` links from the load ticket to the parent submission user story.
 8. Verify the rendered description with a UI screenshot; wiki source is unreliable as a render preview.
 9. As each environment completes, the assigned tester adds their initials and date to the Testing Signoff table (Section 4).
