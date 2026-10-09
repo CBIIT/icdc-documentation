@@ -6,7 +6,7 @@
  */
 const fs = require('fs'), path = require('path');
 const cfg = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-const d = JSON.parse(fs.readFileSync(path.resolve(path.dirname(process.argv[2]), cfg.ticketsFile), 'utf8'));
+const d = JSON.parse(fs.readFileSync(path.resolve(path.dirname(process.argv[2]), cfg.ticketsFile), 'utf8')).filter(x => !(cfg.excludeTypes || []).includes(x.type));
 const S = new Date(cfg.sprint.window.start), E = new Date(cfg.sprint.window.end);
 const cnt = (arr, f) => arr.reduce((m, x) => { const k = f(x); m[k] = (m[k] || 0) + 1; return m; }, {});
 const done = d.filter(x => x.category === 'Done');
@@ -25,5 +25,8 @@ console.log('Closed by (Assignee):', cnt(done, x => x.assignee));
 console.log('\nNon-Done tickets carrying a resolution date (Ready for QA transition sets it; do NOT count as Done):');
 d.filter(x => x.category !== 'Done' && x.resolved).forEach(x => console.log(' ', x.key, x.status, x.resolved.slice(0, 10)));
 console.log('\nCarry-over by status:', cnt(d.filter(x => x.category !== 'Done'), x => x.status));
+const P2 = arr => Math.round(10 * arr.reduce((t, x) => t + (typeof x.points === 'number' ? x.points : 0), 0)) / 10;
+console.log('Carry-over points by status:', Object.fromEntries(Object.entries(d.filter(x => x.category !== 'Done').reduce((m, x) => { (m[x.status] = m[x.status] || []).push(x); return m; }, {})).map(([k, xs]) => [k, `${P2(xs)} pts (${xs.length})`])));
+console.log('Points by type (closed/carried):', Object.fromEntries([...new Set(d.map(x => x.type))].map(t => [t, `${P2(done.filter(x => x.type === t))}/${P2(d.filter(x => x.type === t && x.category !== 'Done'))}`])));
 console.log('Carry-over by assignee:', cnt(d.filter(x => x.category !== 'Done'), x => x.assignee));
 console.log('Epic links:', cnt(d, x => x.epic || '(none)'));

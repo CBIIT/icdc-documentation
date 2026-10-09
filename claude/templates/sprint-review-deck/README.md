@@ -1,65 +1,63 @@
 # Sprint Review & Retrospective deck generator
 
-Config-driven `pptxgenjs` generator for the ICDC Sprint Review + Retro deck. Format baseline is the
-CTDC Sprint 32 deck (Sept 2026); ICDC and CTDC decks are kept in lockstep, so a format change made
-here should be mirrored in `ctdc-documentation`. Design rules and slide order: `claude/SKILL.md` §9.
+Config-driven `pptxgenjs` generator for the ICDC Sprint Review + Retro deck. **The same `build-deck.js` and `tally.js` live in
+`CBIIT/icdc-documentation` and `CBIIT/ctdc-documentation`.** Keep the two copies identical: when you change one, copy it to the
+other in the same session. Slide order and content rules: `claude/SKILL.md` §9.
 
 ## Files
 
 | File | Purpose |
 |---|---|
-| `build-deck.js` | The generator. Do not put sprint-specific text in here. |
+| `build-deck.js` | The generator. Shared with CTDC; no sprint-specific or project-specific text in here. |
+| `tally.js` | Prints verified counts, story points (by status and type), the resolution-window split and Developer/Assignee tallies. Run it first. |
 | `config.sprintNN.json` | All narrative for one sprint (goals, risks, shout-outs, retro prompts, board URL). Copy the previous sprint's file and edit. |
 | `tickets.sprintNN.json` | Raw Jira pull for the sprint, flattened (schema below). Every number on the deck is computed from this file. |
-| `tally.js` | Prints the verified counts, resolution-window split and Developer/Assignee tallies. Run it first (SKILL.md §7b). |
-| `config.sprint50.json`, `tickets.sprint50.json` | Worked example: ICDC Sprint 50 (Jira 8838). |
+| `config.sprint51.json`, `tickets.sprint51.json` (and Sprint 50) | Worked example. |
 
 ## Run
 
 ```bash
-node tally.js config.sprintNN.json          # verify counts before writing any narrative
+node tally.js config.sprintNN.json          # verify counts and points before writing any narrative
 node build-deck.js config.sprintNN.json      # writes ICDC_SprintNN_Review_Retro_<date>.pptx
 # QA: soffice --headless --convert-to pdf <deck>.pptx && pdftoppm -jpeg -r 80 <deck>.pdf slide ; inspect every slide
 ```
 
 ## tickets.sprintNN.json schema
 
-One object per ticket from `jira_search` with `jql = "sprint = <sprintId>"` and fields
+One object per ticket from `jira_search` with `jql = "sprint = <sprintId>"` (board 574) and fields
 `summary,status,issuetype,assignee,priority,labels,resolutiondate,customfield_23650,customfield_12350,customfield_10042`:
 
 ```json
-{ "key": "ICDC-4203", "summary": "...", "status": "Closed", "category": "Done", "type": "Task",
+{ "key": "ICDC-1234", "summary": "...", "status": "Closed", "category": "Done", "type": "Task",
   "priority": "Major", "assignee": "Eric Miller", "dev": ["millerer"], "epic": "ICDC-35",
   "resolved": "2026-08-27T22:08:56-0400", "points": 2 }
 ```
 
-`points` is `customfield_10042` ("Story Points" in the Jira UI; `null` when unpointed). `category` is Jira's status category (`To Do` / `In Progress` / `Done`). `dev` is the Developer field
-(`customfield_23650`, array of Jira usernames), mapped to display names via `developerNames` in the config.
+`points` is `customfield_10042` (Story Points, Fibonacci; `null` when unpointed). `category` is Jira's status category. `dev` is the
+Developer field (`customfield_23650`), mapped to display names via `developerNames` in the config.
 
-## Before you write the narrative (lessons from Sprint 50)
+## Config switches that change the slides
 
-1. **Verify sprint identity** by `(id, date range)` on board 574. The sprint being reviewed is the closed
-   one; the active sprint is the next one.
-2. **Compute, do not count.** Run `tally.js`. Velocity is story points (committed / delivered / carried) with
-   ticket count alongside; the slide prints pointed coverage so a low points figure is not misread when tickets are
-   unpointed. Check how many "closed" tickets were resolved before the window opened or after it closed; say so on
-   the Numbers slide.
-3. **Confirm delivery status with Gina or Philip before scoring a study workstream.** Study release
-   tickets (Data Loading, Data Indexing, Data Submission Review, resubmissions) routinely stay open in
-   Ready for Review / Ready for QA after the study is already released, while Philip finalizes details.
-   Open tickets are not evidence the study did not ship.
-4. **Terminology:** studies are "loaded and released through the ICDC". Never "data pipeline".
-5. **No Jira hygiene on the deck.** Missing sprint goal, missing epic links, resolution-date quirks and
-   similar record-keeping observations do not go on slides, in the Slack post or in retro prompts. Keep
-   them as analyst notes in the sprint summary only. When there is no Jira goal, score against the
-   workstreams the sprint carried and say so neutrally ("Scored against the four workstreams the sprint
-   carried"); do not print "(none recorded)".
-6. **Risks slide:** four rows is the target. Every row needs a severity pill and a "Next step" that names
-   a decision, an owner or a date. Order HIGH before MEDIUM.
-7. **Two charts on Who Closed What:** Assignee at close (usually QA) and Developer field (credit).
-8. **Demos and release slides only when real.** No demo slots unless the item is deployed to QA/Stage;
-   no release overview unless a tagged release shipped in the sprint.
-9. **Cross-check carry-over** against the next sprint's membership (`sprint = <nextId>`) so the "X of Y
-   are in Sprint N+1" and "% inherited" numbers are true.
-10. Slack announcement goes to `#icdc` as a draft (`slack_send_message_draft`), one draft per channel;
-    re-issuing replaces it. Mention people by Slack user ID. Never use em dashes anywhere.
+- `excludeTypes`: issue types dropped before anything is counted. ICDC: `"excludeTypes": []` (ICDC counts every issue type today; an Epic in the sprint adds a ticket but no points).
+- `sprint.goal`: the Jira sprint goal, verbatim. When set, the scorecard banner quotes it; when empty, the banner shows `scorecard.bannerText` (the workstreams).
+- `goals[].status`: `delivered` (✓ green), `partial` (▲ amber) or `not_started` (✗ red). Up to five rows. The older boolean `delivered` still works.
+- `risks[].severity`: `HIGH` or `MEDIUM` only; the build fails on anything else. Three to five rows; HIGH rows are sorted first.
+- `agenda`: meeting length is per project (ICDC 55 minutes, CTDC 60).
+
+## What the generator does for you
+
+- Charts on slides 3, 5 and 7 are in **story points**; ticket counts ride in the legend or labels. Slide 3 prints pointed coverage.
+- Green means Closed and amber means Carried over. The "What the shape tells us" cards beside the work-type chart always use a neutral NIH Blue stripe.
+- Bar-chart axes start at 0.
+
+## Before you write the narrative
+
+1. **Verify sprint identity** by `(id, date range)` on board 574. The sprint being reviewed is the closed one; the active sprint is the next one.
+2. **Compute, do not count.** Run `tally.js`. Check how many closed tickets were resolved before the window opened or after it closed and say so on the Numbers slide.
+3. **Confirm delivery status with the TPM (and the Data Concierge for study work) before scoring a data workstream.** Open data tickets are not evidence the data did not ship.
+4. **No Jira hygiene on the deck.** Missing sprint goal, missing epic links, resolution-date quirks and pointing gaps stay in the analyst notes, never on slides, in the Slack post or in retro prompts.
+5. **Risks:** every row needs a "Next step" that names a decision, an owner or a date.
+6. **Two charts on Who Closed What:** Assignee at close (usually QA) and Developer field (credit).
+7. **Demos and release slides only when real.**
+8. **Cross-check carry-over** against the next sprint's membership (`sprint = <nextId>`) so `nextSprint.inherited` and `% inherited` are true.
+9. Slack announcement goes to `#icdc` (`CE0EA6W93`) as a draft (`slack_send_message_draft`). Mention people by Slack user ID. Never use em dashes anywhere.

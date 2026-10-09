@@ -1,0 +1,219 @@
+{
+  "project": "ICDC",
+  "excludeTypes": [],
+  "ticketsFile": "tickets.sprint51.json",
+  "sprint": {
+    "number": 51,
+    "jiraId": 8911,
+    "dateRange": "September 10 – September 23, 2026",
+    "dateRangeShort": "September 10 – September 23",
+    "startLong": "September 10",
+    "window": {
+      "start": "2026-09-10T09:00:00-04:00",
+      "end": "2026-09-23T17:00:00-04:00"
+    },
+    "goal": ""
+  },
+  "nextSprint": {
+    "number": 52,
+    "jiraId": 8983,
+    "dateRange": "October 1 to October 21, 2026",
+    "total": 34,
+    "inherited": 23
+  },
+  "meeting": {
+    "dayLong": "Friday, October 9, 2026",
+    "dateLong": "October 9, 2026",
+    "dateISO": "2026-10-09",
+    "time": "12:30 PM ET"
+  },
+  "preparedBy": {
+    "name": "Gina Kuffel",
+    "title": "Senior Technical Project Manager",
+    "org": "Frederick National Laboratory for Cancer Research (FNL)",
+    "supporting": "Supporting NCI / CBIIT"
+  },
+  "developerNames": {
+    "ranaab": "Ambar Rana",
+    "millerer": "Eric Miller",
+    "udosent2": "Toyo Udosen",
+    "nguca": "Charles Ngu",
+    "kuffelgr": "Gina Kuffel",
+    "epishinavv": "Valentina Epishina",
+    "scrufaripp": "Peter Scrufari",
+    "stogsdillhh": "Hannah Stogsdill",
+    "flemingme": "Michael Fleming"
+  },
+  "qaNames": [
+    "Valentina Epishina"
+  ],
+  "agenda": {
+    "subtitle": "55 minutes · review first, retro second · no demos this sprint",
+    "total": "55 minutes",
+    "rows": [
+      {
+        "title": "Sprint 51 by the Numbers",
+        "detail": "Points and tickets: where the 39 tickets landed, and when they actually closed",
+        "minutes": "5 min"
+      },
+      {
+        "title": "Goal Scorecard",
+        "detail": "Five workstreams scored on what shipped",
+        "minutes": "8 min"
+      },
+      {
+        "title": "Work Type & Team Throughput",
+        "detail": "What got closed, and by whom",
+        "minutes": "7 min"
+      },
+      {
+        "title": "Carry-Over into Sprint 52",
+        "detail": "23 unfinished tickets, 14 of them waiting on review",
+        "minutes": "8 min"
+      },
+      {
+        "title": "Risks & Flags",
+        "detail": "What needs a decision today",
+        "minutes": "7 min"
+      },
+      {
+        "title": "Retrospective: Liked · Lacked · Learned",
+        "detail": "10 min silent brainstorm, then group and vote",
+        "minutes": "20 min"
+      }
+    ]
+  },
+  "numbers": {
+    "carryNote": "All 23 pulled into Sprint 52; 3 later closures also sit there",
+    "extraStats": [
+      {
+        "value": "12 of 16",
+        "label": "Closed by sprint close-out",
+        "note": "8 by Sep 23 and 4 study close-outs on Sep 24: 36.5 pts",
+        "tone": "green"
+      },
+      {
+        "value": "4",
+        "label": "Closed after Sprint 52 opened",
+        "note": "ICDC-4241 Oct 1 · 4027, 4172, 4238 Oct 5: 9 pts",
+        "tone": "MEDIUM"
+      }
+    ],
+    "closedNote": "(5 of the 16 closed carry no points; counts as of Oct 9)",
+    "motionNote": "14 are waiting on review",
+    "holdNote": "(ICDC-4187 MEVAL bucket policy)",
+    "openNote": "(includes the 2022 DMN sidebar story)",
+    "speakerNote": "Resolution dates: 4190 Sep 14; 4214/4232/4233 Sep 16; 4181/4182/4205/4206 Sep 23 evening; 4174/4176/4202/4204 Sep 24; 4241 Oct 1; 4027/4172/4238 Oct 5. ICDC-4250 carries an Oct 5 resolution date from its Ready for QA transition but is not Done."
+  },
+  "scorecard": {
+    "subtitle": "Scored against the five workstreams the sprint carried, not against raw ticket completion",
+    "bannerEyebrow": "Sprint 51 workstreams",
+    "bannerText": "Studies  ·  Security  ·  Prefect  ·  News & Announcements  ·  Human Relevance",
+    "bottomLine": "Three studies closed out and the August hotfix is live in Production. The Critical Prefect blocker finally cleared, so the migrations, the News page and Human Relevance carry with momentum, but 14 tickets now sit in review."
+  },
+  "goals": [
+    {
+      "delivered": true,
+      "title": "Close out the September study releases",
+      "detail": "COTC026, COTC030, PRECINCT02 and the COTC021 Low Pass WGS load closed. Three COTC021/022 v.3 tickets remain in close-out.",
+      "refs": "8 tickets closed · 4193 · 4194 · 4195 in close-out"
+    },
+    {
+      "delivered": true,
+      "title": "Get the August Invicti remediation to Production",
+      "detail": "Hotfix live in Production Sep 16. Interop GraphQL fix in review (SLA Oct 16); new High Tomcat CVE Ready for QA (SLA Oct 14).",
+      "refs": "ICDC-4232 · 4214 closed · 4213 · 4250"
+    },
+    {
+      "delivered": false,
+      "title": "Advance the Jenkins to Prefect migration",
+      "detail": "Critical worker permissions closed Oct 5 after five sprints; all three job migrations moved to Ready for Review. Bucket and Jenkins teardown In Progress.",
+      "refs": "ICDC-4172 closed · 4082 · 4083 · 4084"
+    },
+    {
+      "delivered": false,
+      "title": "Ship the updated News and Announcements pages",
+      "detail": "Backend queries closed Sep 14; Homepage Announcements closed Oct 5. News page build and Publications design are in review.",
+      "refs": "ICDC-4190 · 4027 closed · 4186 · 4248"
+    },
+    {
+      "delivered": false,
+      "title": "Human Relevance and C3DC interoperability",
+      "detail": "ICDC to C3DC interop requirements closed Oct 1. MVP prototype design in review with Hannah; investigator review In Progress with Gina.",
+      "refs": "ICDC-4241 closed · 4242 · 4183"
+    }
+  ],
+  "workType": {
+    "points": [
+      {
+        "tone": "blue",
+        "title": "Tasks carried the sprint: 13 of 32 (41%)",
+        "detail": "Eight were study-release close-outs. The rest: Prefect worker permissions, the Production hotfix deploy, a GraphQL introspection fix, the Announcements backend queries and the C3DC requirements."
+      },
+      {
+        "tone": "blue",
+        "title": "User stories: 2 of 4 closed",
+        "detail": "Study-page query error handling and the Homepage Announcements section. DMN example-file sync is in review; the 2022 DMN sidebar story is still unassigned."
+      },
+      {
+        "tone": "blue",
+        "title": "Bugs: 1 of 2 closed",
+        "detail": "The Critical file download bug (HTML returned instead of the file) closed Oct 5. View in Browser opening a blank page is in review with Eric."
+      }
+    ]
+  },
+  "team": {
+    "shoutout": "Ambar Rana built 6 of the 16 closed tickets: the COTC026, COTC030, PRECINCT02 and COTC021 Low Pass WGS loads, the PRECINCT02 submission review and the /v1/graphql introspection fix. Philip Musk ran the study close-out and closed 8. Charles Ngu landed the Prefect permissions and the Production hotfix. Toyo Udosen shipped the Announcements backend and Homepage section.",
+    "whyDisagree": "The Assignee on a closed ICDC ticket is whoever moved it to Closed: this sprint that was mostly Philip (study close-out) and Valentina (QA). Credit comes from the Developer field (customfield_23650); coordination work such as resubmissions and IndexD carries no Developer by design. Counts are as of Oct 9, so they include four tickets closed after Sprint 52 opened."
+  },
+  "carry": {
+    "bigNote": "Fourteen of them are already waiting on review.",
+    "facts": [
+      {
+        "title": "14 of 23 in Ready for Review",
+        "detail": "Three Prefect migrations, three security items, three study close-outs, plus News page, Publications design, DMN example files, View in Browser and the C3DC prototype."
+      },
+      {
+        "title": "Two security SLAs next week",
+        "detail": "ICDC-4250 Tomcat CVE (High) due Oct 14, Ready for QA. ICDC-4213 interop GraphQL introspection (Medium) due Oct 16, in review."
+      },
+      {
+        "title": "ICDC-4172 is finally closed",
+        "detail": "Critical Prefect worker permissions closed Oct 5 after five sprints; the three migrations it gated are now in review."
+      }
+    ]
+  },
+  "risks": [
+    {
+      "severity": "HIGH",
+      "title": "Two security SLAs land Oct 14 and Oct 16",
+      "detail": "ICDC-4250 (High, Tomcat 10.1.59) is Ready for QA; ICDC-4213 (Medium, interop GraphQL introspection) is Ready for Review. Both still need Stage and Production deploys through a ServiceNow change request.",
+      "nextStep": "confirm today who finishes QA on 4250 and review on 4213, and book the Production change request before Oct 14."
+    },
+    {
+      "severity": "HIGH",
+      "title": "Review queue: 14 of 23 carry-overs are in Ready for Review",
+      "detail": "Review and QA throughput has been flagged before. The queue now holds the Prefect trio, three security items and three study close-outs, so Sprint 52 delivery depends on it clearing.",
+      "nextStep": "decide today: name a review owner per track and a target to clear the Prefect and security items by Oct 14."
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Sprint 52 is 68% inherited",
+      "detail": "23 of its 34 tickets carried from Sprint 51, leaving little room for new work such as the Human Relevance C3DC display story (ICDC-4244, 8 pts).",
+      "nextStep": "at Sprint 52 midpoint, confirm what new work still fits, and pull ICDC-2808 (2022, unassigned) from the sprint."
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Prefect cutover still has open dependencies",
+      "detail": "Lower-tier Prefect bucket (4192) and Jenkins AppServer teardown (4180) are In Progress; the MEVAL bucket policy (4187) is On Hold.",
+      "nextStep": "Eric and Charles to give a cutover date for the three migrations once review clears."
+    }
+  ],
+  "retro": {
+    "boardUrl": "https://retrotool.io/iXOWXjbNPPN5szzmyUFGs",
+    "timingNote": "Sprint 52 started October 1 and is more than a week in. Action items from today either get inserted into the sprint already in flight, or deferred to Sprint 53 planning. Decide which as we assign each one.",
+    "liked": "The Prefect permissions blocker finally cleared, three studies closed out and the August hotfix reached Production. Say what made those go well.",
+    "lacked": "Fourteen tickets are waiting on review and two security SLAs land next week. Name the real cause.",
+    "learned": "Anything about the Prefect permissions path, the study close-out, or how a security fix moves from scan to Production."
+  }
+}

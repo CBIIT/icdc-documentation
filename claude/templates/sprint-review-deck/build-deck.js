@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 /**
- * ICDC Sprint Review & Retrospective deck generator (pptxgenjs).
- * Format baseline: CTDC Sprint 32 / ICDC Sprint 50 decks (Sept 2026). Keep ICDC and CTDC in lockstep.
+ * CRDC Sprint Review & Retrospective deck generator (pptxgenjs), shared by ICDC and CTDC.
+ * Format baseline: CTDC Sprint 32 / ICDC Sprint 50 decks (Sept 2026), aligned Oct 2026 (ICDC Sprint 51).
+ * The same file lives in CBIIT/icdc-documentation and CBIIT/ctdc-documentation: keep the two copies identical.
+ * Charts on slides 3, 5 and 7 are in story points (Fibonacci); ticket counts ride in the labels.
  *
  * Usage:   node build-deck.js config.sprintNN.json
  * Inputs:  config JSON (all sprint-specific text) + tickets JSON (raw Jira pull, see README.md)
@@ -18,7 +20,8 @@ const pptxgen = require('pptxgenjs');
 const cfgPath = process.argv[2];
 if (!cfgPath) { console.error('usage: node build-deck.js config.json'); process.exit(1); }
 const cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
-const d = JSON.parse(fs.readFileSync(path.resolve(path.dirname(cfgPath), cfg.ticketsFile), 'utf8'));
+// cfg.excludeTypes (e.g. ["Epic"]) drops issue types that are not sprint work before anything is counted
+const d = JSON.parse(fs.readFileSync(path.resolve(path.dirname(cfgPath), cfg.ticketsFile), 'utf8')).filter(x => !(cfg.excludeTypes || []).includes(x.type));
 
 // ---------- palette & type (SKILL.md §9b) ----------
 const C = { blue: '20558A', dark: '143458', darkCard: '1E4470', light: 'EAF1F8', red: 'BE0000', green: '16A34A', amber: 'D97706', ink: '1F2937', muted: '64748B', line: 'E2E8F0', white: 'FFFFFF', pale: 'A9C3DF', ice: 'CADCFC' };
@@ -37,12 +40,26 @@ const T = Object.fromEntries(types.map(t => [t, { done: done.filter(x => x.type 
 const cnt = (arr, f) => arr.reduce((m, x) => { const k = f(x); m[k] = (m[k] || 0) + 1; return m; }, {});
 const devC = Object.entries(cnt(done.flatMap(x => x.dev), u => cfg.developerNames[u] || u)).sort((a, b) => b[1] - a[1]);
 const asgC = Object.entries(cnt(done, x => (cfg.qaNames || []).includes(x.assignee) ? `${x.assignee} (QA)` : x.assignee)).sort((a, b) => b[1] - a[1]);
-const carryByStatus = Object.entries(cnt(d.filter(x => x.category !== 'Done'), x => x.status.replace(' Testing', ''))).sort((a, b) => b[1] - a[1]);
 const pts = x => (typeof x.points === 'number' ? x.points : null);
 const P = { committed: d.reduce((a, x) => a + (pts(x) || 0), 0), done: done.reduce((a, x) => a + (pts(x) || 0), 0), pointed: d.filter(x => pts(x) !== null).length, pointedDone: done.filter(x => pts(x) !== null).length };
 P.carry = P.committed - P.done; P.pct = P.committed ? (100 * P.done / P.committed).toFixed(1) : '0.0';
+const sumPts = arr => Math.round(10 * arr.reduce((a, x) => a + (pts(x) || 0), 0)) / 10;
+const inMotion = x => ['In Progress', 'Ready for Review', 'Ready for QA Testing', 'Testing'].includes(x.status);
+const PS = { done: sumPts(done), motion: sumPts(d.filter(inMotion)), hold: sumPts(d.filter(x => x.status === 'On Hold')), open: sumPts(d.filter(x => ['Open', 'Reopened'].includes(x.status))) };
+const TP = Object.fromEntries(types.map(t => [t, { done: sumPts(done.filter(x => x.type === t)), carry: sumPts(d.filter(x => x.type === t && x.category !== 'Done')) }]));
+const carryPtsByStatus = Object.entries(d.filter(x => x.category !== 'Done').reduce((m, x) => { const k = x.status.replace(' Testing', ''); (m[k] = m[k] || []).push(x); return m; }, {}))
+  .map(([k, xs]) => [`${k} (${xs.length})`, sumPts(xs)]).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+const ptsMax = v => Math.max(5, Math.ceil(v * 1.15 / 5) * 5);
+const NOZERO = '[=0]"";General';
 const S = cfg.sprint, N1 = cfg.nextSprint;
-const goalsDelivered = cfg.goals.filter(g => g.delivered).length;
+// goal status: 'delivered' | 'partial' | 'not_started' (legacy boolean `delivered` still accepted)
+const gStatus = g => g.status || (g.delivered ? 'delivered' : 'partial');
+const GS = { delivered: ['✓', 'DELIVERED', C.green], partial: ['▲', 'PARTIAL', C.amber], not_started: ['✗', 'NOT STARTED', C.red] };
+const goalsDelivered = cfg.goals.filter(g => gStatus(g) === 'delivered').length;
+// risks: HIGH and MEDIUM only (no green INFO: green means Closed), HIGH first, 3 to 5 rows
+cfg.risks.forEach(r => { if (!['HIGH', 'MEDIUM'].includes(r.severity)) throw new Error(`risk severity must be HIGH or MEDIUM, got ${r.severity}`); });
+cfg.risks.sort((a, b) => (a.severity === 'HIGH' ? 0 : 1) - (b.severity === 'HIGH' ? 0 : 1));
+if (cfg.risks.length < 3 || cfg.risks.length > 5) console.warn(`warning: ${cfg.risks.length} risks; the standard is 3 to 5`);
 
 // ---------- primitives ----------
 const pres = new pptxgen();
@@ -59,7 +76,7 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
 const hbar = (s, data, opt) => s.addChart(pres.ChartType.bar, [{ name: opt.name, labels: data.map(x => x[0]), values: data.map(x => x[1]) }], Object.assign({
   barDir: 'bar', chartColors: [opt.color], showLegend: false, showValue: true, dataLabelPosition: 'outEnd', dataLabelFontFace: B, dataLabelFontSize: 10, dataLabelColor: C.ink,
   catAxisLabelFontFace: B, catAxisLabelFontSize: 10, catAxisLabelColor: C.ink, catAxisOrientation: 'maxMin', valAxisLabelFontFace: B, valAxisLabelFontSize: 9, valAxisLabelColor: C.muted,
-  valGridLine: { color: C.line, size: 0.5 }, catGridLine: { style: 'none' }, valAxisMajorUnit: opt.unit || 1, valAxisMaxVal: opt.max, barGapWidthPct: 60,
+  valGridLine: { color: C.line, size: 0.5 }, catGridLine: { style: 'none' }, valAxisMajorUnit: opt.unit || 1, valAxisMinVal: 0, valAxisMaxVal: opt.max, barGapWidthPct: 60,
 }, opt.extra || {}));
 const niceMax = v => Math.ceil(v * 1.15 / (v > 10 ? 2 : 1)) * (v > 10 ? 2 : 1) + 1;
 
@@ -118,28 +135,31 @@ const niceMax = v => Math.ceil(v * 1.15 / (v > 10 ? 2 : 1)) * (v > 10 ? 2 : 1) +
   ];
   brk.forEach((r, i) => s.addText([{ text: r[0] + '   ', options: { bold: true, color: C.ink } }, { text: r[1], options: { color: C.muted } }], { x: 0.8, y: 4.75 + i * 0.3, w: 6.9, h: 0.28, fontFace: B, fontSize: 10.5, isTextBox: true, margin: 0 }));
   tb(s, `Carry-over = ${total} − ${M.done} = ${M.carry} tickets · ${P.carry} pts   |   pointed: ${P.pointed} of ${total} tickets, ${P.pointedDone} of ${M.done} closed`, { x: 0.8, y: 6.3, w: 6.9, h: 0.28, fontSize: 10, bold: true, color: C.amber });
-  s.addChart(pres.ChartType.doughnut, [{ name: `Sprint ${S.number} status`, labels: ['Closed', 'In motion', 'On hold', 'Open'], values: [M.done, M.motion, M.hold, M.open] }], {
+  s.addChart(pres.ChartType.doughnut, [{ name: `Sprint ${S.number} status`, labels: [`Closed (${M.done})`, `In motion (${M.motion})`, `On hold (${M.hold})`, `Open (${M.open})`], values: [PS.done, PS.motion, PS.hold, PS.open] }], {
     x: 8.3, y: 1.9, w: 4.4, h: 4.8, holeSize: 55, chartColors: [C.green, C.blue, C.amber, C.muted], showLegend: true, legendPos: 'b', legendFontFace: B, legendFontSize: 9, legendColor: C.ink,
-    showValue: true, showPercent: false, dataLabelColor: C.white, dataLabelFontFace: B, dataLabelFontSize: 11, dataLabelFontBold: true,
+    showValue: true, showPercent: false, dataLabelColor: C.white, dataLabelFontFace: B, dataLabelFontSize: 11, dataLabelFontBold: true, dataLabelFormatCode: NOZERO,
+    showTitle: true, title: 'Story points by status (tickets)', titleFontFace: B, titleFontSize: 10, titleColor: C.muted,
   });
   s.addNotes(`Story points from customfield_10042: committed ${P.committed}, delivered ${P.done}, carried ${P.carry}; ${P.pointed}/${total} tickets pointed. Computed from ${cfg.ticketsFile}: Closed ${M.done}, Ready for Review ${M.rfr}, In Progress ${M.inProg}, Ready for QA ${M.rfqa}, On Hold ${M.hold}, Open ${M.open} = ${total}. ${cfg.numbers.speakerNote || ''}`);
 }
 
 // ================= 4. GOAL SCORECARD =================
 {
-  const s = pres.addSlide(); header(s, 'Goal Scorecard', `Sprint ${S.number} Goal Scorecard`, cfg.scorecard.subtitle); footer(s, 4);
+  const jiraGoal = (S.goal || '').trim();
+  const sub = cfg.scorecard.subtitle || (jiraGoal ? 'Scored against the sprint goal recorded in Jira' : `Scored against the ${cfg.goals.length} workstreams the sprint carried, not against raw ticket completion`);
+  const s = pres.addSlide(); header(s, 'Goal Scorecard', `Sprint ${S.number} Goal Scorecard`, sub); footer(s, 4);
   box(s, 0.6, 1.95, 12.13, 0.95, C.light, C.light);
-  eyebrow(s, cfg.scorecard.bannerEyebrow, 0.85, 2.08, C.muted, 8);
-  tb(s, cfg.scorecard.bannerText, { x: 0.85, y: 2.36, w: 8.6, h: 0.4, fontFace: H, fontSize: 14, bold: true, italic: true, color: C.ink, valign: 'middle' });
+  eyebrow(s, jiraGoal ? `Sprint ${S.number} goal (Jira)` : (cfg.scorecard.bannerEyebrow || `Sprint ${S.number} workstreams`), 0.85, 2.08, C.muted, 8);
+  tb(s, jiraGoal ? `“${jiraGoal}”` : cfg.scorecard.bannerText, { x: 0.85, y: 2.36, w: 8.6, h: 0.4, fontFace: H, fontSize: 14, bold: true, italic: true, color: C.ink, valign: 'middle' });
   const allDone = goalsDelivered === cfg.goals.length, pc = allDone ? C.green : goalsDelivered ? C.green : C.amber;
   s.addShape(pres.ShapeType.roundRect, { x: 9.6, y: 2.13, w: 2.9, h: 0.6, fill: { color: pc }, line: { color: pc }, rectRadius: 0.06 });
   tb(s, `${goalsDelivered ? '✓' : '▲'}  ${goalsDelivered} OF ${cfg.goals.length} DELIVERED`, { x: 9.6, y: 2.13, w: 2.9, h: 0.6, fontFace: H, fontSize: 15, bold: true, color: C.white, align: 'center', valign: 'middle' });
   const rowH = cfg.goals.length <= 4 ? 0.76 : 0.6, gap = cfg.goals.length <= 4 ? 0.86 : 0.68;
   cfg.goals.forEach((g, i) => {
-    const y = 3.1 + i * gap, col = g.delivered ? C.green : C.amber;
+    const [mark, word, col] = GS[gStatus(g)], y = 3.1 + i * gap;
     box(s, 0.6, y, 12.13, rowH); stripe(s, 0.6, y, rowH, col);
-    tb(s, g.delivered ? '✓' : '▲', { x: 0.85, y: y + 0.08, w: 0.5, h: 0.4, fontSize: 20, bold: true, color: col, align: 'center', valign: 'middle' });
-    tb(s, g.delivered ? 'DELIVERED' : 'PARTIAL', { x: 0.7, y: y + rowH - 0.28, w: 0.8, h: 0.2, fontSize: 6.5, bold: true, color: col, align: 'center' });
+    tb(s, mark, { x: 0.85, y: y + 0.08, w: 0.5, h: 0.4, fontSize: 20, bold: true, color: col, align: 'center', valign: 'middle' });
+    tb(s, word, { x: 0.6, y: y + rowH - 0.28, w: 1.0, h: 0.2, fontSize: 6.5, bold: true, color: col, align: 'center' });
     tb(s, g.title, { x: 1.55, y: y + 0.07, w: 7.6, h: 0.3, fontFace: H, fontSize: 13, bold: true, color: C.ink });
     tb(s, g.detail, { x: 1.55, y: y + 0.36, w: 7.6, h: rowH - 0.36, fontSize: 8.5, color: C.muted, valign: 'top' });
     tb(s, g.refs, { x: 9.3, y: y + 0.07, w: 3.25, h: rowH - 0.14, fontSize: 8.5, bold: true, color: C.blue, align: 'right', valign: 'middle' });
@@ -150,18 +170,19 @@ const niceMax = v => Math.ceil(v * 1.15 / (v > 10 ? 2 : 1)) * (v > 10 ? 2 : 1) +
 
 // ================= 5. WORK TYPE =================
 {
-  const s = pres.addSlide(); header(s, 'Throughput', 'Breakdown by Work Type', `Closed vs. carried, by issue type: ${total} tickets total`); footer(s, 5);
-  const labels = types.sort((a, b) => T[b].total - T[a].total);
-  const maxT = Math.max(...labels.map(l => T[l].total));
-  s.addChart(pres.ChartType.bar, [{ name: 'Closed', labels, values: labels.map(l => T[l].done) }, { name: 'Carried over', labels, values: labels.map(l => T[l].total - T[l].done) }], {
-    x: 0.6, y: 1.95, w: 7.2, h: 4.8, barDir: 'bar', barGrouping: 'stacked', chartColors: [C.green, C.amber], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: C.white, dataLabelFontFace: B, dataLabelFontSize: 10, dataLabelFormatCode: '#;-#;',
-    showLegend: true, legendPos: 'b', legendFontFace: B, legendFontSize: 9, catAxisLabelFontFace: B, catAxisLabelFontSize: 10, catAxisLabelColor: C.ink, catAxisOrientation: 'maxMin', valAxisLabelFontFace: B, valAxisLabelFontSize: 9, valAxisLabelColor: C.muted, valGridLine: { color: C.line, size: 0.5 }, catGridLine: { style: 'none' }, valAxisMaxVal: Math.ceil(maxT / 5) * 5 + 5, valAxisMajorUnit: 5, barGapWidthPct: 60,
+  const s = pres.addSlide(); header(s, 'Throughput', 'Breakdown by Work Type', `Story points closed vs. carried, by issue type: ${P.committed} pts across ${total} tickets (ticket counts in the labels)`); footer(s, 5);
+  const order = types.sort((a, b) => (TP[b].done + TP[b].carry) - (TP[a].done + TP[a].carry) || T[b].total - T[a].total);
+  const labels = order.map(t => `${t} (${T[t].done} of ${T[t].total})`);
+  const maxT = Math.max(...order.map(t => TP[t].done + TP[t].carry));
+  s.addChart(pres.ChartType.bar, [{ name: 'Closed (pts)', labels, values: order.map(t => TP[t].done) }, { name: 'Carried over (pts)', labels, values: order.map(t => TP[t].carry) }], {
+    x: 0.6, y: 1.95, w: 7.2, h: 4.8, barDir: 'bar', barGrouping: 'stacked', chartColors: [C.green, C.amber], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: C.white, dataLabelFontFace: B, dataLabelFontSize: 10, dataLabelFormatCode: NOZERO,
+    showLegend: true, legendPos: 'b', legendFontFace: B, legendFontSize: 9, catAxisLabelFontFace: B, catAxisLabelFontSize: 10, catAxisLabelColor: C.ink, catAxisOrientation: 'maxMin', valAxisLabelFontFace: B, valAxisLabelFontSize: 9, valAxisLabelColor: C.muted, valGridLine: { color: C.line, size: 0.5 }, catGridLine: { style: 'none' }, valAxisMinVal: 0, valAxisMaxVal: ptsMax(maxT), valAxisMajorUnit: ptsMax(maxT) > 50 ? 10 : 5, barGapWidthPct: 60,
   });
   box(s, 8.15, 1.95, 4.58, 4.75, C.light, C.light);
   tb(s, 'What the shape tells us', { x: 8.4, y: 2.1, w: 4.1, h: 0.35, fontFace: H, fontSize: 15, bold: true, color: C.blue });
   cfg.workType.points.slice(0, 4).forEach((p, i) => {
     const step = cfg.workType.points.length > 3 ? 1.0 : 1.3, y = 2.6 + i * step;
-    stripe(s, 8.4, y, step - 0.2, SEV[p.tone] || C[p.tone] || C.blue);
+    stripe(s, 8.4, y, step - 0.2, C.blue); // always neutral: green and amber mean Closed and Carried over in the chart beside it
     tb(s, p.title, { x: 8.6, y, w: 3.95, h: 0.3, fontSize: 10.5, bold: true, color: C.ink });
     tb(s, p.detail, { x: 8.6, y: y + 0.3, w: 3.95, h: step - 0.5, fontSize: 9, color: C.muted, valign: 'top' });
   });
@@ -185,11 +206,11 @@ const niceMax = v => Math.ceil(v * 1.15 / (v > 10 ? 2 : 1)) * (v > 10 ? 2 : 1) +
 // ================= 7. CARRY-OVER =================
 {
   const s = pres.addSlide(); header(s, 'Looking ahead', `Carry-Over into Sprint ${N1.number}`, `Sprint ${N1.number} is already running: ${N1.dateRange}`); footer(s, 7);
-  tb(s, 'Unfinished at close, by status', { x: 0.6, y: 1.95, w: 7, h: 0.3, fontSize: 10, color: C.muted, align: 'center' });
-  hbar(s, carryByStatus, { name: 'Carry-over tickets', color: C.amber, max: niceMax(carryByStatus[0][1]), unit: 2, extra: { x: 0.6, y: 2.2, w: 7.0, h: 4.5 } });
+  tb(s, 'Unfinished story points at close, by status (tickets in parentheses)', { x: 0.6, y: 1.95, w: 7, h: 0.3, fontSize: 10, color: C.muted, align: 'center' });
+  hbar(s, carryPtsByStatus, { name: 'Carry-over points', color: C.amber, max: ptsMax(carryPtsByStatus[0][1]), unit: ptsMax(carryPtsByStatus[0][1]) > 30 ? 10 : 5, extra: { x: 0.6, y: 2.2, w: 7.0, h: 4.5 } });
   box(s, 8.0, 1.95, 4.73, 1.25, C.light, C.light);
-  tb(s, String(N1.inherited), { x: 8.2, y: 1.98, w: 1.5, h: 1.2, fontFace: H, fontSize: 52, bold: true, color: C.amber, valign: 'middle' });
-  tb(s, `of ${M.carry} unfinished Sprint ${S.number} tickets are in Sprint ${N1.number}. ${cfg.carry.bigNote}`, { x: 9.7, y: 2.1, w: 2.9, h: 1.0, fontSize: 9.5, color: C.ink, valign: 'middle' });
+  tb(s, String(P.carry), { x: 8.15, y: 1.98, w: 1.85, h: 1.2, fontFace: H, fontSize: 44, bold: true, color: C.amber, valign: 'middle', align: 'center' });
+  tb(s, `story points carried in ${M.carry} unfinished tickets; ${N1.inherited} of ${M.carry} are in Sprint ${N1.number}. ${cfg.carry.bigNote}`, { x: 10.05, y: 2.05, w: 2.55, h: 1.1, fontSize: 9, color: C.ink, valign: 'middle' });
   const facts = [{ title: `Sprint ${N1.number} is ${Math.round(100 * N1.inherited / N1.total)}% inherited`, detail: `${N1.inherited} open carry-overs of ${N1.total} tickets; ${N1.total - N1.inherited} tickets are new to Sprint ${N1.number}.` }, ...cfg.carry.facts].slice(0, 4);
   facts.forEach((f, i) => {
     const y = 3.4 + i * 0.85;
