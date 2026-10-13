@@ -1,4 +1,4 @@
-### 📥 Data Submission Epic Template (v1, mirrors CTDC DO-EPIC v1.1, filled with ICDC info)
+### 📥 Data Submission Epic Template (v1.1, mirrors CTDC DO-EPIC v1.2, filled with ICDC info)
 
 > **Use this template for every ICDC study data submission.** One epic per study submission (and per version, when a study submits again). It replaces the Data Submission user story (retired 2026-10-13, never used on a live ICDC submission) and takes study submissions out of the catch-all ICDC Data epic, which held every submission's tasks side by side. Canonical example: **ICDC-4267** (*ICDC Data Submission: COP COTC021 v.3*), the first built on this template, with ICDC-4268 (COP COTC022 v.3) beside it.
 
@@ -32,7 +32,7 @@ Each section header is an `h3.` Jira wiki heading using the emoji + bold title f
    | SharePoint Folder | Link; the submission's working documents; always first; created at SRF approval |
    | Submission Request Form (SRF) | Link; SRF approval triggers Concierge assignment and the SharePoint folder |
    | CRDC Data Submission Request Date | |
-   | Submission ID | Monospace; assigned by the Portal when the submission is created |
+   | Submission ID | Monospace; assigned by the Portal when the submission is created. **One row per submission, one value per cell.** A version delivered as several Portal submissions gets one row each, labeled with the submission's name: `Submission ID: <Submission Name>` (for example `Submission ID: COTC021 Deep WGS`), in the order the submissions were released, matching the one-row-per-submission tables on the IndexD and loading tasks. A single submission keeps the plain `Submission ID` label. |
    | Program | `NA` when the study has no program |
    | Program Short Name | `NA` when the study has no program |
    | Study Name | |
@@ -113,8 +113,9 @@ Each section header is an `h3.` Jira wiki heading using the emoji + bold title f
 
 **Provenance**
 
-Mirrors CTDC's Data Submission Epic (DO-EPIC v1.1, piloted on CTDC-2110), filled with ICDC info. ICDC differences: no dbGaP validation task or dbGaP rows (open access); no megazip task; no DHDM row; the ICDC-original Data Submission Review task is a child; the submission data modeling task is a child of this epic (ICDC has no standing Submission Data Modeling epic), while internally driven model changes go to ICDC Internal Data Modeling; the SharePoint Folder row leads Submission Details.
+Mirrors CTDC's Data Submission Epic (DO-EPIC v1.2, piloted on CTDC-2110), filled with ICDC info. ICDC differences: no dbGaP validation task or dbGaP rows (open access); no megazip task; no DHDM row; the ICDC-original Data Submission Review task is a child; the submission data modeling task is a child of this epic (ICDC has no standing Submission Data Modeling epic), while internally driven model changes go to ICDC Internal Data Modeling; the SharePoint Folder row leads Submission Details.
 
 **Changelog**
 
+- **v1.1 (2026-10-13)**: Submission ID is one row per submission with one value per cell, labeled `Submission ID: <Submission Name>`, matching the one-row-per-submission tables on the IndexD and loading tasks; same change made to CTDC DO-EPIC (v1.2).
 - **v1 (2026-10-13)**: Initial ICDC port of CTDC DO-EPIC v1.1. Replaces the Data Submission user story template (retired the same day, never used on a live submission) and moves study submissions out of the catch-all ICDC Data epic. Title `ICDC Data Submission: <Program Short Name> <Study Short Name> <version>`, matching CTDC; the Program Short Name was added the same day for consistency.
