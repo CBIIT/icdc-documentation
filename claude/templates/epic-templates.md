@@ -60,7 +60,7 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 
 ### 7e-D. Data Epic Variant (Lean v2.1-D)
 
-> **Use this variant only for a standing data epic**, such as the planned ICDC Internal Data Modeling epic. ICDC is moving study submissions to one closing epic per submission, mirroring CTDC's Data Submission Epic (DO-EPIC); until that template is ported, data loading and indexing tasks stay under ICDC Data. Everything in 7e applies except where this subsection says otherwise.
+> **Use this variant only for a standing data epic**, such as ICDC Internal Data Modeling (ICDC-4266, canonical example, 2026-10-13). ICDC is moving study submissions to one closing epic per submission, mirroring CTDC's Data Submission Epic (DO-EPIC); until that template is ported, data loading and indexing tasks stay under ICDC Data. Everything in 7e applies except where this subsection says otherwise.
 
 A feature epic delivers something and closes. A standing data epic is a pipeline: model changes, submissions, and loads keep arriving, and each is a child ticket that opens and closes on its own. The body describes how work flows through the epic, not what one phase delivers.
 
@@ -68,7 +68,7 @@ A feature epic delivers something and closes. A standing data epic is a pipeline
 
 0. **Card line**: same rule as 7e item 0.
 1. `h3. 🎯 *Epic Statement*`: same as 7e.
-2. `h3. 🧬 *Description*`: Two short paragraphs. (a) How the work runs: repos and branches (`CBIIT/icdc-model-tool`, `CBIIT/icdc-dataloader`), the CRDC Submission Portal where relevant, and the data stores (Neo4j for ingestion, OpenSearch for serving). (b) How child work is tracked: the child naming pattern and the event that closes each child. No list of active studies or releases in the body.
+2. `h3. 🧬 *Description*`: Two short paragraphs. (a) How the work runs: the repo, files, and branches the work changes. For a data modeling epic that is the model itself (`CBIIT/icdc-model-tool`, `icdc-model.yml` and `icdc-model-props.yml`, `develop` to `master`, the version history the Data Model Navigator displays); loading study data into Neo4j and serving it from OpenSearch is data management, not modeling, and does not belong in a modeling epic. (b) How child work is tracked: the child naming pattern and the event that closes each child. No list of active studies or releases in the body.
 3. `h3. 🗺️ *Scope*`: *In Scope* and *Out of Scope*, about five bullets each. Out of Scope names the sister data epics in prose. Omit 7e's closing "new epic" bullet.
 4. `h3. 🔗 *Upstream & Downstream*`: Two labeled sub-lists, *Upstream* (what must be true before this work starts) and *Downstream* (who consumes what it produces), two to four bullets each, named in prose.
 5. `h3. ✅ *Definition of Done*`: Three to five **standing** conditions, each phrased "Every <child, release, or load> ...": the bar each child must meet to close, since the standing epic itself does not close. A data promotion constraint (for example, no direct loads to Prod) is one item here.

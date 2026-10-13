@@ -796,7 +796,7 @@ When building or extending anything in this `icdc-documentation` repo — templa
 | Template | Status | Canonical Example |
 |---|---|---|
 | Lean epic (7e) | ✅ v2.1 (2026-10-13): card line plus 5 sections, Definition of Done in place of Acceptance Criteria; replaces the v1 per-grouping templates (Application Pages 7e-1 and Products 7e-4, 15 sections each) | ICDC-4264 |
-| Standing data epic (7e-D) | ✅ v2.1 (2026-10-13): card line plus 7 sections | First use: the planned ICDC Internal Data Modeling epic |
+| Standing data epic (7e-D) | ✅ v2.1 (2026-10-13): card line plus 7 sections; a modeling epic covers the model itself, not data loading | ICDC-4266 |
 | Invicti scan epic | ✅ v1 (2026-09-15): own template, `invicti-scan-epic-template.md` | ICDC-4249 |
 
 ---
