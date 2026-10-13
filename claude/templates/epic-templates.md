@@ -75,7 +75,7 @@ A feature epic delivers something and closes. A standing data epic is a pipeline
 6. `h3. ⚠️ *Risks & Mitigations*`: Required. A Jira wiki table `||Risk||Impact||Mitigation||` with three to six rows of standing risks only; a risk tied to one study or release goes on that child ticket.
 7. `h3. 📝 *Notes*`: Two or three bullets: the Standing line ("Standing: stays Open for the life of the ICDC project; each child closes when <event>.") and the canonical repos with branch.
 
-**Content rules that differ from 7e**: under 800 words including the Risks table; standing, not closed; the word "evergreen" is not used.
+**Content rules that differ from 7e**: under 800 words including the Risks table; standing, not closed; the word "evergreen" is not used. **The model, not the data:** for a modeling epic, Upstream & Downstream names the consumers of the released model (the Data Model Navigator, schema conversion tooling, synthetic data generation, submission validation), and the Definition of Done holds no data-loading condition. Whether a release loads cleanly into Neo4j is verified on the data management tasks.
 
 ---
 
