@@ -32,7 +32,7 @@ Every Jira task (2a, 3, 5a, and the Data Loading Task that spans 5b and 7) is a 
 
 **0. Submission request and approval (CRDC Portal).** The submitter applies through the [CRDC Submission Portal](https://hub.datacommons.cancer.gov/) with a Submission Request Form (SRF) describing the study. The CRDC Submission Review Committee evaluates NCI/NIH funding, data completeness, dbGaP registration (for controlled-access data), and de-identification, and decides in about 4 to 6 weeks. SRF approval is what starts ICDC's work.
 
-**1. Data Submission Epic.** On approval, the Data Concierge (Philip Musk) opens the **Data Submission Epic** (`ICDC Data Submission: <Study Short Name> <version>`), assigns himself, and creates the study's SharePoint folder. The epic coordinates everything below and is the home for study identity, chronology, and risks. Every task below is its child through the Epic Link. Template: `claude/templates/data-submission-epic-template.md`.
+**1. Data Submission Epic.** On approval, the Data Concierge (Philip Musk) opens the **Data Submission Epic** (`ICDC Data Submission: <Program Short Name> <Study Short Name> <version>`, a token every child task title reuses), assigns himself, and creates the study's SharePoint folder. The epic coordinates everything below and is the home for study identity, chronology, and risks. Every task below is its child through the Epic Link. Template: `claude/templates/data-submission-epic-template.md`.
 
 **2. Data submission and validation (CRDC Portal).** The submitter uploads the metadata manifest and the data files; the Portal runs automated validation against the ICDC data model. The Data Concierge supports the submitter throughout. Nothing proceeds until every validation passes.
 

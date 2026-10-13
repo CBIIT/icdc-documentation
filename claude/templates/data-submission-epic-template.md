@@ -1,14 +1,14 @@
 ### 📥 Data Submission Epic Template (v1, mirrors CTDC DO-EPIC v1.1, filled with ICDC info)
 
-> **Use this template for every ICDC study data submission.** One epic per study submission (and per version, when a study submits again). It replaces the Data Submission user story (retired 2026-10-13, never used on a live ICDC submission) and takes study submissions out of the catch-all ICDC Data epic, which held every submission's tasks side by side. Canonical example: the COTC021 v.3 submission epic, the first built on this template.
+> **Use this template for every ICDC study data submission.** One epic per study submission (and per version, when a study submits again). It replaces the Data Submission user story (retired 2026-10-13, never used on a live ICDC submission) and takes study submissions out of the catch-all ICDC Data epic, which held every submission's tasks side by side. Canonical example: the COP COTC021 v.3 submission epic, the first built on this template.
 
 **Why this template**
 
-A study submission has a real start (the Submission Request Form) and a real finish (the study verified in Production with its files downloadable). That makes it an epic: it holds the Data Submission Review, IndexD registration, data loading, and submission data modeling tasks as native children, and it closes when the study is live. On this Jira instance a user story cannot hold tasks as children, which is why the ported Data Submission user story needed a `Relates` link from every task; the epic replaces those links with the Epic Link. Each epic is also one card on the epic Kanban board, which is how leadership already talks about the work ("where is COTC021 v.3?").
+A study submission has a real start (the Submission Request Form) and a real finish (the study verified in Production with its files downloadable). That makes it an epic: it holds the Data Submission Review, IndexD registration, data loading, and submission data modeling tasks as native children, and it closes when the study is live. On this Jira instance a user story cannot hold tasks as children, which is why the ported Data Submission user story needed a `Relates` link from every task; the epic replaces those links with the Epic Link. Each epic is also one card on the epic Kanban board, which is how leadership already talks about the work ("where is COP COTC021 v.3?").
 
 **Title and Epic Name**
 
-`ICDC Data Submission: <Study Short Name> <version>`, using the version string the study's tasks already use. Example: `ICDC Data Submission: COTC021 v.3`. Set the Epic Name (`customfield_12351`) to the same string. Every child task reuses the same `<Study Short Name> <version>` token verbatim, so one `summary ~ "<token>"` search finds the whole family:
+`ICDC Data Submission: <Program Short Name> <Study Short Name> <version>`, the same pattern as CTDC, omitting any part that does not apply (no program, or a first submission with no version). The Program Short Name is the acronym the study's program uses on the ICDC Programs page; the version string matches what the study's tasks already use (`v.3`). Example: `ICDC Data Submission: COP COTC021 v.3`. Set the Epic Name (`customfield_12351`) to the same string. Every child task reuses the same `<Program Short Name> <Study Short Name> <version>` token verbatim, so one `summary ~ "<token>"` search finds the whole family. Where a child task template writes `<Study Name vN>`, it means this token. Children created before the epic are renamed to the token when they move under it:
 
 | Child | Title |
 |---|---|
@@ -22,7 +22,7 @@ A study submission has a real start (the Submission Request Form) and a real fin
 Each section header is an `h3.` Jira wiki heading using the emoji + bold title format shown. Author in Jira wiki markup (see `README.md`, "Universal patterns").
 
 0. **Card line** (no header): one plain sentence, 140 characters or fewer, for the epic Kanban card. Same rule as every ICDC epic (`epic-templates.md` 7e item 0).
-1. `h3. 🎯 *Epic Summary*`: One short paragraph. What this submission brings into ICDC and why, written as a goal (not as a user story). Example: *"Integrate the COTC021 v.3 submission into ICDC: guide the submission through the CRDC Submission Portal, obtain the Release Package, and see the data reviewed, indexed, loaded, and verified so the study is correctly integrated and its files are downloadable in Production at caninecommons.cancer.gov."*
+1. `h3. 🎯 *Epic Summary*`: One short paragraph. What this submission brings into ICDC and why, written as a goal (not as a user story). Example: *"Integrate the COP COTC021 v.3 submission into ICDC: guide the submission through the CRDC Submission Portal, obtain the Release Package, and see the data reviewed, indexed, loaded, and verified so the study is correctly integrated and its files are downloadable in Production at caninecommons.cancer.gov."*
 2. `h3. 🧬 *Context & Background*`: The study, its program, and its history in ICDC (new study or existing study, prior versions, why this submission now), ending with who benefits. The comparative oncology value (what the canine data offers human cancer research) and FAIR stated where they fall naturally. No protocol text copied from the submission.
 3. `h3. 🏁 *Goal / Objectives*`: Three to five bullets for this submission (for example: released and marked Complete in the Portal; the pre-load review passes; every file registered in IndexD; loaded through Dev, QA, Stage, and Prod with signoff).
 4. `h3. 🗂️ *Submission Details*`: Two-column `||Field||Value||` table, in this row order. Rows a submission does not have are left out, not filled with placeholders.
@@ -36,7 +36,7 @@ Each section header is an `h3.` Jira wiki heading using the emoji + bold title f
    | Program | `NA` when the study has no program |
    | Program Short Name | `NA` when the study has no program |
    | Study Name | |
-   | Study Short Name | The source of the title token |
+   | Study Short Name | With the Program Short Name, the source of the title token |
    | Associated Publications | When known |
    | Study Status in ICDC | New study, or existing study with a new version |
    | Submitter / Submission Team | |
@@ -117,4 +117,4 @@ Mirrors CTDC's Data Submission Epic (DO-EPIC v1.1, piloted on CTDC-2110), filled
 
 **Changelog**
 
-- **v1 (2026-10-13)**: Initial ICDC port of CTDC DO-EPIC v1.1. Replaces the Data Submission user story template (retired the same day, never used on a live submission) and moves study submissions out of the catch-all ICDC Data epic. Title `ICDC Data Submission: <Study Short Name> <version>`.
+- **v1 (2026-10-13)**: Initial ICDC port of CTDC DO-EPIC v1.1. Replaces the Data Submission user story template (retired the same day, never used on a live submission) and moves study submissions out of the catch-all ICDC Data epic. Title `ICDC Data Submission: <Program Short Name> <Study Short Name> <version>`, matching CTDC; the Program Short Name was added the same day for consistency.
