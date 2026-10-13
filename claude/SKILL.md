@@ -699,7 +699,8 @@ claude/
     data-modeling-for-study-submission-template.md  ← Submission-driven data-modeling ticket.
     data-model-update-task-template.md              ← Internally-driven data model update ticket.
     epic-templates.md                               ← Lean epic template (7e), data variant (7e-D), shared conventions (7e-shared).
-    user-story-template.md                          ← Software-dev user story (5 sections; canonical ICDC-4244).
+    user-story-template.md                          ← Software-dev user story (4 sections; canonical ICDC-4244).
+    general-task-template.md                        ← Any task no other template covers (4 sections; canonical ICDC-4284).
     design-task-template.md                         ← Design task (6 sections; canonical ICDC-4242).
     sprint-review-deck/                             ← Config-driven Sprint Review + Retro deck generator (pptxgenjs).
       README.md                                     ← How to run it + the pre-write checklist (lessons from Sprint 50).
@@ -725,9 +726,10 @@ claude/
 | `claude/conventions/data-operations-study-submission-sop.md` | Running or referencing the ICDC Data Operations SOP (data-operations work supporting a study submission, CRDC Submission Portal through production release) |
 | `claude/architecture/domain-context.md` | Needing the full ICDC domain reference (moved out of SKILL.md Section 2) |
 | `claude/templates/epic-templates.md` | Drafting or normalizing any epic: the lean template, the standing data variant, and shared conventions |
-| `claude/templates/user-story-template.md` | Drafting or normalizing a software-development user story (5 sections; canonical ICDC-4244) |
+| `claude/templates/user-story-template.md` | Drafting or normalizing a software-development user story (4 sections; canonical ICDC-4244) |
 | `claude/templates/design-task-template.md` | Drafting or normalizing a design task for Hannah Stogsdill (6 sections; canonical ICDC-4242) |
 | `claude/templates/devops-task-template.md` | Drafting or normalizing a DevOps task: infrastructure, Prefect workers, buckets, KMS, security groups, environment variables (7 sections; canonical ICDC-4274) |
+| `claude/templates/general-task-template.md` | Drafting a task no other template covers: backend or API work, spikes, audits and surveys, documentation (4 sections; canonical ICDC-4284) |
 | `claude/conventions/slack-communication.md` | Composing ICDC Slack posts; channels, audiences, and message conventions (moved out of SKILL.md Section 14) |
 | `claude/templates/sprint-review-deck/README.md` | Building a Sprint Review + Retro deck; read first, then copy the previous `config.sprintNN.json` |
 
