@@ -409,9 +409,9 @@ Retro board URL: [varies per sprint — confirm with TPM]
 
 ---
 
-## 7e. 🏛️ Epic Templates by Grouping
+## 7e. 🏛️ Epic Template (Lean v2.1)
 
-The full epic-template library (all groupings and per-section formats) has moved to `claude/templates/epic-templates.md`. Use that file when drafting or normalizing an epic; the standing rules (emoji + bold h3 section headers, required section order, Jira-wiki rendering) live there.
+The epic template lives in `claude/templates/epic-templates.md`: one lean template for every epic (card line plus 🎯 Epic Statement · 🧬 Description · 🗺️ Scope · ✅ Definition of Done · 📝 Notes, under 600 words), a standing data epic variant (7e-D), and the shared conventions (7e-shared). It mirrors CTDC's Section 7b and is kept in lockstep. Page work goes into feature epics or a yearly `<Area> Improvements YYYY` epic; there are no standing page epics (2026-10-09).
 
 ## 8. Ticket Writing Standards
 
@@ -697,7 +697,7 @@ claude/
     data-loading-task-template.md                   ← ICDC data-loading ticket.
     data-modeling-for-study-submission-template.md  ← Submission-driven data-modeling ticket.
     data-model-update-task-template.md              ← Internally-driven data model update ticket.
-    epic-templates.md                               ← Epic template library (moved out of SKILL.md Section 7e).
+    epic-templates.md                               ← Lean epic template (7e), data variant (7e-D), shared conventions (7e-shared).
     user-story-template.md                          ← Software-dev user story (5 sections; canonical ICDC-4244).
     design-task-template.md                         ← Design task (6 sections; canonical ICDC-4242).
     sprint-review-deck/                             ← Config-driven Sprint Review + Retro deck generator (pptxgenjs).
@@ -723,7 +723,7 @@ claude/
 | `claude/templates/data-model-update-task-template.md` | Drafting an internally-driven data model update ticket |
 | `claude/conventions/data-operations-study-submission-sop.md` | Running or referencing the ICDC Data Operations SOP (data-operations work supporting a study submission, CRDC Submission Portal through production release) |
 | `claude/architecture/domain-context.md` | Needing the full ICDC domain reference (moved out of SKILL.md Section 2) |
-| `claude/templates/epic-templates.md` | Drafting or normalizing an epic; the full epic template library (moved out of SKILL.md Section 7e) |
+| `claude/templates/epic-templates.md` | Drafting or normalizing any epic: the lean template, the standing data variant, and shared conventions |
 | `claude/templates/user-story-template.md` | Drafting or normalizing a software-development user story (5 sections; canonical ICDC-4244) |
 | `claude/templates/design-task-template.md` | Drafting or normalizing a design task for Hannah Stogsdill (6 sections; canonical ICDC-4242) |
 | `claude/conventions/slack-communication.md` | Composing ICDC Slack posts; channels, audiences, and message conventions (moved out of SKILL.md Section 14) |
@@ -789,22 +789,15 @@ When building or extending anything in this `icdc-documentation` repo — templa
 - When a new ICDC Slack channel is created or an existing channel's purpose changes, update Section 14a (Channel Routing)
 - When a team member joins, leaves, or changes role, pull their Slack User ID via `slack_search_users` and update both Section 11 (Team Roster) AND any Section 14 references
 - If a new Slack formatting failure mode is discovered (e.g., a syntax that triggers `invalid_blocks`), add it to Section 14d (Known Failures) so the next session avoids it
-- When a per-grouping epic template (7e-1 through 7e-7) evolves — new sections, emoji changes, content rules, or new gotchas — update the template here AND consider a normalization pass across all existing epics in that grouping so they stay consistent
-- When the Application Pages roster in Section 7e-1 changes (new page epic created, existing page epic retitled, page route changes), update both the roster table in 7e-1 AND the cross-epic linkage list in 7e-shared
+- When the lean epic template (7e) evolves (sections, emoji, content rules, or new gotchas), update `claude/templates/epic-templates.md` AND CTDC's Section 7b in the same session so the two stay in lockstep.
 
 ### 13a. Epic Template Status Tracker
 
-Track which per-grouping epic templates are drafted vs. still TBD. Each future session that drafts a new template fills in that row.
-
-| Grouping | Template Status | Example Epic for Drafting |
+| Template | Status | Canonical Example |
 |---|---|---|
-| Application Pages (7e-1) | ✅ Drafted v1 (2026-05-05) | ICDC-2036 (Home — anchor) |
-| Microservices (7e-2) | 🚧 TBD | TBD |
-| Features (7e-3) | 🚧 TBD | TBD |
-| Products (7e-4) | ✅ Drafted v1 (2026-05-05) | ICDC-4134 (Synthetic Data Generator — anchor) |
-| Infrastructure (7e-5) | 🚧 TBD | TBD |
-| Security (7e-6) | 🚧 TBD | TBD (candidate: ICDC-4120 Invicti remediation) |
-| Data (7e-7) | 🚧 TBD | TBD |
+| Lean epic (7e) | ✅ v2.1 (2026-10-13): card line plus 5 sections, Definition of Done in place of Acceptance Criteria; replaces the v1 per-grouping templates (Application Pages 7e-1 and Products 7e-4, 15 sections each) | ICDC-4264 |
+| Standing data epic (7e-D) | ✅ v2.1 (2026-10-13): card line plus 7 sections | First use: the planned ICDC Internal Data Modeling epic |
+| Invicti scan epic | ✅ v1 (2026-09-15): own template, `invicti-scan-epic-template.md` | ICDC-4249 |
 
 ---
 
