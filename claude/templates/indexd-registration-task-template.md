@@ -16,7 +16,7 @@ The ICDC team has two primary functions (software development and data managemen
 
 ICDC's role in IndexD registration is **coordination**, not engineering: validate the indexd.tsv manifest that ships inside the CRDC Submission Portal's Release Package, hand it off to the external DCF/DCFS team via the agreed channels, then verify the minted GUIDs resolve correctly. The registration runs **in parallel** with the paired Data Loading Task; metadata can load before GUIDs are minted, and file downloads for the study resolve once this registration's GUID spot-checks pass.
 
-**Tasks execute; user stories deliberate.** This is the core principle the template enforces. Tasks are operational work units the assignee executes; they should carry only what's needed to do the work. **Open questions, risks, and unresolved decisions belong on the parent user story**, where the team negotiates scope and tracks risk at the program level. By the time work is decomposed into Tasks, those questions should be resolved enough that the Task can be executed. If a Task accumulates open questions, that's a signal the parent user story isn't fully baked, and the questions should be raised there, not buried in a Task description where they don't influence sequencing decisions and are harder to find.
+**Tasks execute; the submission epic deliberates.** This is the core principle the template enforces. Tasks are operational work units the assignee executes; they should carry only what's needed to do the work. **Open questions, risks, and unresolved decisions belong on the Data Submission Epic**, where the team negotiates scope and tracks risk at the program level. By the time work is decomposed into Tasks, those questions should be resolved enough that the Task can be executed. If a Task accumulates open questions, that's a signal the Data Submission Epic isn't fully baked, and the questions should be raised there, not buried in a Task description where they don't influence sequencing decisions and are harder to find.
 
 The template is **task-shaped: four short sections totaling well under 700 words, with ownership, external-coordination, and deliberative content removed.** The assignee can read this template-shaped ticket and know exactly what to do without paging through narrative.
 
@@ -25,7 +25,7 @@ The five most common antipatterns this template prevents:
 1. **Treating IndexD registration as internal pipeline work.** It is not. There is no Jenkins job, no Neo4j write, no environment promotion. IndexD is a single centralized service operated by DCF/DCFS that mints GUIDs for the entire CRDC platform. The bottleneck is an external team's queue, not our pipeline capacity.
 2. **Treating the indexd.tsv as a manifest ICDC authors.** It is not. The indexd.tsv ships *inside* the validated Release Package the CRDC Submission Portal produces. ICDC's role is extraction and validation, not authoring. Earlier drafts of this pattern suggested otherwise.
 3. **Duplicating Jira's native Links panel inside the description body.** A standalone "Linked Work" section in a Task description duplicates what the right-sidebar Links panel already shows: Epic Link, Relates links, Blocks links, remote links. The template omits this section entirely, and the body never names other ticket keys (study record, CRINTAKE, paired load); set links via the Jira native mechanisms and trust the sidebar.
-4. **Accumulating open questions on a Task that should be on the parent user story.** This is the v3 lesson. If the Release Package GUID isn't generated yet, if the bucket policy hasn't been refreshed, if model version backward compatibility is unconfirmed, those are *program-level* risks that the parent Data Submission user story (owned by Philip Musk, ICDC Data Concierge) carries on behalf of every Task it spawns. Restating them on each child Task creates noise and dilutes the user story's role as the deliberative anchor.
+4. **Accumulating open questions on a Task that should be on the Data Submission Epic.** This is the v3 lesson. If the Release Package GUID isn't generated yet, if the bucket policy hasn't been refreshed, if model version backward compatibility is unconfirmed, those are *program-level* risks that the Data Submission Epic (owned by Philip Musk, ICDC Data Concierge) carries on behalf of every Task it spawns. Restating them on each child Task creates noise and dilutes the epic's role as the deliberative anchor.
 5. **No verification step recorded on the ticket.** When DCF/DCFS reports "registration complete," ICDC needs to verify by resolving a sample GUID per indexed submission against the IndexD resolution endpoint. The Verification section codifies the spot-check method and acceptance criteria so the close trigger is reproducible.
 
 **Service & handoff anatomy (read once before drafting)**
@@ -41,9 +41,9 @@ The five most common antipatterns this template prevents:
 
 Each section header is a Jira wiki `h3.` heading with the emoji and a bold title, for example `h3. 🎯 *Registration Summary*`. Keep the sections in the order shown so a reader scanning multiple registration tickets sees the same visual flow. All examples below are shown in Jira wiki markup, which is what gets pushed.
 
-1. `h3. 🎯 *Registration Summary*`: **Two sentences.** First, what's being indexed and the paired Data Loading Task this registration runs in parallel with. Second, a **bold new-vs-existing study marker**: state whether this is a new study's first registration or an existing study's data update, with the version. **Do not restate anything else** (dbGaP IDs, submission chronology, submission count, on-hold status): all of that lives on the parent submission user story (linked via the native Links panel) and is visible in Jira statuses. Existing-study example: *"Register the COTC021 v.3 object files in CRDC IndexD, minting the GUIDs that the paired Data Loading Task will reference. **COTC021 is an existing ICDC study; this is a data update (v.3), not a new study registration.**"* New-study example: *"Register the COTC0XX study files in CRDC IndexD, minting GUIDs for the object files that the paired Data Loading Task will reference. **COTC0XX is a new ICDC study; this is its first registration.**"*
+1. `h3. 🎯 *Registration Summary*`: **Two sentences.** First, what's being indexed and the paired Data Loading Task this registration runs in parallel with. Second, a **bold new-vs-existing study marker**: state whether this is a new study's first registration or an existing study's data update, with the version. **Do not restate anything else** (dbGaP IDs, submission chronology, submission count, on-hold status): all of that lives on the Data Submission Epic (linked via the native Links panel) and is visible in Jira statuses. Existing-study example: *"Register the COTC021 v.3 object files in CRDC IndexD, minting the GUIDs that the paired Data Loading Task will reference. **COTC021 is an existing ICDC study; this is a data update (v.3), not a new study registration.**"* New-study example: *"Register the COTC0XX study files in CRDC IndexD, minting GUIDs for the object files that the paired Data Loading Task will reference. **COTC0XX is a new ICDC study; this is its first registration.**"*
 
-2. `h3. 📦 *Submission & Artifacts*`: Required. Two bare-value constant bullets, then a table with **one row per CRDC submission** in the data update. No intro sentence, no explanatory text on the constants. Study identity (program, study name, submitter, chronology) lives on the parent submission user story linked via the native Links panel, not here.
+2. `h3. 📦 *Submission & Artifacts*`: Required. Two bare-value constant bullets, then a table with **one row per CRDC submission** in the data update. No intro sentence, no explanatory text on the constants. Study identity (program, study name, submitter, chronology) lives on the Data Submission Epic linked via the native Links panel, not here.
 
    ```
    * *AWS Account ID*: {{152091478849}}
@@ -105,7 +105,7 @@ Each section header is a Jira wiki `h3.` heading with the emoji and a bold title
 - ❌ **🔗 Linked Work**: Removed in v2. Jira's native Links panel (right sidebar) already shows Epic Link, Relates links, Blocks links, and remote links. Duplicating this content in the description body is noise.
 - ❌ **🌐 External Handoff Coordination**: Removed in v2. The DCF, DCFS, DCF Google Drive folder, CRINTAKE board, and PM contacts are folded into the workflow steps where they're used. A standalone directory section was duplicative.
 - ❌ **🤝 Collaboration & Handoffs**: Removed in v2. Ownership stays implicit via the Jira assignee field + comment audit trail. Standalone ownership directory was epic-shaped.
-- ❌ **🔍 Open Questions / Risks**: Removed in v3. The principle is *tasks execute, user stories deliberate*. Program-level open questions and risks belong on the parent Data Submission user story (owned by Philip Musk, ICDC Data Concierge).
+- ❌ **🔍 Open Questions / Risks**: Removed in v3. The principle is *tasks execute, the submission epic deliberates*. Program-level open questions and risks belong on the Data Submission Epic (owned by Philip Musk, ICDC Data Concierge).
 
 **Standing emoji set (4 entries)**
 
@@ -120,18 +120,18 @@ Each section header is a Jira wiki `h3.` heading with the emoji and a bold title
 
 - **Scope is IndexD registration only.** Minting GUIDs for files via the external DCF/DCFS handoff. **Data loading** uses the Data Loading Task template. **Schema or model changes** use the Data Modeling for Study Submission template or the Data Model Update Task template. See "When NOT to use this template" below.
 - **No em dashes anywhere in the ticket body or comments.** Use commas, colons, semicolons, or parentheses instead. This is a standing ICDC-team preference; the CTDC source template uses em dashes, so strip them when mirroring.
-- **No other ticket keys in the body.** Study record, CRINTAKE intake tickets, paired load, and parent user story are all carried by the native Links panel. If a reference only exists as text in the body today, add it as a native link instead.
+- **No other ticket keys in the body.** Study record, CRINTAKE intake tickets, paired load, and the submission epic are all carried by the native Links panel and the Epic Link. If a reference only exists as text in the body today, add it as a native link instead.
 - **Registration Summary carries the new-vs-existing study marker.** Second sentence, bold, stating new study (first registration) versus existing study (data update, with version). See Section 1.
 - **Non-vital scope detail goes in a ticket comment, not the description.** File counts, file-type breakdowns, publication counts, and other study-content context are useful background but are not indexing steps; post them as a plain-text comment on the registration ticket. If a submission is added later, update that comment's counts too.
 - **No Acceptance Criteria section.** IndexD registration is operational SOP work; the completion bar is the GUID spot-checks passing. AC belongs on user stories, not on Tasks.
-- **No Open Questions / Risks section.** Open questions and risks live on the parent Data Submission user story (owned by Philip Musk, ICDC Data Concierge), not on this Task.
+- **No Open Questions / Risks section.** Open questions and risks live on the Data Submission Epic (owned by Philip Musk, ICDC Data Concierge), not on this Task.
 - **One Task per study data update.** All submissions for one study version go on one registration ticket, one table row each. CRINTAKE intake tickets are one per handoff batch; a single registration ticket can carry several (ICDC-4193 has two). If a single Data Loading Task depends on registrations for two different studies, file two registration tickets and link the load ticket from both via `Relates`.
 - **Issue type is Task** on this tracker. Do not use Story or Subtask.
-- **Title convention:** `Data Indexing: <Study Name vN>`. Reuse the exact `<Study Name vN>` token from the parent Data Submission user story title verbatim. The board title reads "Data Indexing"; the underlying activity is IndexD registration, called out in the task body.
-- **Parent Epic field set via `customfield_12350`.** Default parent is ICDC-3342 (ICDC Data) unless a release-specific epic exists.
+- **Title convention:** `Data Indexing: <Study Name vN>`. Reuse the exact `<Study Name vN>` token from the Data Submission Epic title verbatim. The board title reads "Data Indexing"; the underlying activity is IndexD registration, called out in the task body.
+- **Parent Epic field set via `customfield_12350`**: the submission's Data Submission Epic.
 - **`Data-Concierge` label is mandatory on this registration (Index) task.** Indexing is performed by the Data Concierge, so the IndexD Registration task carries the `Data-Concierge` label, set at creation via the `labels` field. The paired Data Loading task carries **no** label; the load is performed by engineering.
 - **Leave the ticket Unassigned at creation.** Per standing team convention, newly created tickets are left Unassigned unless an assignee is explicitly directed. Data management tasks (IndexD Registration, Data Loading) also do not require the Developer field.
-- **`Relates` link to the parent submission user story is mandatory.** Set via `jira_create_issue_link` after ticket creation.
+- **The Data Submission Epic is set through the Epic Link, not a `Relates` link.**
 - **`Relates` link to the study record is mandatory** (for example ICDC-3206 for COTC021, ICDC-1993 for COTC022), since the body no longer names it.
 - **`Relates` link to the paired Data Loading Task is mandatory** when that load ticket exists. The registration and the load run **in parallel**: IndexD registration does **not** block the load. Do **not** use a `Blocks` link between them. Pass the registration ticket as the inward issue, the load ticket as the outward issue.
 - **Native Jira link to each CRINTAKE ticket is mandatory** once workflow step 4 is complete. CRINTAKE is on the same Jira instance, so use `jira_create_issue_link` (both canonical tickets use the "Related To" type). A free-text reference to the CRINTAKE key is **not** sufficient.
@@ -143,13 +143,13 @@ Each section header is a Jira wiki `h3.` heading with the emoji and a bold title
 
 **Writing-and-publishing workflow**
 
-1. Confirm the upstream artifacts exist before drafting the registration ticket. If the Release Packages aren't generated yet in `nci-cbiit-caninedatacommons-dev`, or the Object Files aren't in `nci-crdc-data-bucket-prod`, the registration ticket is premature. **Surface any open questions on the parent submission user story, not on the Task.**
+1. Confirm the upstream artifacts exist before drafting the registration ticket. If the Release Packages aren't generated yet in `nci-cbiit-caninedatacommons-dev`, or the Object Files aren't in `nci-crdc-data-bucket-prod`, the registration ticket is premature. **Surface any open questions on the Data Submission Epic, not on the Task.**
 2. Confirm this work is IndexD registration, not data loading or modeling.
-3. **Identify the parent Data Submission user story** (owned by Philip Musk, ICDC Data Concierge) and the study record.
+3. **Identify the Data Submission Epic** (owned by Philip Musk, ICDC Data Concierge) and the study record.
 4. Confirm the paired Data Loading Task exists (or will exist). The two tickets are paired by design and run **in parallel**.
-5. Create the IndexD registration task via `jira_create_issue` with `issue_type = "Task"`, a short placeholder description, the parent epic linked via `customfield_12350` in `additional_fields` (default: ICDC-3342), and the `Data-Concierge` label via the `labels` field. **Leave the ticket Unassigned.**
+5. Create the IndexD registration task via `jira_create_issue` with `issue_type = "Task"`, a short placeholder description, the parent epic linked via `customfield_12350` in `additional_fields` (the Data Submission Epic), and the `Data-Concierge` label via the `labels` field. **Leave the ticket Unassigned.**
 6. Push the full description in a second call via `jira_update_issue`, authored in **Jira wiki markup**. Read the description back to confirm it was stored as wiki markup.
-7. Add `Relates` links from the registration ticket to the parent Data Submission user story, the study record, and the paired Data Loading Task using `jira_create_issue_link` (registration ticket as inward issue). Do **not** use `Blocks`.
+7. Add `Relates` links from the registration ticket to the study record and the paired Data Loading Task using `jira_create_issue_link` (registration ticket as inward issue). Do **not** use `Blocks`.
 8. Post the data-update context comment (file counts, file-type breakdown, publication and study-content context) as plain text via `jira_add_comment`, then verify the rendered description with a UI screenshot.
 9. As the workflow progresses, link each CRINTAKE ticket via `jira_create_issue_link` once it is filed, and add a table row (with the next batch number) for any late-arriving submission.
 10. After every indexed submission's spot-check passes, transition the ticket to Closed with resolution `Fixed`.
@@ -169,7 +169,7 @@ The ICDC team has two primary functions: software development and data managemen
 
 **Data modeling**: does NOT use this template. Use the **Data Modeling for Study Submission** template for study-driven model additions, or the **Data Model Update Task** template for infrastructure-level model changes.
 
-**Other upstream artifact creation work**: standalone upstream artifact-creation work has no dedicated ICDC template yet. File it as a standalone Task under ICDC-3342 (ICDC Data) and link it from the Data Loading Task via native Jira links.
+**Other upstream artifact creation work**: standalone upstream artifact-creation work has no dedicated ICDC template yet. File it as a standalone Task under the Data Submission Epic and link it from the Data Loading Task via native Jira links.
 
 **CRDC platform changes**: Fence, IndexD, Submission Portal upgrades owned by CRDC platform teams. Out of ICDC scope entirely; ICDC files dependency tickets if affected, but does not own the work.
 
@@ -182,6 +182,6 @@ The ICDC team has two primary functions: software development and data managemen
 - the workflow grouped Pre-registration / External handoff / Confirmation & verification, with one CRINTAKE intake ticket per batch
 - one spot-check comment per indexed submission, labeled with the submission name
 - file counts, file-type breakdown, and publication/study-content context posted as a plain-text comment rather than in the description body
-- native `Relates` links to the study record (ICDC-3206, ICDC-1993), the parent Data Submission user story, and the paired Data Loading Task; native links to each CRINTAKE ticket
+- native `Relates` links to the study record (ICDC-3206, ICDC-1993), the Data Submission Epic, and the paired Data Loading Task; native links to each CRINTAKE ticket
 - Parent Epic ICDC-3342 (ICDC Data) set via `customfield_12350`
 - the `Data-Concierge` label

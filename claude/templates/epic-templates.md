@@ -60,7 +60,7 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 
 ### 7e-D. Data Epic Variant (Lean v2.1-D)
 
-> **Use this variant only for a standing data epic**, such as ICDC Internal Data Modeling (ICDC-4266, canonical example, 2026-10-13). ICDC is moving study submissions to one closing epic per submission, mirroring CTDC's Data Submission Epic (DO-EPIC); until that template is ported, data loading and indexing tasks stay under ICDC Data. Everything in 7e applies except where this subsection says otherwise.
+> **Use this variant only for a standing data epic**, such as ICDC Internal Data Modeling (ICDC-4266, canonical example, 2026-10-13). Study submissions do not use this variant: each submission is its own closing epic built from `data-submission-epic-template.md` (ported from CTDC DO-EPIC, 2026-10-13). Everything in 7e applies except where this subsection says otherwise.
 
 A feature epic delivers something and closes. A standing data epic is a pipeline: model changes, submissions, and loads keep arriving, and each is a child ticket that opens and closes on its own. The body describes how work flows through the epic, not what one phase delivers.
 

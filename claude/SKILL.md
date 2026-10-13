@@ -94,11 +94,11 @@ ICDC data-management work has two sub-functions, and each has its own templates 
 
 **Modeling data** — changing the *shape* of the ICDC data model (`CBIIT/icdc-model-tool`). The split is by **driver, not size**:
 
-- *A change requested by a study submission* → **Data Modeling for Study Submission** template. Anchored on that study's CDE Request Workbook (owned by the Data Concierge, Philip Musk); carries a ⭐ Data Concierge section; requires a `Relates` link to the parent Data Submission user story. Issue type **Task**.
+- *A change requested by a study submission* → **Data Modeling for Study Submission** template. Anchored on that study's CDE Request Workbook (owned by the Data Concierge, Philip Musk); carries a ⭐ Data Concierge section; is a child of the submission's Data Submission Epic. Issue type **Task**.
 - *A change initiated internally by the ICDC project* (application roadmap / data team) → **Data Model Update Task** template. Anchored on the single persistent **ICDC Internal CDE Request Workbook** (project-owned, no individual owner); owned by Philip Musk; no study, no Data Concierge section. Issue type **Task**.
 - The rule is the **driver**: a study-requested change is Study-Submission modeling *even if it is one property*; an internally-driven change is a Model Update Task *even if it is tiny*. Both pass the **DM Federal Lead & SME review** gate (Heather Creasy) and record term-level detail in a CDE Request Workbook — the ticket itself never enumerates terms, permissible values, or counts.
 
-**The umbrella:** every study submission has a parent **Data Submission user story** (owned by Philip Musk, the ICDC Data Concierge) that all of the above *submission-related* tasks (review, IndexD registration, data loading, study-submission modeling) link back to via `Relates`. Internally-driven model updates have no submission user story.
+**The umbrella:** every study submission is its own **Data Submission Epic** (`claude/templates/data-submission-epic-template.md`, since 2026-10-13, matching CTDC DO-EPIC), owned by Philip Musk, the ICDC Data Concierge. All of the above *submission-related* tasks (review, IndexD registration, data loading, study-submission modeling) are its children through the Epic Link (`customfield_12350`). Internally-driven model updates belong to the ICDC Internal Data Modeling epic instead. The Data Submission user story is retired.
 
 **Developer / label convention for modeling tickets:** populate the **Developer** field (`customfield_23650`) with the person who makes the `icdc-model-tool` change (Data Model Author: Mark Jensen); modeling tickets do **not** carry the `Data-Concierge` label (modeling is engineering, though the Data Concierge coordinates study-driven modeling).
 
@@ -691,7 +691,8 @@ claude/
     slack-communication.md          ← Slack communication reference (moved out of SKILL.md Section 14).
   templates/
     README.md                                       ← Template inventory + canonical tickets; read first to pick a data-management template.
-    data-submission-user-story-template.md          ← Parent Data Submission user story for a submission.
+    data-submission-epic-template.md                ← Data Submission Epic: one epic per study submission.
+    data-submission-user-story-template.md          ← RETIRED 2026-10-13 (replaced by the Data Submission Epic).
     data-submission-review-task-template.md         ← Pre-load Data Submission Review task.
     indexd-registration-task-template.md            ← ICDC IndexD registration ticket.
     data-loading-task-template.md                   ← ICDC data-loading ticket.

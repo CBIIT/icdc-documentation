@@ -2,7 +2,7 @@
 
 **Purpose.** The data-operations work that takes a study submission (a new study, or new data for an existing study) from the CRDC Submission Portal through to a live production release in ICDC (`caninecommons.cancer.gov`). This is the ICDC data-operations view (Data Concierge and engineering); it is not the submitter-facing guide to making a submission. Read this first; each stage links to its Jira task template for the detail, so this document stays short.
 
-**Scope.** The full data-operations lane for one study version (`<Study Name vN>`): the parent submission user story, the optional modeling fork, pre-load review, IndexD registration, and the environment-by-environment load. Software-development work is out of scope.
+**Scope.** The full data-operations lane for one study version (`<Study Name vN>`): the submission epic, the optional modeling fork, pre-load review, IndexD registration, and the environment-by-environment load. Software-development work is out of scope.
 
 **Two error checks and two Portal status gates shape the back half of the pipeline.** Keep them straight:
 
@@ -15,24 +15,24 @@
 | # | Stage | Who | Jira artifact | Gate / result |
 |---|---|---|---|---|
 | 0 | Submission request + approval | Submitter; CRDC Submission Review Committee | (none on ICDC side yet) | Committee approves (about 4 to 6 weeks) |
-| 1 | Parent user story opened | Data Concierge (Philip Musk) | Data Submission user story | Story open; SharePoint folder created |
-| 2 | Data submission + validation (Portal) | Submitter; Data Concierge supports | (tracked on the user story) | All Portal validations pass |
+| 1 | Submission epic opened | Data Concierge (Philip Musk) | Data Submission Epic | Epic open; SharePoint folder created |
+| 2 | Data submission + validation (Portal) | Submitter; Data Concierge supports | (tracked on the submission epic) | All Portal validations pass |
 | 2a | Modeling fork (only if new terms needed) | Data Concierge | Data Modeling for Study Submission | New model version live on both DMNs; DM Fed Lead review (Heather Creasy) |
 | 3 | Pre-load review (submitter TSVs, before Release to DC) | Reviewer (triaged) | Data Submission Review Task | Clean review; study cleared to release |
-| 4 | Release to DC (Portal) | Data Concierge | (tracked on the user story) | Immutable Release Package in metadata bucket |
+| 4 | Release to DC (Portal) | Data Concierge | (tracked on the submission epic) | Immutable Release Package in metadata bucket |
 | 5a | IndexD registration (parallel, from Release to DC) | Data Concierge; external DCF | IndexD Registration ("Data Indexing") task | Handoff filed; GUIDs resolve once Complete |
 | 5b | Load Release Package to Dev + verify (parallel) | Loading engineer; TPM (Gina Kuffel) | Data Loading Task | Second error check; errors reopen the submission for a new package |
-| 6 | Submission marked Complete (Portal) | Data Concierge (after Dev is clean) | (tracked on the user story) | Object files to production bucket; GUIDs resolve; unlocks QA |
+| 6 | Submission marked Complete (Portal) | Data Concierge (after Dev is clean) | (tracked on the submission epic) | Object files to production bucket; GUIDs resolve; unlocks QA |
 | 7 | Promote QA to Stage to Prod | Loading engineer; QA (Valentina Epishina) | Data Loading Task | Prod load and signoff |
 | 8 | Production release confirmed | Loading engineer; TPM (Gina Kuffel); Data Concierge | (closes the load task) | Study live and downloads resolve at caninecommons.cancer.gov |
 
-Link every Jira task (2a, 3, 5a, and the Data Loading Task that spans 5b and 7) to the parent user story with `Relates`, never `Blocks`. IndexD registration (5a) and the Dev load (5b) both begin once the Release Package exists and run in parallel; the load then pauses at Complete (6) before promoting to QA (7).
+Every Jira task (2a, 3, 5a, and the Data Loading Task that spans 5b and 7) is a child of the submission epic through the Epic Link; tasks link to each other with `Relates`, never `Blocks`. IndexD registration (5a) and the Dev load (5b) both begin once the Release Package exists and run in parallel; the load then pauses at Complete (6) before promoting to QA (7).
 
 ## Stages
 
 **0. Submission request and approval (CRDC Portal).** The submitter applies through the [CRDC Submission Portal](https://hub.datacommons.cancer.gov/) with a Submission Request Form (SRF) describing the study. The CRDC Submission Review Committee evaluates NCI/NIH funding, data completeness, dbGaP registration (for controlled-access data), and de-identification, and decides in about 4 to 6 weeks. SRF approval is what starts ICDC's work.
 
-**1. Parent Data Submission user story.** On approval, the Data Concierge (Philip Musk) opens the **Data Submission user story** (`Data Submission: <Study Name vN>`), assigns himself, and creates the study's SharePoint folder. This story coordinates everything below and is the home for study identity, chronology, and any open questions or risks. Every task below `Relates` back to it. Template: `claude/templates/data-submission-user-story-template.md`.
+**1. Data Submission Epic.** On approval, the Data Concierge (Philip Musk) opens the **Data Submission Epic** (`ICDC Data Submission: <Study Short Name> <version>`), assigns himself, and creates the study's SharePoint folder. The epic coordinates everything below and is the home for study identity, chronology, and risks. Every task below is its child through the Epic Link. Template: `claude/templates/data-submission-epic-template.md`.
 
 **2. Data submission and validation (CRDC Portal).** The submitter uploads the metadata manifest and the data files; the Portal runs automated validation against the ICDC data model. The Data Concierge supports the submitter throughout. Nothing proceeds until every validation passes.
 
@@ -55,18 +55,18 @@ Link every Jira task (2a, 3, 5a, and the Data Loading Task that spans 5b and 7) 
 - **Prod (Jenkins upper-tier):** run the Prod load and OpenSearch job.
 - Every environment requires both a Neo4j load and an OpenSearch reindex; a Neo4j write without a reindex leaves the frontend stale. File downloads resolve through the central CRDC IndexD, so download checks depend on the parallel IndexD registration (5a) being complete.
 
-**8. Production release confirmed.** With the study loaded to Prod (visible at `caninecommons.cancer.gov`) and its files indexed and resolving, the data is fully released: it renders and file downloads work, with no login since ICDC is open access. The Prod row in the load task's Testing Signoff table closes the load; the IndexD GUID spot-check closes the registration task. The Data Concierge confirms the study looks correct in production, which completes the parent user story's lifecycle.
+**8. Production release confirmed.** With the study loaded to Prod (visible at `caninecommons.cancer.gov`) and its files indexed and resolving, the data is fully released: it renders and file downloads work, with no login since ICDC is open access. The Prod row in the load task's Testing Signoff table closes the load; the IndexD GUID spot-check closes the registration task. The Data Concierge confirms the study looks correct in production, which completes the submission epic's Definition of Done; the epic then closes.
 
 ## Reference
 
-**Roles.** Data Concierge = Philip Musk (owns the user story; coordinates submission, review, Release to DC and Complete in the Portal, and IndexD; marks Complete once Dev is clean). Loading engineer = whoever is named in the Developer field (`customfield_23650`). QA tester = Valentina Epishina. DM Federal Lead and SME review = Heather Creasy (gates the model `develop` to `master` promotion). Data Model Author = Mark Jensen. ICDC TPM = Gina Kuffel.
+**Roles.** Data Concierge = Philip Musk (owns the submission epic; coordinates submission, review, Release to DC and Complete in the Portal, and IndexD; marks Complete once Dev is clean). Loading engineer = whoever is named in the Developer field (`customfield_23650`). QA tester = Valentina Epishina. DM Federal Lead and SME review = Heather Creasy (gates the model `develop` to `master` promotion). Data Model Author = Mark Jensen. ICDC TPM = Gina Kuffel.
 
 **Environments.** Data promotes Dev (local Neo4j and OpenSearch) to QA (Jenkins lower-tier) to Stage (Jenkins upper-tier) to Prod (Jenkins upper-tier). Model code promotes on its own track: feature branch to `develop` (Dev and QA) to `master` (Stage and Prod).
 
 **Two error checks.** (1) Pre-load review on the submitter-uploaded TSVs, before Release to DC. (2) The Dev load of the actual Release Package. Either can reopen the submission; the second one is why QA promotion waits for Complete.
 
-**Portal status gates.** Release to DC = the Release Package is written to the metadata bucket and frozen (reopen the submission for any change). Complete = the Data Concierge marks it after the Dev load is clean; object files move to the production bucket, the GUIDs resolve, and QA promotion is unlocked. Both are tracked on the parent user story. Indexing may begin at Release to DC, but its GUIDs resolve only at Complete.
+**Portal status gates.** Release to DC = the Release Package is written to the metadata bucket and frozen (reopen the submission for any change). Complete = the Data Concierge marks it after the Dev load is clean; object files move to the production bucket, the GUIDs resolve, and QA promotion is unlocked. Both are tracked on the submission epic. Indexing may begin at Release to DC, but its GUIDs resolve only at Complete.
 
 **Key locations.** Metadata bucket (immutable Release Package, written at Release to DC): `nci-cbiit-caninedatacommons-dev`. Object-files / production bucket (populated at Complete, when GUIDs resolve): `nci-crdc-data-bucket-prod`. AWS account: `152091478849`. Model repo: `CBIIT/icdc-model-tool`. Loader: `CBIIT/icdc-dataloader` (`loader.py`). Live site: `caninecommons.cancer.gov`. Submission Portal: `hub.datacommons.cancer.gov`.
 
-**Jira conventions.** Every data task is issue type Task except the parent, which is a User Story. Parent Epic is ICDC-3342 (ICDC Data), set via `customfield_12350`. Link related work with `Relates`, never `Blocks`. IndexD registration and the parent user story carry the `Data-Concierge` label; the load and modeling tasks do not (engineering). Each template carries its own full field rules.
+**Jira conventions.** Every data task is issue type Task; the parent is the submission's Data Submission Epic, set via `customfield_12350`. Link related work with `Relates`, never `Blocks`. IndexD registration and the submission epic carry the `Data-Concierge` label; the load and modeling tasks do not (engineering). Each template carries its own full field rules.

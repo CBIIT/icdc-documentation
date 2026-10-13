@@ -10,7 +10,7 @@ ICDC catches submitter-side data-entry problems *before* committing a submission
 
 This is distinct from the two other loading-data tasks: it is **not** the Data Loading Task (which promotes a validated Release Package through Jenkins into Dev → QA → Stage → Prod), and it is **not** IndexD registration (which mints file GUIDs). It runs earliest of all, typically **before a Release Package or any S3 artifact even exists**.
 
-**Tasks execute; user stories deliberate.** Like the other data-management tasks, this Task carries only what the reviewer needs to execute. Open questions and risks belong on the parent Data Submission user story, not here.
+**Tasks execute; the submission epic deliberates.** Like the other data-management tasks, this Task carries only what the reviewer needs to execute. Open questions and risks belong on the Data Submission Epic, not here.
 
 **Anatomy (read once before drafting)**
 
@@ -84,7 +84,7 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 - **Runs before the Data Loading Task.** This review is the gate; a clean review clears the paired Data Loading Task to proceed. Link the two via `Relates`.
 - **Issue type is Task.** Do not use Story or Subtask.
 - **Created unassigned.** The assignee is left empty at creation; it is set later during sprint triage or when work begins. Apply the **`Data-Concierge`** label; submission review is Data Concierge work. *(If the team later decides to treat this as pure engineering like the load, drop the label.)*
-- **Parent Epic via `customfield_12350`**: ICDC-3342 (ICDC Data). **`Relates` link to the parent Data Submission user story** (owned by Philip Musk). **`Relates` link to the paired Data Loading Task** (this review gates it).
+- **Parent Epic via `customfield_12350`**: the submission's Data Submission Epic (owned by Philip Musk). **`Relates` link to the paired Data Loading Task** (this review gates it).
 - **No Release Package / bucket rows in Submission & Artifacts.** At review time there is no Release Package and nothing in S3; the CRDC Submission Portal is the source. Carry only the two rows shown (CRDC Submission ID and Study).
 - **The whole review is local.** Local Neo4j + local OpenSearch + the Dev frontend pointed at them; never the shared Dev / QA / Stage / Prod environments.
 - **Review Findings is the completion record**: there is no separate signoff table. A clean review (no outstanding findings) is the close trigger.
@@ -95,10 +95,10 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 
 1. Confirm the submission exists in the CRDC Submission Portal and its loading TSVs are downloadable. (A Release Package is **not** required: this review runs before one exists.)
 2. Confirm this is a pre-load review, not the actual load, IndexD registration, or modeling.
-3. Identify the parent Data Submission user story and the paired Data Loading Task (add the `Relates` links after creation).
-4. Create the review task via `jira_create_issue` with `issue_type = "Task"`, a short placeholder description, the parent epic (ICDC-3342) via `customfield_12350`, and the `Data-Concierge` label. Leave it unassigned at creation; the assignee is set later during sprint triage or when work begins.
+3. Identify the Data Submission Epic and the paired Data Loading Task (add the `Relates` link after creation).
+4. Create the review task via `jira_create_issue` with `issue_type = "Task"`, a short placeholder description, the Data Submission Epic via `customfield_12350`, and the `Data-Concierge` label. Leave it unassigned at creation; the assignee is set later during sprint triage or when work begins.
 5. Push the full body via `jira_update_issue` (two-step create-then-update).
-6. Add the `Relates` links (parent Data Submission user story; paired Data Loading Task).
+6. Add the `Relates` link to the paired Data Loading Task.
 7. Verify the rendered description with a UI screenshot.
 8. As the review runs, the reviewer fills the Review Findings table. **A clean review closes the task and clears the load.**
 
@@ -107,7 +107,7 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 - **The actual data load** (promoting a validated Release Package through Jenkins into Dev → QA → Stage → Prod) → **Data Loading Task** template.
 - **IndexD registration** (minting file GUIDs) → **IndexD Registration Task** template.
 - **Data modeling / schema changes** → the Data Modeling for Study Submission template or the Data Model Update Task template.
-- **The submission umbrella** (coordinating the whole submission end to end) → the parent **Data Submission user story**.
+- **The submission umbrella** (coordinating the whole submission end to end) → the **Data Submission Epic**.
 
 **Canonical example**
 

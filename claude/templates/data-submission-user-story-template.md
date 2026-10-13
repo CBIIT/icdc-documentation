@@ -1,4 +1,6 @@
-### 📥 Data Submission User Story Template (v1, mirrors CTDC v2, filled with ICDC info)
+### ⛔ RETIRED: Data Submission User Story Template (v1, mirrors CTDC v2, filled with ICDC info)
+
+> **Retired 2026-10-13. Use the Data Submission Epic template (`data-submission-epic-template.md`) instead.** This template was never used on a live ICDC submission. A user story cannot hold tasks as children on this Jira instance, so each submission is now its own epic, matching CTDC (DO-EPIC). Kept for reference only.
 
 > **Use this template for the parent user story of every ICDC study data submission**: the artifact the **ICDC Data Concierge** uses to shepherd a study's data into ICDC end to end. Canonical example: **TBD**: the first ICDC Data Submission user story drafted under this template becomes the canonical example; the COTC030 submission (parent of ICDC-4175 / ICDC-4176) is the natural first instance. This story is the **coordinating outline** for one study submission; it is **not** where any activity is executed. Data modeling (the Data Modeling for Study Submission template and the Data Model Update Task template), IndexD registration (the IndexD Registration Task template), and data loading (the Data Loading Task template) each get their own linked task, and term-level modeling detail lives in the study's CDE Request Workbook. This is the parent that every downstream data-management task for the submission links back to.
 
