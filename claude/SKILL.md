@@ -110,6 +110,9 @@ ICDC data-management work has two sub-functions, and each has its own templates 
 | Developer (all issue types) | `customfield_23650` | Multi-user, array format — canonical |
 | Developer Legacy | `customfield_18250` | Deprecated; unused — do not read or write |
 
+### Closing Epics
+- Close via the `Closed` transition (id 31 on the epic workflow both projects share since 2026-10-01); **no resolution is set or required on epics**. An epic is either Open or Closed: the children's resolutions record how the work ended, and the closing comment states whether the epic was **delivered** (name the release) or **retired** (why). To find open epics, query `statusCategory != Done`, never `resolution = Unresolved` (closed epics carry no resolution, so resolution-based filters would count them as open). TPM decision, 2026-10-13.
+
 ### Issue Types
 - **Confirmed working:** `Epic`, `Task`, `User Story` (the type name is `User Story`, not `Story`; confirmed on ICDC-4233 / ICDC-4244)
 - **Bugs:** Use `Task` with a `[BUG]` prefix in the summary if the Bug issue type is unavailable

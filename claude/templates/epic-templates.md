@@ -59,7 +59,7 @@ Misframing pathways (e.g., calling the Data Retriever a "real-time microservice"
 
 **Epic posture defaults**
 - **Priority:** Major (set via MCP, not the description). For application page epics that already exist as evergreen containers (ICDC-2036, etc.), preserve the existing priority unless it's actively wrong.
-- **Status:** Open. These are evergreen containers, not work items.
+- **Status and lifecycle:** Open while child work is in flight; **Closed** when the epic is delivered or retired. Epics are not evergreen containers (TPM decision, 2026-10-09: page-level and functional-area standing epics are retired in favor of feature epics and yearly area improvement epics). Close via the `Closed` transition (id 31 on the epic workflow both projects share since 2026-10-01); **no resolution is set or required on epics**. An epic is either Open or Closed: the children's resolutions record how the work ended, and the closing comment states whether the epic was **delivered** (name the release) or **retired** (why). To find open epics, query `statusCategory != Done`, never `resolution = Unresolved` (closed epics carry no resolution, so resolution-based filters would count them as open). TPM decision, 2026-10-13.
 - **Assignee:** Unassigned, unless directed otherwise. Individual child tickets carry the actual ownership.
 - **Labels:** Preserve any existing labels. Do not add or remove labels in epic-normalization passes unless deliberately changing them.
 
