@@ -2,13 +2,13 @@
 
 > **Use this template for every ICDC software-development user story.** The canonical example is **ICDC-4244 (Surface matching C3DC human cancer data on the ICDC Human Relevance tab)**: drafted 2026-09-04 as the first application of this template, epic-linked to ICDC-3882 (ICDC Human Relevance) and paired with design task ICDC-4242. Data-submission user stories (the Data Concierge's parent ticket for a study submission) use `data-submission-user-story-template.md` instead.
 >
-> **Status:** v2 (2026-10-09): section headers and authoring moved to Jira wiki markup; the Performance & Quality bar is now identical in CTDC (CTDC dropped its cross-browser item). v1 (2026-09-04): ported from CTDC's §7a User Story Template and **slimmed from 7 to 5 sections**: the 🔗 Parent Epic & Context section was dropped (the Epic Link field is the canonical link; restating it in the body is noise) and the 📝 Notes section was dropped (predecessor tickets, design tasks, and decisions are carried by native Jira links and comments). CTDC's §7a was slimmed to the same 5-section shape on the same day so the two projects stay aligned.
+> **Status:** v3 (2026-10-13): Testing Requirements is unit tests only. Integration and manual test scenarios belong to QA, who write their own test cases from the Acceptance Criteria; the story no longer prescribes them. CTDC's §7a changed the same day. v2 (2026-10-09): section headers and authoring moved to Jira wiki markup; the Performance & Quality bar is now identical in CTDC (CTDC dropped its cross-browser item). v1 (2026-09-04): ported from CTDC's §7a User Story Template and **slimmed from 7 to 5 sections**: the 🔗 Parent Epic & Context section was dropped (the Epic Link field is the canonical link; restating it in the body is noise) and the 📝 Notes section was dropped (predecessor tickets, design tasks, and decisions are carried by native Jira links and comments). CTDC's §7a was slimmed to the same 5-section shape on the same day so the two projects stay aligned.
 
 ## Why this template
 
 User stories are smaller-scope deliverables than epics: they ship and close. The bare As-a/I-want/So-that line is a starting point, but it leaves the engineer without enough structure to know when a story is *done*. This template gives every story a one-sentence summary, the classic framing as flowing prose, an In/Out of Scope split that prevents adjacent-feature creep, Acceptance Criteria split into Functional and Performance & Quality, and a dedicated Testing Requirements section so unit/integration/manual coverage is named explicitly rather than buried in a P&Q bullet.
 
-Testing Requirements is a first-class section because Valentina Epishina is QA-only (SDET, does not write feature code): every line of automated test that covers a story is written by the engineer, and the story should say so.
+Testing Requirements names the unit tests the engineer writes, because Valentina Epishina is QA-only (SDET, does not write feature code). Integration and manual test scenarios are QA's to design from the Acceptance Criteria, so the story does not prescribe them.
 
 ## Section order (5 sections, exactly this sequence)
 
@@ -27,10 +27,8 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
      2. ICDC design system conformance (colors, typography, spacing)
      3. Performance baseline of the affected page maintained
 
-5. `h3. 🧪 *Testing Requirements*`: Three sub-blocks, each a numbered list:
+5. `h3. 🧪 *Testing Requirements*`: One sub-block:
    - **Unit Tests**: isolated behaviors (parsers, URL builders, reducers, utilities)
-   - **Integration Tests**: end-to-end flows across components (render paths, error paths, empty paths)
-   - **Manual QA Scenarios**: things that are hard to automate: outbound-link destinations, keyboard and screen-reader passes, visual conformance against the Figma design on the linked design task
 
 ## Standing emoji set (5 entries)
 
@@ -49,7 +47,7 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 - **Epic Link set on the ticket itself** via `customfield_12350` (SKILL.md Section 3). There is no Parent Epic line in the body.
 - **No Jira ticket keys anywhere in the body.** Related tickets (design task, requirements task, siblings, follow-ons) are `Relates` issue links; Jira's Links panel is the single source. No Notes section, no cross-reference lines.
 - **Acceptance Criteria are testable**: one observable behavior per item.
-- **Testing Requirements is the developer's checklist before "Ready for QA."** Not optional, not a duplicate of P&Q.
+- **Testing Requirements is the developer's unit test checklist before "Ready for QA."** Not optional, not a duplicate of P&Q. No Integration or Manual QA sub-blocks: QA writes those test cases from the Acceptance Criteria.
 - **Assignee at creation is the author (TPM)** until the story is pulled into a sprint; then the engineer. Populate the Developer field (`customfield_23650`) with the implementing engineer when known.
 - **Jira wiki authoring** (connector Markdown translation is off, so what is sent is stored exactly; see `claude/templates/README.md`, "Universal patterns"): `h3. {emoji} *Title*` headers; `* *Label*: content` labeled lines; `*` bullets and `#` numbered lists at column 0; `*bold*`; `{{monospace}}`; tables `||header||` / `|cell|`; links `[text|url]`; curly braces escaped as `\{...\}`. Blank line after every heading. After pushing, read the description back and confirm it starts with `h3.`, not `###`.
 
@@ -63,5 +61,5 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 ## When to expand vs trim
 
 - **Fewer than 5 functional ACs** → keep all 5 sections; the structure earns its keep by giving the engineer a checklist.
-- **Documentation or copy change with no code path** → Unit and Integration sub-blocks say "None at this time"; Manual QA carries the check.
+- **Documentation or copy change with no code path** → Unit Tests says "None at this time"; QA verifies against the Acceptance Criteria.
 - **Spike or research task** → wrong shape; use a free-form Task with explicit deliverables.
