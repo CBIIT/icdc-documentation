@@ -716,7 +716,7 @@ claude/
 | `claude/decisions/sprint-43-scope.md` | Questions arise about why CSP/SRI were deferred, or Sprint 43 scope |
 | `claude/conventions/workflow.md` | Onboarding a new session, or when a workflow question comes up (e.g., PR strategy, SDL, role clarification) |
 | `claude/templates/README.md` | Deciding which data-management template applies; template inventory + canonical tickets (read first) |
-| `claude/templates/data-submission-user-story-template.md` | Drafting the parent Data Submission user story for a submission |
+| `claude/templates/data-submission-epic-template.md` | Drafting the Data Submission Epic for a study submission (parent of the review, IndexD, loading, and modeling tasks) |
 | `claude/templates/data-submission-review-task-template.md` | Drafting the pre-load Data Submission Review task |
 | `claude/templates/indexd-registration-task-template.md` | Drafting an ICDC IndexD registration ticket |
 | `claude/templates/data-loading-task-template.md` | Drafting or normalizing an ICDC data-loading ticket |
@@ -727,6 +727,7 @@ claude/
 | `claude/templates/epic-templates.md` | Drafting or normalizing any epic: the lean template, the standing data variant, and shared conventions |
 | `claude/templates/user-story-template.md` | Drafting or normalizing a software-development user story (5 sections; canonical ICDC-4244) |
 | `claude/templates/design-task-template.md` | Drafting or normalizing a design task for Hannah Stogsdill (6 sections; canonical ICDC-4242) |
+| `claude/templates/devops-task-template.md` | Drafting or normalizing a DevOps task: infrastructure, Prefect workers, buckets, KMS, security groups, environment variables (7 sections; canonical ICDC-4274) |
 | `claude/conventions/slack-communication.md` | Composing ICDC Slack posts; channels, audiences, and message conventions (moved out of SKILL.md Section 14) |
 | `claude/templates/sprint-review-deck/README.md` | Building a Sprint Review + Retro deck; read first, then copy the previous `config.sprintNN.json` |
 
