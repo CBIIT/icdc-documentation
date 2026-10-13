@@ -1,6 +1,6 @@
 ### 📥 Data Submission Epic Template (v1, mirrors CTDC DO-EPIC v1.1, filled with ICDC info)
 
-> **Use this template for every ICDC study data submission.** One epic per study submission (and per version, when a study submits again). It replaces the Data Submission user story (retired 2026-10-13, never used on a live ICDC submission) and takes study submissions out of the catch-all ICDC Data epic, which held every submission's tasks side by side. Canonical example: the COP COTC021 v.3 submission epic, the first built on this template.
+> **Use this template for every ICDC study data submission.** One epic per study submission (and per version, when a study submits again). It replaces the Data Submission user story (retired 2026-10-13, never used on a live ICDC submission) and takes study submissions out of the catch-all ICDC Data epic, which held every submission's tasks side by side. Canonical example: **ICDC-4267** (*ICDC Data Submission: COP COTC021 v.3*), the first built on this template, with ICDC-4268 (COP COTC022 v.3) beside it.
 
 **Why this template**
 
@@ -91,7 +91,7 @@ Each section header is an `h3.` Jira wiki heading using the emoji + bold title f
 
 **Metadata**
 
-- Issue type **Epic**; priority **Major**; component **Data**; label **`Data-Concierge`**; assignee Philip Musk (ICDC Data Concierge).
+- Issue type **Epic**; priority **Major**; label **`Data-Concierge`**; assignee Philip Musk (ICDC Data Concierge). No component: the ICDC project has no Data component (CTDC's does).
 - Status follows the epic workflow; the epic closes (transition `Closed`, no resolution) when the study is verified in Production and every child is Closed, with a comment naming the Production verification.
 - Epics are not placed in sprints; the child tasks are.
 
@@ -105,7 +105,7 @@ Each section header is an `h3.` Jira wiki heading using the emoji + bold title f
 **Writing-and-publishing workflow**
 
 1. `jira_create_issue` with `issue_type = "Epic"`, a one-line placeholder description, and the Epic Name in `customfield_12351`.
-2. Set the summary and Epic Name to the title convention; set label `Data-Concierge`, priority Major, component Data, assignee Philip Musk.
+2. Set the summary and Epic Name to the title convention; set label `Data-Concierge`, priority Major, assignee Philip Musk.
 3. Push the full description via `jira_update_issue` (raw Jira wiki in `additional_fields` as `{"description": "..."}`).
 4. Set the Epic Link on each child task via `jira_update_issue` `additional_fields` `{"customfield_12350": "<EPIC>"}` and confirm with JQL `"Epic Link" = <EPIC>`; rename children to the title token.
 5. Remove any `Supports` links; the Epic Link carries the hierarchy.

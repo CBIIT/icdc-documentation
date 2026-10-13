@@ -183,5 +183,5 @@ The ICDC team has two primary functions: software development and data managemen
 - one spot-check comment per indexed submission, labeled with the submission name
 - file counts, file-type breakdown, and publication/study-content context posted as a plain-text comment rather than in the description body
 - native `Relates` links to the study record (ICDC-3206, ICDC-1993), the Data Submission Epic, and the paired Data Loading Task; native links to each CRINTAKE ticket
-- Parent Epic ICDC-3342 (ICDC Data) set via `customfield_12350`
+- Parent Epic ICDC-4267 (ICDC Data Submission: COP COTC021 v.3) set via `customfield_12350`
 - the `Data-Concierge` label
