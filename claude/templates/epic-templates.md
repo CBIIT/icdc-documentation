@@ -24,7 +24,7 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 1. `h3. 🎯 *Epic Statement*`: One paragraph stating the **goal**, the **objectives**, and **why** the work is being done. Not a user story: the As a / I want / So that form belongs to the child stories. Name the two to four objectives that define the outcome and the value that justifies it; FAIR and, for user-facing work, the comparative oncology purpose are stated here where they fall naturally.
 2. `h3. 🧬 *Description*`: Two short paragraphs. (a) How it works: the surface(s) it lives on with the route, the services and data stores involved, and the data pathway when data moves (see "Domain content rules"). (b) What this epic's phase delivers (design, frontend, backend, DevOps, defect fixes) and the release it shipped in or targets. Ground (a) in the canonical repo and the live UI, not in ticket titles.
 3. `h3. 🗺️ *Scope*`: Two sub-blocks, *In Scope* and *Out of Scope*, about five bullets each. Out of Scope names adjacent or excluded work in prose (never by ticket key) and ends with the bullet that future enhancements will be scoped as a new epic.
-4. `h3. ✅ *Definition of Done*`: A numbered list of three to five closure conditions: what must be true for this epic to close. Write them as outcomes, not test steps. The epic itself is not tested: verification happens in its child stories and tasks, whose Acceptance Criteria carry the testable detail. No quality-bar item: Section 508 and WCAG 2.1 AA, design system conformance, and test coverage live on every child story and are not restated on the epic.
+4. `h3. ✅ *Definition of Done*`: A numbered list of three to five closure conditions: what must be true for this epic to close. Write them as outcomes, not test steps. The epic itself is not tested: verification happens in its child stories and tasks, whose Acceptance Criteria carry the testable detail. No quality-bar item: The quality bar (Section 508 and WCAG 2.1 AA accessibility, ICDC design system conformance, page performance) is a team-wide standard that QA checks on every story and release. It is not written into user stories, tasks, or epics (TPM decision, 2026-10-13).
 5. `h3. 📝 *Notes*`: Two or three bullets at most: the phase statement (complete and the release it shipped in, or what closes it), and the canonical repos with branch. Nothing else.
 
 **Standing emoji set (5 entries)**
@@ -113,7 +113,7 @@ When an epic touches data movement, name the correct pathway from Section 2:
 - **Labels:** Preserve any existing labels. Do not add or remove labels in epic passes unless deliberately changing them.
 
 **Quality bar**
-- Section 508 and WCAG 2.1 AA accessibility, ICDC design system conformance, performance baselines, and automated test coverage live in each child story's Acceptance Criteria and Testing Requirements. Epics do not restate the bar, not even as one Definition of Done item.
+- The quality bar (Section 508 and WCAG 2.1 AA accessibility, ICDC design system conformance, page performance) is a team-wide standard that QA checks on every story and release. It is not written into user stories, tasks, or epics (TPM decision, 2026-10-13).
 
 **Verification & ground truth**
 - **User-facing work:** verify the live UI with Playwright (`browser_navigate` + `browser_snapshot`) before drafting. Production is `https://caninecommons.cancer.gov` and routes are hash-based (`#/home`, `#/explore`, `#/studies`, `#/study/\{clinical_study_designation\}`, `#/fileCentricCart`).

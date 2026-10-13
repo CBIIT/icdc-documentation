@@ -2,11 +2,11 @@
 
 > **Use this template for every ICDC software-development user story.** The canonical example is **ICDC-4244 (Surface matching C3DC human cancer data on the ICDC Human Relevance tab)**: drafted 2026-09-04 as the first application of this template, epic-linked to ICDC-3882 (ICDC Human Relevance) and paired with design task ICDC-4242. Data-submission user stories (the Data Concierge's parent ticket for a study submission) use `data-submission-user-story-template.md` instead.
 >
-> **Status:** v3 (2026-10-13): Testing Requirements is unit tests only. Integration and manual test scenarios belong to QA, who write their own test cases from the Acceptance Criteria; the story no longer prescribes them. CTDC's §7a changed the same day. v2 (2026-10-09): section headers and authoring moved to Jira wiki markup; the Performance & Quality bar is now identical in CTDC (CTDC dropped its cross-browser item). v1 (2026-09-04): ported from CTDC's §7a User Story Template and **slimmed from 7 to 5 sections**: the 🔗 Parent Epic & Context section was dropped (the Epic Link field is the canonical link; restating it in the body is noise) and the 📝 Notes section was dropped (predecessor tickets, design tasks, and decisions are carried by native Jira links and comments). CTDC's §7a was slimmed to the same 5-section shape on the same day so the two projects stay aligned.
+> **Status:** v3 (2026-10-13): Acceptance Criteria is one functional list; the Performance & Quality sub-block is removed (the quality bar is a team-wide standard QA checks, not restated per ticket). Testing Requirements is unit tests only. Integration and manual test scenarios belong to QA, who write their own test cases from the Acceptance Criteria; the story no longer prescribes them. CTDC's §7a changed the same day. v2 (2026-10-09): section headers and authoring moved to Jira wiki markup; the Performance & Quality bar is now identical in CTDC (CTDC dropped its cross-browser item). v1 (2026-09-04): ported from CTDC's §7a User Story Template and **slimmed from 7 to 5 sections**: the 🔗 Parent Epic & Context section was dropped (the Epic Link field is the canonical link; restating it in the body is noise) and the 📝 Notes section was dropped (predecessor tickets, design tasks, and decisions are carried by native Jira links and comments). CTDC's §7a was slimmed to the same 5-section shape on the same day so the two projects stay aligned.
 
 ## Why this template
 
-User stories are smaller-scope deliverables than epics: they ship and close. The bare As-a/I-want/So-that line is a starting point, but it leaves the engineer without enough structure to know when a story is *done*. This template gives every story a one-sentence summary, the classic framing as flowing prose, an In/Out of Scope split that prevents adjacent-feature creep, Acceptance Criteria split into Functional and Performance & Quality, and a dedicated Testing Requirements section so unit/integration/manual coverage is named explicitly rather than buried in a P&Q bullet.
+User stories are smaller-scope deliverables than epics: they ship and close. The bare As-a/I-want/So-that line is a starting point, but it leaves the engineer without enough structure to know when a story is *done*. This template gives every story a one-sentence summary, the classic framing as flowing prose, an In/Out of Scope split that prevents adjacent-feature creep, testable Acceptance Criteria, and the unit tests the engineer writes.
 
 Testing Requirements names the unit tests the engineer writes, because Valentina Epishina is QA-only (SDET, does not write feature code). Integration and manual test scenarios are QA's to design from the Acceptance Criteria, so the story does not prescribe them.
 
@@ -20,12 +20,7 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 
 3. `h3. 🗺️ *Scope*`: Two sub-blocks, **In Scope** and **Out of Scope**, each a bullet list. Out of Scope items describe the excluded work in words; do not cite the Jira key of the ticket that covers it (add a `Relates` link instead).
 
-4. `h3. ✅ *Acceptance Criteria*`: Two sub-blocks:
-   - **Functional**: Numbered list. Each item is a single observable behavior QA can pass/fail in one check on a deployed environment. If an item has two clauses joined by "and," split it. `*Bold*` key UI labels and component names. Escape curly braces as `\{...\}`.
-   - **Performance & Quality**: Numbered list. The ICDC quality bar:
-     1. Section 508 / WCAG 2.1 AA accessibility on all new UI elements
-     2. ICDC design system conformance (colors, typography, spacing)
-     3. Performance baseline of the affected page maintained
+4. `h3. ✅ *Acceptance Criteria*`: Numbered list. Each item is a single observable behavior QA can pass/fail in one check on a deployed environment. If an item has two clauses joined by "and," split it. `*Bold*` key UI labels and component names. Escape curly braces as `\{...\}`. No Performance & Quality sub-block: The quality bar (Section 508 and WCAG 2.1 AA accessibility, ICDC design system conformance, page performance) is a team-wide standard that QA checks on every story and release. It is not written into user stories, tasks, or epics (TPM decision, 2026-10-13).
 
 5. `h3. 🧪 *Testing Requirements*`: One sub-block:
    - **Unit Tests**: isolated behaviors (parsers, URL builders, reducers, utilities)
@@ -47,7 +42,7 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 - **Epic Link set on the ticket itself** via `customfield_12350` (SKILL.md Section 3). There is no Parent Epic line in the body.
 - **No Jira ticket keys anywhere in the body.** Related tickets (design task, requirements task, siblings, follow-ons) are `Relates` issue links; Jira's Links panel is the single source. No Notes section, no cross-reference lines.
 - **Acceptance Criteria are testable**: one observable behavior per item.
-- **Testing Requirements is the developer's unit test checklist before "Ready for QA."** Not optional, not a duplicate of P&Q. No Integration or Manual QA sub-blocks: QA writes those test cases from the Acceptance Criteria.
+- **Testing Requirements is the developer's unit test checklist before "Ready for QA."** Not optional. No Integration or Manual QA sub-blocks: QA writes those test cases from the Acceptance Criteria.
 - **Assignee at creation is the author (TPM)** until the story is pulled into a sprint; then the engineer. Populate the Developer field (`customfield_23650`) with the implementing engineer when known.
 - **Jira wiki authoring** (connector Markdown translation is off, so what is sent is stored exactly; see `claude/templates/README.md`, "Universal patterns"): `h3. {emoji} *Title*` headers; `* *Label*: content` labeled lines; `*` bullets and `#` numbered lists at column 0; `*bold*`; `{{monospace}}`; tables `||header||` / `|cell|`; links `[text|url]`; curly braces escaped as `\{...\}`. Blank line after every heading. After pushing, read the description back and confirm it starts with `h3.`, not `###`.
 
@@ -60,6 +55,6 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 
 ## When to expand vs trim
 
-- **Fewer than 5 functional ACs** → keep all 5 sections; the structure earns its keep by giving the engineer a checklist.
+- **Fewer than 5 Acceptance Criteria** → keep all 5 sections; the structure earns its keep by giving the engineer a checklist.
 - **Documentation or copy change with no code path** → Unit Tests says "None at this time"; QA verifies against the Acceptance Criteria.
 - **Spike or research task** → wrong shape; use a free-form Task with explicit deliverables.
