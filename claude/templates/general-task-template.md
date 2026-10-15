@@ -1,8 +1,8 @@
-### 🧰 General Task Template (ICDC, v1.1)
+### 🧰 General Task Template (ICDC, v1.2)
 
 > **Use this template for any ICDC task that no other template covers**: backend or API work with no user-facing story of its own, research and spikes, audits and surveys, documentation, and coordination tasks. The canonical example is **ICDC-4284 (JBrowse: Survey every viewable case file in Production)**.
 >
-> **Status:** v1.1 (2026-10-15): the handoff step moves the ticket to QA instead of notifying the TPM. v1 (2026-10-13). Created after several tasks were written in this shape before it was documented. It is the ICDC DevOps task template with the infrastructure-only sections removed, so a reader moving between the two sees the same sections in the same order. CTDC adopted the identical template the same day (`CBIIT/ctdc-documentation → claude/templates/general-task-template.md`); the two are kept in lockstep.
+> **Status:** v1.2 (2026-10-15): the location bullet is *Repo*, not *System*, and is left out when the work is not in a repo. v1.1 (2026-10-15): the handoff step moves the ticket to QA instead of notifying the TPM. v1 (2026-10-13). Created after several tasks were written in this shape before it was documented. It is the ICDC DevOps task template with the infrastructure-only sections removed, so a reader moving between the two sees the same sections in the same order. CTDC adopted the identical template the same day (`CBIIT/ctdc-documentation → claude/templates/general-task-template.md`); the two are kept in lockstep.
 
 **Which template to use**
 
@@ -13,7 +13,7 @@ Check the specific templates first. A user-facing change is a **user story**; Fi
 Each header is a Jira wiki `h3.` heading using the emoji + bold title format shown. Don't omit, reorder, or merge sections. If a section has no content, say "None at this time" rather than dropping the header.
 
 1. `h3. 🎯 *Task Summary*`: Two to three sentences: what the task produces, why, and who uses the result. Follow with labeled bullets:
-   * `* *System*:` the repository, service, or tool the work happens in
+   * `* *Repo*:` the GitHub repository the work happens in; omit the bullet when the work is not in a repo
    * `* *Deadline*:` a hard date if one exists; otherwise omit the bullet
    * For a spike, state the time box and that the deliverable is a written assessment, not code.
 
