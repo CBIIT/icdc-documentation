@@ -1,8 +1,8 @@
-### 🧰 General Task Template (ICDC, v1)
+### 🧰 General Task Template (ICDC, v1.1)
 
 > **Use this template for any ICDC task that no other template covers**: backend or API work with no user-facing story of its own, research and spikes, audits and surveys, documentation, and coordination tasks. The canonical example is **ICDC-4284 (JBrowse: Survey every viewable case file in Production)**.
 >
-> **Status:** v1 (2026-10-13). Created after several tasks were written in this shape before it was documented. It is the ICDC DevOps task template with the infrastructure-only sections removed, so a reader moving between the two sees the same sections in the same order. CTDC adopted the identical template the same day (`CBIIT/ctdc-documentation → claude/templates/general-task-template.md`); the two are kept in lockstep.
+> **Status:** v1.1 (2026-10-15): the handoff step moves the ticket to QA instead of notifying the TPM. v1 (2026-10-13). Created after several tasks were written in this shape before it was documented. It is the ICDC DevOps task template with the infrastructure-only sections removed, so a reader moving between the two sees the same sections in the same order. CTDC adopted the identical template the same day (`CBIIT/ctdc-documentation → claude/templates/general-task-template.md`); the two are kept in lockstep.
 
 **Which template to use**
 
@@ -19,9 +19,9 @@ Each header is a Jira wiki `h3.` heading using the emoji + bold title format sho
 
 2. `h3. 🧭 *Scope*`: Two labeled bullets: `* *In scope*:` and `* *Out of scope*:`. Out of scope names adjacent work in words, never by ticket key.
 
-3. `h3. 🚦 *Workflow*`: Numbered steps from start to handoff. Name each phase; do not restate a procedure that lives in a runbook or SOP, point at it instead. The last step is always "Notify the TPM."
+3. `h3. 🚦 *Workflow*`: Numbered steps from start to handoff. Name each phase; do not restate a procedure that lives in a runbook or SOP, point at it instead. The last step is always "Move the ticket to QA."
 
-4. `h3. ✅ *Definition of Done*`: Labeled bullets (`* *Label*: condition`), one per closure condition, written as outcomes. Always end with `* *Handoff*: TPM notified`. Common labels: *Deliverable*, *Recommendation*, *Documentation*, *Verification*, *Time box*.
+4. `h3. ✅ *Definition of Done*`: Labeled bullets (`* *Label*: condition`), one per closure condition, written as outcomes. Always end with `* *Handoff*: ticket moved to QA`. Common labels: *Deliverable*, *Recommendation*, *Documentation*, *Verification*, *Time box*.
 
 **Standing emoji set (4 entries, shared with the DevOps task template)**
 
