@@ -22,6 +22,10 @@ The deployment tasks are created by the TPM with their structure and links in pl
 | Deployment package number | Tech lead | The Release Dashboard, never the tickets |
 | Due dates | TPM | Each deployment task's Due Date field |
 
+**Where the Release Dashboards live**
+
+One Excel Release Dashboard per monthly release, named `ICDC Monthly Release <Month YYYY>.xlsx`, in a folder per calendar year under `ICDC Software Development / ICDC Software Releases / Release Dashboards` on the NCI-CBIIT-FNL-ICDC SharePoint site. 2026: [ICDC 2026 Monthly Releases](https://nih.sharepoint.com/:f:/r/sites/NCI-CBIIT-FNL-ICDC/Shared%20Documents/ICDC%20Software%20Development/ICDC%20Software%20Releases/Release%20Dashboards/ICDC%202026%20Monthly%20Releases?d=wb9dd60b8b88746d384b6c3388dcdab9d&csf=1&web=1&e=oC8VBM).
+
 ---
 
 ## Standing release epic
@@ -30,10 +34,10 @@ One per federal fiscal year (October through September), so the epic stays small
 
 * *Summary*: `ICDC Monthly Releases - FY<YY>`
 * *Type*: Epic
-* *Assignee*: TPM (`gina.kuffel@nih.gov`)
+* *Assignee*: DevOps Lead or TPM, as the TPM directs
 * *Labels*: `release`, `deployment`, `devops`
 
-Body (Jira wiki markup):
+Body (Jira wiki markup). The Release Dashboards link points to the current calendar year's folder; update it in January.
 
 ```
 h3. 🎯 *Purpose*
@@ -47,7 +51,7 @@ h3. 📦 *Release Scope*
 Each release's contents are its Jira Fix Versions (BE, FE, Interop, Files as applicable), applied by developers on their own tickets. This epic holds only the deployment tasks.
 
 h3. 🗂️ *Release Dashboards*
-* *Location*: [ICDC Release Dashboards|https://nih.sharepoint.com/sites/NCI-CBIIT-FNL-ICDC/Shared%20Documents/ICDC%20Software%20Development/ICDC%20Software%20Releases/Release%20Dashboards]
+* *Location*: [ICDC <YYYY> Monthly Releases|<year folder URL>]
 
 h3. ✅ *Closure*
 Closes after the September <YYYY+1> release is deployed to Prod.
@@ -71,7 +75,7 @@ Two tasks per release, identical except the environment word (**Stage** / **Prod
 * *Due Date*: the scheduled deployment date for that tier. The Production date must fall no later than the earliest SLA due date of any security finding shipping in the release, and before the next scheduled Prod Invicti scan. If either condition cannot be met, raise it with the TPM before the date is set.
 * *Issue links*: both tasks "relate to" the Invicti scan epic(s) whose findings the release remediates, and the Stage task "blocks" the Production task. Never cite ticket keys in the body.
 
-**Body**: three sections (🎯 Deployment Summary · 🚦 Workflow · 📋 Tracking), Jira wiki markup:
+**Body**: four sections (🎯 Deployment Summary · 🚦 Workflow · 📋 Tracking · ✅ Definition of Done), Jira wiki markup:
 
 ```
 h3. 🎯 *Deployment Summary*
@@ -89,6 +93,13 @@ h3. 🚦 *Workflow*
 h3. 📋 *Tracking*
 ||Service Now Cloud One Ticket Link||Assignee||Notes about Deployment||
 | |(CloudOne point of contact)|(nuances or issues encountered)|
+
+h3. ✅ *Definition of Done*
+* *ServiceNow*: the Service Now Cloud One ticket is linked in Tracking and closed by CloudOne as successful.
+* *Deployment*: the build is deployed to <Stage | Production> in the scheduled window.
+* *Verification*: {{/version}} on <Stage | Production> returns the version recorded in the Release Dashboard, and the application loads and returns data.
+* *Release Dashboard*: the <Stage | Production> deployment date is recorded.
+* *Handoff*: TPM notified.
 ```
 
 ---
@@ -107,11 +118,12 @@ h3. 📋 *Tracking*
 4. Link both tasks to each Invicti scan epic the release remediates ("Related To"), and link Stage "Blocks" Production.
 5. Open both tickets in the Jira UI and confirm they render.
 
-At the start of each fiscal year, create the new standing epic before the October tasks.
+At the start of each fiscal year, create the new standing epic before the October tasks. In January, create the new calendar-year dashboards folder and update the epic's Release Dashboards link.
 
 ---
 
 ## Changelog
 
+* *v1.2 (2026-10-20)*: Added ✅ Definition of Done as the fourth deployment-task section (matching CTDC v3). Recorded where Release Dashboards live (one folder per calendar year). Epic assignee left to the TPM's direction.
 * *v1.1 (2026-10-20)*: Split the single combined task into separate Stage and Production tasks to match CTDC; Stage blocks Production. Tracking table first column renamed to "Service Now Cloud One Ticket Link" (matching CTDC v3). Canonical ICDC-4291 (Stage) and ICDC-4292 (Production).
-* *v1 (2026-10-20)*: Ported from CTDC's Release Ticket Templates (v2, 2026-10-07). ICDC differences: standing epic is per fiscal year rather than permanent; Release Dashboard link and scan epic link required; ownership table (developers own Fix Versions, DevOps owns ServiceNow links, tech lead owns the package number in the Release Dashboard); Due Date rule tied to the Invicti SLA; {{/version}} check in the Workflow; no Final Design QA epic (ICDC has not adopted one). Canonical ICDC-4290.
+* *v1 (2026-10-20)*: Ported from CTDC's Release Ticket Templates (v2, 2026-10-07). ICDC differences: standing epic is per fiscal year rather than permanent; Release Dashboard link and scan epic link required; ownership table (developers own Fix Versions, DevOps owns ServiceNow links, tech lead owns the package number in the Release Dashboard); Due Date rule tied to the Invicti SLA; version check in the Workflow; no Final Design QA epic (ICDC has not adopted one). Canonical ICDC-4290.
