@@ -1,4 +1,4 @@
-### 🔒 Invicti Finding Task Template (v1, 2026-09-15)
+### 🔒 Invicti Finding Task Template (v1.1, 2026-10-22)
 
 > **Use this template for every finding that is first observed in a monthly Invicti scan.** One task per finding, where a finding is one vulnerability name on one endpoint (the same finding observed on Prod and Stage is one task listing both environments). The task carries the SLA due date and lives until QA confirms the fix on the tier where it was observed, or until NCI Security accepts a disposition. Surrounding workflow: `claude/sops/invicti-monthly-scan-sop.md`. Parent: the monthly epic from `invicti-scan-epic-template.md`.
 
@@ -52,6 +52,7 @@ Each header is `h3. {emoji} *Title*` with the emoji shown. All five are required
 **Required content rules**
 
 * *One task per finding, all environments on it*: if the finding is later observed on an additional environment, add it to Section 1 and re-evaluate the due date against the more restrictive tier; do not create a second task.
+* *Companion deployment-config task (the one exception)*: when the fix needs both a code change and a deployment-configuration change (for example a new environment variable the code reads at startup), a second task may carry the configuration work. Rules: the summary keeps the same `[SEC-<sev>]` prefix and names the configuration change (`[SEC-MED] Set GRAPHQL_INTROSPECTION_ENABLED in deployment config for Dev, QA, Stage, and Prod`), while the finding task's summary ends with `: code change in <service>`; both tasks carry the same five sections, the same Finding and Why It Matters content, and the same `sla-due-YYYY-MM-DD` label; the companion's Acceptance Criteria cover only the configuration being present and deploys succeeding, while the finding task keeps the end-to-end criteria (evidence gone on every tier); link them with `Blocks` so the companion blocks the finding task, never `Cloners`; the finding task closes last, after the companion is done and QA confirms the evidence is gone.
 * *Due date is mandatory at creation*: a finding task without a due date is incomplete.
 * *Evidence is one line*: full request and response bodies, payloads, cookie values, and internal IPs stay in the attached PDF on the epic. The task quotes only the line that identifies the finding.
 * *Disposition tasks close as Won't Fix*: with the label `false-positive` or `risk-accepted` and a comment containing the justification exactly as sent to NCI Security.
@@ -65,7 +66,8 @@ Each header is `h3. {emoji} *Title*` with the emoji shown. All five are required
 2. `jira_create_issue` with `issue_type = "Task"`, the summary above, a placeholder description, labels, priority. Leave Unassigned.
 3. `jira_update_issue` with the full body and the `sla-due-YYYY-MM-DD` label (`duedate` is rejected on this screen scheme).
 4. `jira_update_issue` with `{"customfield_12350": "<epic key>"}` to link the parent epic (separate call; the `epicKey` parameter does not work reliably on this instance).
-5. Post the PR link as a plain-text comment when it opens; QA closes the task with resolution Fixed after confirming on the observed tier(s).
+5. If a companion deployment-config task is needed, create it the same way, then `jira_create_issue_link` with `link_type = "Blocks"`, `inward_issue_key = <companion>`, `outward_issue_key = <finding task>` (verified: this renders as the finding task "is blocked by" the companion).
+6. Post the PR link as a plain-text comment when it opens; QA closes the task with resolution Fixed after confirming on the observed tier(s).
 
 **Worked example (September 2026 High)**
 
