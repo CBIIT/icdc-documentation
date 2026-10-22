@@ -8,7 +8,7 @@
 
 ICDC catches submitter-side data-entry problems *before* committing a submission to the real Dev → QA → Stage → Prod load. A submission's loading TSVs can carry subtle errors that pass structural validation but are still wrong: a misspelled value, an unintentionally inserted character (a stray tab, a smart quote, a non-printing / encoding artifact), a DOI or URL that doesn't resolve, a count that doesn't look right. The cheapest place to find these is a **local load** the reviewer can eyeball in the application UI. This task does exactly that: download the loading TSVs directly from the CRDC Submission Portal, load them into a local Neo4j + local OpenSearch, view them through the ICDC Dev frontend, and log every issue. A clean review clears the paired Data Loading Task to proceed; a review that finds problems sends them back to the Data Submitter to correct and resubmit before any pipeline load happens.
 
-This is distinct from the two other loading-data tasks: it is **not** the Data Loading Task (which promotes a validated Release Package through Jenkins into Dev → QA → Stage → Prod), and it is **not** IndexD registration (which mints file GUIDs). It runs earliest of all, typically **before a Release Package or any S3 artifact even exists**.
+This is distinct from the two other loading-data tasks: it is **not** the Data Loading Task (which promotes a validated Release Package through the Prefect data loading pipeline into Dev → QA → Stage → Prod), and it is **not** IndexD registration (which mints file GUIDs). It runs earliest of all, typically **before a Release Package or any S3 artifact even exists**.
 
 **Tasks execute; the submission epic deliberates.** Like the other data-management tasks, this Task carries only what the reviewer needs to execute. Open questions and risks belong on the Data Submission Epic, not here.
 
@@ -31,7 +31,7 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
    | Field | Value | Notes |
    |---|---|---|
    | CRDC Submission ID | *(CRDC Submission Portal ID; one per submission; link it to the Portal submission if a URL is handy)* | Issued by the CRDC Submission Portal; one per submission. |
-   | Study (acronym + version) | *(e.g., `COTC030 v.1`)* | New study vs. addition to an existing study. |
+   | Study (acronym + version) | *(e.g., `COTC030 v.1`)* | New study vs. study update. |
 
    **Naming discipline**: the CRDC Submission ID names the review's input by identity (the submission in the Portal, where the loading TSVs live), not by a content description.
 
@@ -104,7 +104,7 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 
 **When NOT to use this template**
 
-- **The actual data load** (promoting a validated Release Package through Jenkins into Dev → QA → Stage → Prod) → **Data Loading Task** template.
+- **The actual data load** (promoting a validated Release Package through the Prefect data loading pipeline into Dev → QA → Stage → Prod) → **Data Loading Task** template.
 - **IndexD registration** (minting file GUIDs) → **IndexD Registration Task** template.
 - **Data modeling / schema changes** → the Data Modeling for Study Submission template or the Data Model Update Task template.
 - **The submission umbrella** (coordinating the whole submission end to end) → the **Data Submission Epic**.

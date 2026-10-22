@@ -13,7 +13,7 @@ The **Integrated Canine Data Commons (ICDC)** is part of the NCI's Cancer Resear
   - `bento-icdc-backend` — Spring Boot backend (GraphQL; reads/writes OpenSearch indices)
   - `crdc-icdc-data-retriever` — **Python ETL** that fetches external-node data (IDC, TCIA) and writes to OpenSearch's `external_data` index. Runs on a **Jenkins schedule**, not in response to runtime requests.
   - `bento-icdc-interoperation` — Node.js service. **As of Release 4.3.0.528, its active role is the outbound CGC export** (`storeManifest` GraphQL mutation → S3 upload → CloudFront pre-signed URL → Seven Bridges). The legacy `studiesByProgram` / `studyLinks` queries in this repo are now dead code after the FE cutover in ICDC-4022.
-  - `icdc-dataloader` — Data ingestion pipeline. Home of `loader.py`, the Python job that runs via Jenkins to load ICDC study data from approved source files.
+  - `icdc-dataloader`: Data ingestion pipeline. Home of `loader.py`, the Python loader the Prefect data loading pipeline runs to load ICDC study data from approved source files.
   - `icdc-model-tool` — Data model representations and build tools
   - `icdc-deployments` — Deployment configurations
   - `icdc-devops` — DevOps infrastructure
@@ -46,14 +46,14 @@ Before writing any stakeholder-facing description of an ICDC service, integratio
 
 ICDC has three distinct data-movement pathways. Each is owned, scheduled, and scoped differently.
 
-#### 1. Study data ingestion — **Jenkins jobs running `loader.py`** (inbound, batch)
+#### 1. Study data ingestion: **the Prefect data loading pipeline** (inbound, batch)
 
 - **What it does:** Loads all ICDC study data — samples, cases, diagnoses, files, clinical trial metadata — into the ICDC databases from approved source files.
-- **Mechanism:** Scheduled **Jenkins jobs** running `loader.py` from the `icdc-dataloader` repo. Not API calls. Not on-the-fly loads. Not the Data Retriever (which is unrelated — Data Retriever deals exclusively with external API data).
-- **Pipeline stages:** Full SDL promotion path — **DEV → QA → Stage → Production**. Each promotion is its own Jira ticket (e.g., COTC021 v.2 Stage was ICDC-4053, Prod was ICDC-4061).
-- **Ownership:** Managed by dedicated Jenkins pipelines outside the application team's direct control.
+- **Mechanism:** The **Prefect data loading pipeline**, run per tier, loading Neo4j from the study's Release Packages and reindexing OpenSearch. Not API calls. Not on-the-fly loads. Not the Data Retriever (which is unrelated: Data Retriever deals exclusively with external API data).
+- **Pipeline stages:** Full SDL promotion path: **DEV → QA → Stage → Production**, all on one Data Loading Task (older loads such as COTC021 v.2 used one ticket per environment, e.g. Stage ICDC-4053, Prod ICDC-4061).
+- **Ownership:** Run by the engineer named in the Data Loading Task's Developer field.
 - **Cadence:** Scheduled, validated, QA'd ahead of release. Never spontaneous.
-- **Demo implications:** When advising presenters, do NOT suggest anything like "refresh the TSV," "reload the data file," or "rerun the load" as a mid-demo action. There is no in-app way to swap or refresh data loaded via Jenkins. The data visible in a demo environment is what Jenkins promoted to that environment.
+- **Demo implications:** When advising presenters, do NOT suggest anything like "refresh the TSV," "reload the data file," or "rerun the load" as a mid-demo action. There is no in-app way to swap or refresh loaded data. The data visible in a demo environment is what the data loading pipeline promoted to that environment.
 
 #### 2. External-node data retrieval — **Data Retriever (Python ETL, Jenkins-scheduled)** (inbound, batch)
 
@@ -75,10 +75,10 @@ ICDC has three distinct data-movement pathways. Each is owned, scheduled, and sc
 
 - ❌ "InterOp feeds IDC/TCIA data into ICDC." — WRONG (as of Release 4.3.0.528). That role moved to the Data Retriever; Interop's active role is now CGC export.
 - ❌ "The Data Retriever is a runtime microservice / Spring Boot service / real-time backend API." — WRONG. It is a **Python batch ETL** invoked via CLI on a Jenkins schedule. Data flows through OpenSearch, not through runtime calls to the Data Retriever.
-- ❌ "loader.py is complementary to the Data Retriever." — WRONG. loader.py is part of `icdc-dataloader` (Pathway 1) and loads ICDC study data via Jenkins. It has nothing to do with external APIs, OpenSearch `external_data`, or the Data Retriever.
+- ❌ "loader.py is complementary to the Data Retriever.": WRONG. loader.py is part of `icdc-dataloader` (Pathway 1) and loads ICDC study data through the Prefect data loading pipeline. It has nothing to do with external APIs, OpenSearch `external_data`, or the Data Retriever.
 - ❌ "The Data Retriever has graceful-degradation logic that handles external outages at runtime." — WRONG framing. The Data Retriever is a batch job; resilience to external-node outages comes from the fact that the FE never calls those external APIs at request time — it reads OpenSearch. If an external API is down when the Data Retriever runs, the batch job logs it and the OpenSearch data stays at its last-successful state.
-- ❌ "All ICDC data is loaded via Jenkins OR via API." — MISLEADING. Study data is loaded via Jenkins `loader.py` (Pathway 1). External-node enrichment is loaded via the Data Retriever, also via Jenkins (Pathway 2). CGC export flows through Interop `storeManifest` (Pathway 3, outbound). All three are distinct.
-- ✅ "Study data is loaded by Jenkins running `loader.py`. IDC/TCIA external-node data is populated on a Jenkins schedule by the Data Retriever Python ETL, which writes to OpenSearch. CGC export runs through Interop's `storeManifest` mutation, which uploads a manifest to S3 and returns a signed CloudFront URL."
+- ❌ "All ICDC data is loaded via Jenkins OR via API.": MISLEADING. Study data is loaded by the Prefect data loading pipeline (Pathway 1). External-node enrichment is loaded via the Data Retriever, also via Jenkins (Pathway 2). CGC export flows through Interop `storeManifest` (Pathway 3, outbound). All three are distinct.
+- ✅ "Study data is loaded by the Prefect data loading pipeline. IDC/TCIA external-node data is populated on a Jenkins schedule by the Data Retriever Python ETL, which writes to OpenSearch. CGC export runs through Interop's `storeManifest` mutation, which uploads a manifest to S3 and returns a signed CloudFront URL."
 
 ### 📡 Data Retriever Architecture — A Multi-Year Backend Redesign
 

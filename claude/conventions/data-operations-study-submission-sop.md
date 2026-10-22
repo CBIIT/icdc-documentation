@@ -44,15 +44,15 @@ Every Jira task (2a, 3, 5a, and the Data Loading Task that spans 5b and 7) is a 
 
 **5a. IndexD registration (may begin once the Release Package exists; runs in parallel with the load).** Register every file's GUID in CRDC IndexD through the external DCF handoff: extract the `indexd.tsv` from the Release Package, drop it in the DCF Google Drive folder, file a CRINTAKE intake ticket, then verify by resolving a minted GUID. The `indexd.tsv` ships inside the Release Package, so registration can start as soon as the package exists (Release to DC) and runs alongside the load. The minted GUIDs do not resolve until the submission is Complete (stage 6), so the GUID spot-check passes only after Complete. Template: `indexd-registration-task-template.md`.
 
-**5b. Load the Release Package to Dev and verify (second error check; runs in parallel with 5a).** The Data Loading Task begins in Dev: build a local Neo4j from a Dev dump, pull the model plus the loading files from the Release Package, configure `data-loader-config.yml`, run `loader.py` (dry-run, then load), trigger the OpenSearch ETL, verify the surfaces, and the TPM signs off Dev. This is the second error check: loading the actual Release Package can surface problems the submitter-TSV review did not catch. If errors are found, reopen the submission for a corrected Release Package (back to stage 4), since the current one is immutable. Pre-load gate: the Release Package is present in the metadata bucket, and the model version tied to the Submission ID is deployed in Dev. Template: `data-loading-task-template.md`.
+**5b. Load the Release Package to Dev and verify (second error check; runs in parallel with 5a).** The Data Loading Task begins in Dev: run the Prefect data loading pipeline for Dev (Neo4j load plus OpenSearch reindex), verify the surfaces, and record Dev in Testing Signoff. This is the second error check: loading the actual Release Package can surface problems the submitter-TSV review did not catch. If errors are found, reopen the submission for a corrected Release Package (back to stage 4), since the current one is immutable. Pre-load gate: the Release Package is present in the metadata bucket, and the model version tied to the Submission ID is deployed in Dev. Template: `data-loading-task-template.md`.
 
 **6. Submission marked Complete (Portal).** Once the Dev load is clean, the **Data Concierge marks the submission Complete** in the Portal. This moves the object files into the CRDC production bucket `nci-crdc-data-bucket-prod`, so the IndexD GUIDs resolve. Complete is the point of no return, done only after Dev verification passes, and it unlocks promotion to QA.
 
 **7. Promote QA to Stage to Prod.** With the submission Complete, the same Data Loading Task promotes the study through the remaining environments:
 
-- **QA (Jenkins lower-tier):** run the QA load and OpenSearch job; Valentina Epishina tests (rendering, file downloads, no regressions) and signs off.
-- **Stage (Jenkins upper-tier):** run the Stage load and OpenSearch job; test with production-parity checks and sign off.
-- **Prod (Jenkins upper-tier):** run the Prod load and OpenSearch job.
+- **QA:** run the Prefect data loading pipeline for QA; Valentina Epishina tests (rendering, file downloads, no regressions) and signs off.
+- **Stage:** run the Prefect data loading pipeline for Stage; test with production-parity checks and sign off.
+- **Prod:** run the Prefect data loading pipeline for Prod.
 - Every environment requires both a Neo4j load and an OpenSearch reindex; a Neo4j write without a reindex leaves the frontend stale. File downloads resolve through the central CRDC IndexD, so download checks depend on the parallel IndexD registration (5a) being complete.
 
 **8. Production release confirmed.** With the study loaded to Prod (visible at `caninecommons.cancer.gov`) and its files indexed and resolving, the data is fully released: it renders and file downloads work, with no login since ICDC is open access. The Prod row in the load task's Testing Signoff table closes the load; the IndexD GUID spot-check closes the registration task. The Data Concierge confirms the study looks correct in production, which completes the submission epic's Definition of Done; the epic then closes.
@@ -61,7 +61,7 @@ Every Jira task (2a, 3, 5a, and the Data Loading Task that spans 5b and 7) is a 
 
 **Roles.** Data Concierge = Philip Musk (owns the submission epic; coordinates submission, review, Release to DC and Complete in the Portal, and IndexD; marks Complete once Dev is clean). Loading engineer = whoever is named in the Developer field (`customfield_23650`). QA tester = Valentina Epishina. DM Federal Lead and SME review = Heather Creasy (gates the model `develop` to `master` promotion). Data Model Author = Mark Jensen. ICDC TPM = Gina Kuffel.
 
-**Environments.** Data promotes Dev (local Neo4j and OpenSearch) to QA (Jenkins lower-tier) to Stage (Jenkins upper-tier) to Prod (Jenkins upper-tier). Model code promotes on its own track: feature branch to `develop` (Dev and QA) to `master` (Stage and Prod).
+**Environments.** Data promotes Dev to QA to Stage to Prod, each tier through the Prefect data loading pipeline (Neo4j load plus OpenSearch reindex). Model code promotes on its own track: feature branch to `develop` (Dev and QA) to `master` (Stage and Prod).
 
 **Two error checks.** (1) Pre-load review on the submitter-uploaded TSVs, before Release to DC. (2) The Dev load of the actual Release Package. Either can reopen the submission; the second one is why QA promotion waits for Complete.
 

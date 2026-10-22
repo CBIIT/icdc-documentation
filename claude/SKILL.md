@@ -75,7 +75,7 @@ ICDC data-management work splits into two **paired** ticket types with **opposit
 
 | Ticket type | Example | Development? | Developer (`customfield_23650`) | `Data-Concierge` label |
 |---|---|---|---|---|
-| **Data loading** (load a study into ICDC) | ICDC-4176 | **Yes** — engineering pipelines: local Neo4j + `loader.py`, Jenkins lower/upper-tier, OpenSearch ETL | **Populated** — the engineer who ran the load | **No** — loading is engineering, not the Data Concierge service |
+| **Data loading** (load a study into ICDC) | ICDC-4176 | **Yes**: engineering pipeline: Prefect data loading pipeline per tier (Neo4j load + OpenSearch reindex) | **Populated**: the engineer who ran the load | **No**: loading is engineering, not the Data Concierge service |
 | **IndexD registration** (register file GUIDs with DCF) | ICDC-4175 | **No** — coordination with DCF to mint/register GUIDs; nothing is built | **Empty by design** | **Yes** — registration *is* part of the Data Concierge service |
 
 - **Do not "fix" an empty Developer field on an IndexD-registration task** — empty is the correct state.
@@ -612,7 +612,7 @@ Headline format: *"X of Y goals delivered."* This reframes a sprint more favorab
 ### 10d. ICDC-Specific Demo Day Notes
 
 - **No data-release vs software-release split.** ICDC is all open access — there's no separate data-release announcement channel like CTDC has. Sprint review and release demo combine into a single meeting and a single Slack post.
-- **Three data pathways are demo-relevant.** When framing what shipped in a release, be precise about which pathway changed (Jenkins `loader.py` for study data ingestion, Data Retriever Python ETL for external-node data, Interop `storeManifest` for CGC export — see Section 2 for the full reference). Misframing pathways in a demo announcement is a common mistake.
+- **Three data pathways are demo-relevant.** When framing what shipped in a release, be precise about which pathway changed (the Prefect data loading pipeline for study data ingestion, Data Retriever Python ETL for external-node data, Interop `storeManifest` for CGC export; see Section 2 for the full reference). Misframing pathways in a demo announcement is a common mistake.
 - **Vocabulary discipline.** Never say "DMN v2.0" or "Data Model Navigator v2.0" — see Section 2's Data Model vs. DMN rule. Versioning applies to the Data Model content, not the Navigator tool.
 - **Developer-field shoutouts.** When calling out who built what in a Slack announcement, pull from the Developer field, not Assignee. Tagging the QA who closed the ticket as the builder is a real and common mistake on ICDC.
 
@@ -772,7 +772,7 @@ When building or extending anything in this `icdc-documentation` repo — templa
 
 - **Structure to mirror.** `ctdc-documentation/claude/` organizes content as `templates/`, `workflows/`, `architecture/`, and `lessons-learned/` (ICDC uses `decisions/` for that role), plus a top-level `README.md` component-library index and `SKILL.md`. When adding a new kind of artifact, check where CTDC puts it first.
 - **Templates index.** The ICDC template inventory — every template mapped to its file and canonical Jira ticket — lives in `claude/templates/README.md`; keep it current when templates are added or revised. CTDC's equivalent index is in `claude/README.md`, mirrored in its SKILL.md §9a "Canonical Example Index."
-- **Always translate, never copy verbatim.** CTDC and ICDC differ in ways that matter: graph store (Memgraph vs **Neo4j**), model repo (`ctdc-model` vs **`icdc-model-tool`**), loader (`crdc-ctdc-dataloader`, all-Jenkins vs **`icdc-dataloader`**, hybrid Dev-local `loader.py`), application surfaces (Participants / Studies / Specimens vs **Cases / Studies / Samples**), and file access (controlled + open vs **open-access only**). The "differences from CTDC" table in `claude/templates/README.md` is the running list — consult it before porting anything.
+- **Always translate, never copy verbatim.** CTDC and ICDC differ in ways that matter: graph store (Memgraph vs **Neo4j**), model repo (`ctdc-model` vs **`icdc-model-tool`**), loading stores (local Neo4j into a single Memgraph, OpenSearch by backup and restore vs **Neo4j plus a per-environment OpenSearch reindex**; both load through Prefect), application surfaces (Participants / Studies / Specimens vs **Cases / Studies / Samples**), and file access (controlled + open vs **open-access only**). The "differences from CTDC" table in `claude/templates/README.md` is the running list: consult it before porting anything.
 - **Reference, don't share.** CTDC and ICDC keep separate repos deliberately; port useful patterns, but each repo owns and maintains its own copy. Never create a cross-repo dependency.
 
 ---

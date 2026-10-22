@@ -158,7 +158,7 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 This template covers internally/ICDC-driven model changes across the full weight range. The following are different:
 
 - **Study-driven model changes**: requested by an incoming study submission, anchored on that study's CDE Request Workbook. Use the **Data Modeling for Study Submission** template. The driver is the study, and the term-level truth lives in the study's workbook (owned by that study's Data Concierge), not the internal workbook.
-- **Loading data into the existing schema**: new studies, new data added to existing studies, megazip loads. Use the **Data Loading Task** template. This is also where a breaking change's downstream re-load is tracked.
+- **Loading data into the existing schema**: new studies, study updates to existing studies, megazip loads. Use the **Data Loading Task** template. This is also where a breaking change's downstream re-load is tracked.
 - **Software development that does not change the schema**: frontend features, backend refactors, microservice work, bug fixes, library upgrades. Use the software development family.
 - **CRDC platform changes**: Fence, IndexD, Submission Portal upgrades owned by CRDC platform teams. Out of ICDC scope.
 - **Bento Core MDF framework changes**: changes to the underlying MDF tooling itself (`bento-mdf` submodule). Upstream concern; file with the Bento team.

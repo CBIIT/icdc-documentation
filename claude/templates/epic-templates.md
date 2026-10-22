@@ -99,7 +99,7 @@ These rules apply to every ICDC epic, including 7e-D.
 **Three data pathways (ICDC-specific)**
 
 When an epic touches data movement, name the correct pathway from Section 2:
-- **Pathway 1: Study data ingestion via `loader.py`** (inbound, batch; Dev local, QA/Stage/Prod through Jenkins). Cases, samples, diagnoses, files, clinical-trial metadata.
+- **Pathway 1: Study data ingestion via the Prefect data loading pipeline** (inbound, batch; every tier through Prefect). Cases, samples, diagnoses, files, clinical-trial metadata.
 - **Pathway 2: External-node data via the Data Retriever Python ETL** (inbound, batch, scheduled). IDC and TCIA metadata into the OpenSearch `external_data` index.
 - **Pathway 3: CGC export via Interop `storeManifest`** (outbound). Manifest to S3 to CloudFront signed URL to Seven Bridges.
 
