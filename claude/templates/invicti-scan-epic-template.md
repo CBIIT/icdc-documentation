@@ -1,6 +1,8 @@
-### 🛡️ Invicti Scan Remediation Epic Template (v1, 2026-09-15)
+### 🛡️ Invicti Scan Remediation Epic Template (v1.1, 2026-10-22)
 
 > **Use this template for the epic that represents one monthly Invicti scan cycle.** One epic per month, covering every environment scanned that month. The epic is the intake record; it owns only the finding tasks that were **first observed** in this cycle plus one verification task. Carryover findings stay on their original tasks and are linked, never cloned. The workflow that surrounds this template is `claude/sops/invicti-monthly-scan-sop.md`. Prior-shape references: ICDC-4120 (February 2026) and ICDC-4210 (August 2026).
+>
+> **Status:** v1.1 (2026-10-22): New Findings bullets lead with the severity word to match the finding-task summary format `Invicti Security Vulnerability (<Severity>): <remedy>`. v1 (2026-09-15). Mirrors CTDC's Invicti Scan Remediation Epic template (`CBIIT/ctdc-documentation → claude/templates/invicti-scan-epic-template.md`); the two are kept in lockstep.
 
 **Issue type**: Epic. **Summary**: `ICDC Security Vulnerabilities - <Month YYYY> Invicti Scan Remediation`. **Assignee**: left Unassigned at creation; the ESI tech lead assigns during triage. **Labels**: `invicti-scan`, `security`, `vulnerability-remediation`, plus `prod-environment` and/or `stage-environment`. **Attachments**: the Invicti PDF for each environment scanned.
 
@@ -35,9 +37,9 @@ Each header is `h3. {emoji} *Title*` with the emoji shown. Omit a section only w
 
 4. `h3. 🆕 *New Findings*`
 
-   Findings first observed this cycle. Each one has a task under this epic. Bulleted, one per finding, severity prefix first, then name, environments, endpoint, CVE if any, and the one-line remedy. Regressions (a finding whose earlier task was Closed) are listed here with the marker **Regression** and the reopened task is linked rather than a new one created.
+   Findings first observed this cycle. Each one has a task under this epic. Bulleted, one per finding, severity word first, then name, environments, endpoint, CVE if any, and the one-line remedy. Regressions (a finding whose earlier task was Closed) are listed here with the marker **Regression** and the reopened task is linked rather than a new one created.
 
-   * *[SEC-HIGH]*: Out-of-date Apache Tomcat 10.1.57, CVE-2026-66299, Prod and Stage, fingerprinted on the `/version` error page. Remedy: upgrade to 10.1.59 and suppress the error-page version banner.
+   * *High*: Out-of-date Apache Tomcat 10.1.57, CVE-2026-66299, Prod and Stage, fingerprinted on the `/version` error page. Remedy: upgrade to 10.1.59 and suppress the error-page version banner.
 
 5. `h3. 🔁 *Carryover Findings*`
 
