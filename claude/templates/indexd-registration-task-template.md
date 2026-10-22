@@ -49,7 +49,7 @@ Each section header is a Jira wiki `h3.` heading with the emoji and a bold title
    **Columns:**
    - *Submission*: the submission's name in the CRDC Submission Portal (for example "COTC021 Methylation"), first on purpose because it is the handle everyone uses. Use the same name as the paired Data Loading Task's table so the two tickets line up. If the Portal name is unknown, use a descriptive label and confirm it with the Data Concierge.
    - *Release Package*: the directory name within the Release Package bucket, rendered as a clickable S3-console link. It holds that submission's indexd.tsv manifest. PLACEHOLDER until the study is released from the Portal.
-   - *Sample GUID*: the spot-check anchor for that submission's manifest. PLACEHOLDER until minted.
+   - *Sample GUID*: the GUID actually tested in that submission's spot-check (see Verification). PLACEHOLDER until the spot-check runs; whoever runs it enters the tested GUID here.
 
    **Clickable Release Package links**: `[<timestamp>-<submission-id>/|<url>]`, which renders correctly inside a table cell. The `prefix=` value is the directory URL-encoded (colons as `%3A`):
 
@@ -82,7 +82,7 @@ Each section header is a Jira wiki `h3.` heading with the emoji and a bold title
 
 4. `h3. 🧪 *Verification*`: How ICDC confirms the registration worked. Labeled bullets (`* *Label*: content`):
 
-   - *Spot-check method*: for every row in the table, resolve its Sample GUID at `https://nci-crdc.datacommons.io/index/<guid>` and paste the returned IndexD record into a comment on this ticket, labeled with the submission name. A pass returns the record with `urls` pointing to the expected object-files location, a non-empty `acl`, and non-empty `size` and `hashes`.
+   - *Spot-check method*: for every row in the table, pick one GUID from that submission's indexd.tsv manifest, resolve it at `https://nci-crdc.datacommons.io/index/<guid>`, enter the tested GUID in that row's Sample GUID cell, and paste the returned IndexD record into a comment on this ticket, labeled with the submission name. A pass returns the record with `urls` pointing to the expected object-files location, a non-empty `acl`, and non-empty `size` and `hashes`.
    - *Why one per submission*: each submission has its own manifest, so a pass on one says nothing about the others.
    - *If a check fails*: do not close. Reopen the relevant CRINTAKE ticket with the GUID and the resolution-endpoint response, coordinate the fix with the DCF, and surface the issue on the Data Submission Epic.
 
@@ -164,7 +164,7 @@ Each section header is a Jira wiki `h3.` heading with the emoji and a bold title
 
 **Changelog**
 
-- **v7 (2026-10-22)**: Table slimmed to three columns: **Submission, Release Package, Sample GUID**. Dropped CRDC Submission ID (embedded in the Release Package directory name and carried by the Data Loading Task), Index? (every row is implicitly indexed, so metadata-only submissions no longer get a row), and Intake batch (the CRINTAKE links carry it). Lockstep with CTDC DO-INDEX v10.
+- **v7 (2026-10-22)**: Table slimmed to three columns: **Submission, Release Package, Sample GUID**. Dropped CRDC Submission ID (embedded in the Release Package directory name and carried by the Data Loading Task), Index? (every row is implicitly indexed, so metadata-only submissions no longer get a row), and Intake batch (the CRINTAKE links carry it). Lockstep with CTDC DO-INDEX v10. The Sample GUID cell records the GUID actually tested in the spot-check, entered when the spot-check runs (PLACEHOLDER until then).
 - **v6 (2026-10-22)**: Realigned with CTDC DO-INDEX v9 (same layout and rules; platform specifics differ). The indexing team is the **DCF** throughout. Added the standing `ICDC Data Related` sprint rule (id 6645), `Relates` links to **each submission's DHDM tracker**, and an explicit no-ticket-keys rule. Close trigger no longer "clears the paired Data Loading Task" (the two run in parallel). Spot-check pass now also requires a non-empty `acl`, and a failure is surfaced on the Data Submission Epic. Study record link is "when one exists". Loading is described as Prefect, not Jenkins. "Study update" replaces "data update". History moved to this changelog.
 - **v5 (2026-10-09)**: Aligned with CTDC IndexD v8. Dropped the 📝 Notes section (4 sections); headers take a bold title and labeled lines use `* *Label*: content`.
 - **v4 (2026-10-08)**: One row per submission (Submission, CRDC Submission ID, Release Package, Index?, Sample GUID, Intake batch) after ICDC-4193 outgrew the five-row field/value table; constants as bare-value bullets; metadata-only rows marked Index = No; one CRINTAKE ticket per handoff batch; one spot-check per indexed submission; descriptions authored in Jira wiki markup; Confirmation & verification phase added.
