@@ -40,14 +40,15 @@ Each section header is a Jira wiki `h3.` heading with the emoji and a bold title
    * *AWS Account ID*: {{152091478849}}
    * *Release Package bucket*: {{nci-cbiit-caninedatacommons-dev}}
 
-   ||Submission||Release Package||Sample GUID||
-   |COTC021 Methylation|[<timestamp>-<submission-id>/|<S3 console URL>]|dg.4DFC/<guid>|
-   |COTC021 Low Pass WGS|[<timestamp>-<submission-id>/|<S3 console URL>]|dg.4DFC/<guid>|
-   |COTC021 Deep WGS|[<timestamp>-<submission-id>/|<S3 console URL>]|dg.4DFC/<guid>|
+   ||Submission||CRDC Submission ID||Release Package||Sample GUID||
+   |COTC021 Methylation|<submission-id>|[<timestamp>-<submission-id>/|<S3 console URL>]|dg.4DFC/<guid>|
+   |COTC021 Low Pass WGS|<submission-id>|[<timestamp>-<submission-id>/|<S3 console URL>]|dg.4DFC/<guid>|
+   |COTC021 Deep WGS|<submission-id>|[<timestamp>-<submission-id>/|<S3 console URL>]|dg.4DFC/<guid>|
    ```
 
    **Columns:**
    - *Submission*: the submission's name in the CRDC Submission Portal (for example "COTC021 Methylation"), first on purpose because it is the handle everyone uses. Use the same name as the paired Data Loading Task's table so the two tickets line up. If the Portal name is unknown, use a descriptive label and confirm it with the Data Concierge.
+   - *CRDC Submission ID*: issued by the CRDC Submission Portal. Plain text, no `{{ }}`. Use the same value as the paired Data Loading Task's row so the two tickets line up on the ID as well as the name.
    - *Release Package*: the directory name within the Release Package bucket, rendered as a clickable S3-console link. It holds that submission's indexd.tsv manifest. PLACEHOLDER until the study is released from the Portal.
    - *Sample GUID*: the GUID actually tested in that submission's spot-check (see Verification). PLACEHOLDER until the spot-check runs; whoever runs it enters the tested GUID here.
 
@@ -61,7 +62,7 @@ Each section header is a Jira wiki `h3.` heading with the emoji and a bold title
 
    **Only submissions being indexed get a row.** Every row is implicitly indexed, so there is no Index? column. Metadata-only submissions (publication corrections, study-detail refreshes) have nothing to register and are left out; they appear on the paired Data Loading Task, which lists every submission.
 
-   **Not in the table**: CRDC Submission ID (it is embedded in the Release Package directory name, and the Data Loading Task carries it); intake batch (the CRINTAKE links in the Links panel show which handoff covered what); GUID prefix (always `dg.4DFC/`); manifest path (it's in the Release Package); data model version (belongs on the Data Loading Task); object files location (the manifest's `url` column has it); ACL value (the manifest's `acl` column has it).
+   **Not in the table**: intake batch (the CRINTAKE links in the Links panel show which handoff covered what); GUID prefix (always `dg.4DFC/`); manifest path (it's in the Release Package); data model version (belongs on the Data Loading Task); object files location (the manifest's `url` column has it); ACL value (the manifest's `acl` column has it).
 
 3. `h3. 🚦 *Registration Workflow*`: Numbered `#` list in three phases, each introduced by a bold label. Put a blank line after the heading and after each bold phase label so the lists render cleanly. Never hardcode a submission or manifest count; refer to "each submission in the table" so the table stays the single source of truth.
 
@@ -164,6 +165,7 @@ Each section header is a Jira wiki `h3.` heading with the emoji and a bold title
 
 **Changelog**
 
+- **v8 (2026-10-22)**: Restored the **CRDC Submission ID** column, after Submission: **Submission, CRDC Submission ID, Release Package, Sample GUID**. The ID is the key the Data Hub and the CRDC Submission Portal use, and having it in its own column keeps the IndexD table lined up with the Data Loading Task's table, which already carries it. Lockstep with CTDC DO-INDEX v11.
 - **v7 (2026-10-22)**: Table slimmed to three columns: **Submission, Release Package, Sample GUID**. Dropped CRDC Submission ID (embedded in the Release Package directory name and carried by the Data Loading Task), Index? (every row is implicitly indexed, so metadata-only submissions no longer get a row), and Intake batch (the CRINTAKE links carry it). Lockstep with CTDC DO-INDEX v10. The Sample GUID cell records the GUID actually tested in the spot-check, entered when the spot-check runs (PLACEHOLDER until then).
 - **v6 (2026-10-22)**: Realigned with CTDC DO-INDEX v9 (same layout and rules; platform specifics differ). The indexing team is the **DCF** throughout. Added the standing `ICDC Data Related` sprint rule (id 6645), `Relates` links to **each submission's DHDM tracker**, and an explicit no-ticket-keys rule. Close trigger no longer "clears the paired Data Loading Task" (the two run in parallel). Spot-check pass now also requires a non-empty `acl`, and a failure is surfaced on the Data Submission Epic. Study record link is "when one exists". Loading is described as Prefect, not Jenkins. "Study update" replaces "data update". History moved to this changelog.
 - **v5 (2026-10-09)**: Aligned with CTDC IndexD v8. Dropped the 📝 Notes section (4 sections); headers take a bold title and labeled lines use `* *Label*: content`.
