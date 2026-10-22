@@ -10,7 +10,9 @@ A release deployment is not a finding and not a DevOps change. One release can c
 
 The Deployment Package task answers "what shipped" before anything moves. It pins the exact version of every microservice in the release, so DevOps deploys a known package to Stage and the same package to Production. It blocks both deployment tasks: a deployment cannot start until the package it deploys is defined.
 
-Stage and Production get separate tasks because they are separate events: each has its own ServiceNow ticket, its own scheduled date, and its own outcome. Separate tasks let Stage close when Stage is done, give each task a due date that matches its own deployment, and make a Production delay visible on its own ticket.
+Stage and Production get separate tasks because they are separate events: each has its own ServiceNow ticket, its own scheduled date, and its own outcome. Separate tasks let Stage close when Stage is done and make a Production delay visible on its own ticket.
+
+**Dates live on the Release Dashboard, never in the tickets.** Deployment dates move, and a date copied into a ticket goes stale silently. Release tickets carry no Due Date and no date in their body; the Release Dashboard is the one place a deployment date is set and changed.
 
 **Who fills what**
 
@@ -22,7 +24,7 @@ The release tickets are created by the TPM with their structure and links in pla
 | Fix Versions | Developers | Their own story, bug, and finding tickets, never the release tickets |
 | Microservice versions and Deployment Package Number | Tech lead, through the Deployment Package task | The Release Dashboard, never the tickets |
 | Service Now Cloud One Ticket Link | DevOps engineer | Each deployment task's Tracking table |
-| Due dates | TPM | Each Deployment Package and deployment task's Due Date field |
+| Deployment dates | TPM | The Release Dashboard, never the tickets |
 
 **Where the Release Dashboards live**
 
@@ -74,7 +76,7 @@ One per release, created first; it blocks both deployment tasks.
 * *Developer* (`customfield_23650`): `[{"name": "ranaab"}]`.
 * *Labels*: `release`, `deployment`
 * *Fix Version*: leave empty.
-* *Due Date*: before the Stage deployment task's Due Date, leaving time to file the Stage ServiceNow request.
+* *Due Date*: leave empty. Schedule this work so it finishes before the Stage deployment date on the Release Dashboard, leaving time to file the Stage ServiceNow request.
 * *Issue links*: "blocks" the Stage task and "blocks" the Production task.
 
 **Body**: three sections (🎯 Task Summary · 🚦 Workflow · ✅ Definition of Done), Jira wiki markup:
@@ -113,7 +115,7 @@ Two tasks per release, identical except the environment word (**Stage** / **Prod
 * *Developer* (`customfield_23650`): `[{"name": "nguca"}]`. The field rejects a bare username string.
 * *Labels*: `release`, `deployment`, `devops`
 * *Fix Version*: leave empty. Fix Versions belong to the work being shipped, not to the tasks that ship it.
-* *Due Date*: the scheduled deployment date for that tier. The Production date must fall no later than the earliest SLA due date of any security finding shipping in the release, and before the next scheduled Prod Invicti scan. If either condition cannot be met, raise it with the TPM before the date is set.
+* *Due Date*: leave empty. The deployment date for each tier is set on the Release Dashboard. When setting it there, the Production date must fall no later than the earliest SLA due date of any security finding shipping in the release, and before the next scheduled Prod Invicti scan; if either condition cannot be met, raise it with the TPM before the date is set.
 * *Issue links*: both tasks are "blocked by" the Deployment Package task and "relate to" the Invicti scan epic(s) whose findings the release remediates, and the Stage task "blocks" the Production task. Never cite ticket keys in the body.
 
 **Body**: four sections (🎯 Deployment Summary · 🚦 Workflow · 📋 Tracking · ✅ Definition of Done), Jira wiki markup. There is no handoff step or Handoff bullet: the handoff is the ticket's status change in Jira.
@@ -153,7 +155,7 @@ h3. ✅ *Definition of Done*
 
 ## Creating each month's tasks
 
-1. Create the Deployment Package task, then the Stage and Production tasks, each with a placeholder body; then `jira_update_issue` each with the body above, the Due Date, and labels.
+1. Create the Deployment Package task, then the Stage and Production tasks, each with a placeholder body; then `jira_update_issue` each with the body above and labels. Leave Due Date empty.
 2. Set the epic link (`customfield_12350`) and Developer (`customfield_23650`) on each and confirm both with `jira_get_issue`.
 3. Swap `<Month YYYY>` and `<Stage | Production>` in the summary and body, resolve the two `[Production only: ...]` phrases (keep the words on Production, delete them on Stage), and paste the month's Release Dashboard link. The Release Dashboard must always be linked; a release task without one is incomplete.
 4. Link the Deployment Package task "Blocks" the Stage task and "Blocks" the Production task; link both deployment tasks to each Invicti scan epic the release remediates ("Related To"); and link Stage "Blocks" Production.
@@ -165,6 +167,7 @@ At the start of each fiscal year, create the new standing epic before the Octobe
 
 ## Changelog
 
+* *v1.5 (2026-10-22)*: Dates live on the Release Dashboard only: release tickets carry no Due Date and no date in their body, because deployment dates change and a copied date goes stale. The Invicti SLA rule for the Production date now applies to the date set on the Release Dashboard. Ownership table row renamed to "Deployment dates". CTDC changed in lockstep (v7).
 * *v1.4 (2026-10-22)*: Added the **Deployment Package task**: the Tech Lead identifies every microservice version and records the Deployment Package Number on the Release Dashboard; it blocks both deployment tasks. Canonical ICDC-4296 (October 2026). Ownership table and creation steps updated to match. Stated that tickets are created from this spec, not cloned. CTDC changed in lockstep (v6), and also dropped its Jira clone-source tickets so both projects use the same create-from-spec model.
 * *v1.3 (2026-10-22)*: Adopted the wording already in use on ICDC-4291 and ICDC-4292: "monthly release" in the Deployment Summary; "Deployment Package" replaces "the build" in Workflow step 4 and the Definition of Done; new *Deployment Package* Definition of Done bullet tying the deployed package to the Deployment Package Number on the Release Dashboard, with Production also requiring the same package verified in Stage. Removed the *Handoff* Definition of Done bullet and the "notify the TPM" clause from Workflow step 4: the handoff is the ticket's status change in Jira. CTDC updated in lockstep (v4).
 * *v1.2 (2026-10-20)*: Added ✅ Definition of Done as the fourth deployment-task section (matching CTDC v3). Recorded where Release Dashboards live (one folder per calendar year). Epic assignee left to the TPM's direction.
