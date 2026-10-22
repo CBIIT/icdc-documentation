@@ -1,6 +1,6 @@
-### 🔖 IndexD Registration Task Template (v6)
+### 🔖 IndexD Registration Task Template (v7)
 
-> **Use this template for every ICDC data management task that registers a study's files in CRDC IndexD, minting the GUIDs that the paired Data Loading Task will reference.** Canonical examples: **ICDC-4193** (Data Indexing: COP COTC021 v.3; four submissions in two intake batches, one metadata-only) and **ICDC-4194** (Data Indexing: COP COTC022 v.3; three submissions, one batch; the wording reference). This template covers the **upstream artifact creation** work pattern within the loading-data sub-function; it is the **parallel partner** of a Data Loading Task, not a substitute for one, and not a blocker of one. Kept in lockstep with CTDC's IndexD Registration Task template (DO-INDEX v9); the differences are the platform specifics noted below. See "When NOT to use this template" at the end.
+> **Use this template for every ICDC data management task that registers a study's files in CRDC IndexD, minting the GUIDs that the paired Data Loading Task will reference.** Canonical examples: **ICDC-4193** (Data Indexing: COP COTC021 v.3; three indexed submissions across two CRINTAKE handoffs) and **ICDC-4194** (Data Indexing: COP COTC022 v.3; two indexed submissions, one handoff; the wording reference). This template covers the **upstream artifact creation** work pattern within the loading-data sub-function; it is the **parallel partner** of a Data Loading Task, not a substitute for one, and not a blocker of one. Kept in lockstep with CTDC's IndexD Registration Task template (DO-INDEX v10); the differences are the platform specifics noted below. See "When NOT to use this template" at the end.
 
 **Why this template**
 
@@ -34,25 +34,22 @@ Each section header is a Jira wiki `h3.` heading with the emoji and a bold title
 
 1. `h3. 🎯 *Registration Summary*`: **Two sentences.** First, what's being indexed and that the paired Data Loading Task will reference the GUIDs. Second, a **bold new-vs-existing study marker**: a new study's first registration, or a study update to an existing study with its version. Do **not** restate anything else (submission count, chronology, file counts, on-hold status): that lives on the Data Submission Epic or in Jira statuses. Study-update example: *"Register the COTC021 v.3 object files in CRDC IndexD, minting the GUIDs that the paired Data Loading Task will reference. **COTC021 is an existing ICDC study; this is a study update (v.3), not a new study registration.**"* New-study example: *"Register the COTC0XX study files in CRDC IndexD, minting GUIDs for the object files that the paired Data Loading Task will reference. **COTC0XX is a new ICDC study; this is its first registration.**"*
 
-2. `h3. 📦 *Submission & Artifacts*`: Required. Two bare-value constant bullets, then a table with **one row per CRDC submission** in the study update. No intro sentence, no explanatory text on the constants.
+2. `h3. 📦 *Submission & Artifacts*`: Required. Two bare-value constant bullets, then a table with **one row per CRDC submission being indexed** (every submission that carries object files). No intro sentence, no explanatory text on the constants.
 
    ```
    * *AWS Account ID*: {{152091478849}}
    * *Release Package bucket*: {{nci-cbiit-caninedatacommons-dev}}
 
-   ||Submission||CRDC Submission ID||Release Package||Index?||Sample GUID||Intake batch||
-   |COTC021 Methylation|<submission-id>|[<timestamp>-<submission-id>/|<S3 console URL>]|Yes|dg.4DFC/<guid>|Batch 1|
-   |COTC021 Deep WGS|<submission-id>|[<timestamp>-<submission-id>/|<S3 console URL>]|Yes|dg.4DFC/<guid>|Batch 2|
-   |Publication corrections|<submission-id>|[<timestamp>-<submission-id>/|<S3 console URL>]|No, no indexing required|N/A|N/A|
+   ||Submission||Release Package||Sample GUID||
+   |COTC021 Methylation|[<timestamp>-<submission-id>/|<S3 console URL>]|dg.4DFC/<guid>|
+   |COTC021 Low Pass WGS|[<timestamp>-<submission-id>/|<S3 console URL>]|dg.4DFC/<guid>|
+   |COTC021 Deep WGS|[<timestamp>-<submission-id>/|<S3 console URL>]|dg.4DFC/<guid>|
    ```
 
    **Columns:**
-   - *Submission*: the submission's name in the CRDC Submission Portal (for example "COTC021 Methylation"), first on purpose because it is the handle everyone uses. Use the same name as the paired Data Loading Task's table so the two tickets line up row for row. If the Portal name is unknown, use a descriptive label and confirm it with the Data Concierge.
-   - *CRDC Submission ID*: issued by the CRDC Submission Portal. Plain text, no `{{ }}`.
+   - *Submission*: the submission's name in the CRDC Submission Portal (for example "COTC021 Methylation"), first on purpose because it is the handle everyone uses. Use the same name as the paired Data Loading Task's table so the two tickets line up. If the Portal name is unknown, use a descriptive label and confirm it with the Data Concierge.
    - *Release Package*: the directory name within the Release Package bucket, rendered as a clickable S3-console link. It holds that submission's indexd.tsv manifest. PLACEHOLDER until the study is released from the Portal.
-   - *Index?*: `Yes` when the submission carries object files to register; `No, no indexing required` for metadata-only submissions (publication corrections, study-detail refreshes), which still get a row so the table accounts for every submission.
-   - *Sample GUID*: the spot-check anchor for that submission's manifest. PLACEHOLDER until minted; `N/A` for Index = No.
-   - *Intake batch*: which CRINTAKE handoff covered this submission (`Batch 1`, `Batch 2`, ...). Batch numbers, not CRINTAKE keys; `N/A` for Index = No.
+   - *Sample GUID*: the spot-check anchor for that submission's manifest. PLACEHOLDER until minted.
 
    **Clickable Release Package links**: `[<timestamp>-<submission-id>/|<url>]`, which renders correctly inside a table cell. The `prefix=` value is the directory URL-encoded (colons as `%3A`):
 
@@ -60,30 +57,32 @@ Each section header is a Jira wiki `h3.` heading with the emoji and a bold title
    https://us-east-1.console.aws.amazon.com/s3/buckets/nci-cbiit-caninedatacommons-dev?region=us-east-1&prefix=<URL-ENCODED-DIR>/&showversions=false
    ```
 
-   **Why one row per submission**: one study update can span several CRDC submissions, each with its own Release Package and manifest. A field/value table with semicolon-separated cells relied on matching positions across rows; on ICDC-4193 a late-arriving submission had nowhere to go and hardcoded counts went stale. A row per submission makes each submission self-contained and a late arrival a single new row. The Data Loading Task uses the same rows, so the paired tickets line up.
+   **Why one row per submission**: one study update can span several CRDC submissions, each with its own Release Package and manifest. A field/value table with semicolon-separated cells relied on matching positions across rows; on ICDC-4193 a late-arriving submission had nowhere to go and hardcoded counts went stale. A row per submission makes each submission self-contained and a late arrival a single new row.
 
-   **Not in the table**: GUID prefix (always `dg.4DFC/`); manifest path (it's in the Release Package); data model version (belongs on the Data Loading Task); object files location (the manifest's `url` column has it); ACL value (the manifest's `acl` column has it).
+   **Only submissions being indexed get a row.** Every row is implicitly indexed, so there is no Index? column. Metadata-only submissions (publication corrections, study-detail refreshes) have nothing to register and are left out; they appear on the paired Data Loading Task, which lists every submission.
 
-3. `h3. 🚦 *Registration Workflow*`: Numbered `#` list in three phases, each introduced by a bold label. Put a blank line after the heading and after each bold phase label so the lists render cleanly. Never hardcode a submission or manifest count; refer to "each submission marked Index = Yes" so the table stays the single source of truth.
+   **Not in the table**: CRDC Submission ID (it is embedded in the Release Package directory name, and the Data Loading Task carries it); intake batch (the CRINTAKE links in the Links panel show which handoff covered what); GUID prefix (always `dg.4DFC/`); manifest path (it's in the Release Package); data model version (belongs on the Data Loading Task); object files location (the manifest's `url` column has it); ACL value (the manifest's `acl` column has it).
+
+3. `h3. 🚦 *Registration Workflow*`: Numbered `#` list in three phases, each introduced by a bold label. Put a blank line after the heading and after each bold phase label so the lists render cleanly. Never hardcode a submission or manifest count; refer to "each submission in the table" so the table stays the single source of truth.
 
    **Pre-registration**
-   1. For each submission marked Index = Yes, extract the indexd.tsv manifest from its Release Package in `nci-cbiit-caninedatacommons-dev`. Validate that every row carries a non-empty `acl` and that it is the same open-access value on every row, the row count matches the file count, every row's `url` is well-formed (a format check is enough), and the GUIDs use the `dg.4DFC/` prefix.
+   1. For each submission in the table, extract the indexd.tsv manifest from its Release Package in `nci-cbiit-caninedatacommons-dev`. Validate that every row carries a non-empty `acl` and that it is the same open-access value on every row, the row count matches the file count, every row's `url` is well-formed (a format check is enough), and the GUIDs use the `dg.4DFC/` prefix.
 
    **External handoff**
    2. Upload each manifest to the DCF Google Drive folder for indexing; keep the Release Package filenames.
-   3. File a CRINTAKE intake ticket describing this study update, naming every manifest in the batch and any requested due date. A submission that arrives after an intake ticket is filed goes on a new intake ticket; record the batch in the Intake batch column.
+   3. File a CRINTAKE intake ticket describing this study update, naming every manifest in this handoff and any requested due date. A submission that arrives after an intake ticket is filed goes on a new intake ticket.
    4. Link each CRINTAKE ticket to this ticket with a native Jira link.
    5. If a due date is communicated, notify the NCI CRDC (Leidos) PM and the NCI DCFS PM as early as possible.
 
    **Confirmation & verification**
-   6. Monitor each CRINTAKE ticket; its status shows when the DCF has finished indexing that batch.
-   7. Once every batch is complete, run the GUID spot-checks (see Verification). Passing spot-checks are the trigger to close this ticket.
+   6. Monitor each CRINTAKE ticket; its status shows when the DCF has finished indexing its manifests.
+   7. Once every CRINTAKE ticket is complete, run the GUID spot-checks (see Verification). Passing spot-checks are the trigger to close this ticket.
 
    **Step count: 7 (1 pre-registration, 4 external handoff, 2 confirmation & verification).** Step 7 is the only place the close trigger is stated.
 
 4. `h3. 🧪 *Verification*`: How ICDC confirms the registration worked. Labeled bullets (`* *Label*: content`):
 
-   - *Spot-check method*: for every row marked Index = Yes, resolve its Sample GUID at `https://nci-crdc.datacommons.io/index/<guid>` and paste the returned IndexD record into a comment on this ticket, labeled with the submission name. A pass returns the record with `urls` pointing to the expected object-files location, a non-empty `acl`, and non-empty `size` and `hashes`.
+   - *Spot-check method*: for every row in the table, resolve its Sample GUID at `https://nci-crdc.datacommons.io/index/<guid>` and paste the returned IndexD record into a comment on this ticket, labeled with the submission name. A pass returns the record with `urls` pointing to the expected object-files location, a non-empty `acl`, and non-empty `size` and `hashes`.
    - *Why one per submission*: each submission has its own manifest, so a pass on one says nothing about the others.
    - *If a check fails*: do not close. Reopen the relevant CRINTAKE ticket with the GUID and the resolution-endpoint response, coordinate the fix with the DCF, and surface the issue on the Data Submission Epic.
 
@@ -112,8 +111,8 @@ Each section header is a Jira wiki `h3.` heading with the emoji and a bold title
 - **All four sections are required**, in order: Registration Summary, Submission & Artifacts, Registration Workflow, Verification.
 - **No Acceptance Criteria or Open Questions / Risks sections.** The completion bar is the GUID spot-checks; risks belong on the Data Submission Epic.
 - **Registration Summary carries the new-vs-existing study marker** as its bold second sentence: a new study's first registration, or a study update with its version.
-- **One Task per study update.** All submissions for one study version go on one registration ticket, one row each. CRINTAKE tickets are one per handoff batch, so one registration ticket can carry several.
-- **Submission & Artifacts table is mandatory and complete at creation.** One row per submission, every column populated; PLACEHOLDER when a value is pending, never a blank cell.
+- **One Task per study update.** All submissions for one study version go on one registration ticket, one row each. CRINTAKE tickets are one per handoff, so one registration ticket can carry several.
+- **Submission & Artifacts table is mandatory and complete at creation.** One row per submission being indexed (metadata-only submissions are left out), every column populated; PLACEHOLDER when a value is pending, never a blank cell.
 - **Non-vital scope detail goes in a comment, not the description.** File counts, file-type breakdowns, and study-content context go in a plain-text study-update context comment.
 - **Spot-check method and pass criteria are explicit in Verification**, so the close trigger is reproducible by anyone reading the ticket.
 - **Issue type is Task.** Do not use Story or Subtask.
@@ -141,14 +140,14 @@ Each section header is a Jira wiki `h3.` heading with the emoji and a bold title
 6. Add the ticket to the `ICDC Data Related` sprint (id 6645) via `jira_add_issues_to_sprint`.
 7. Add the `Relates` links: each submission's DHDM tracker, the paired Data Loading Task, and the study record if one exists.
 8. Post the study-update context comment (file counts, file-type breakdown) as plain text, then verify the rendered description with a UI screenshot.
-9. As the work progresses, add a "Related To" link to each CRINTAKE ticket once filed, and add a row (with the next batch number) for any late-arriving submission.
+9. As the work progresses, add a "Related To" link to each CRINTAKE ticket once filed, and add a row for any late-arriving submission.
 10. After every indexed submission's spot-check passes, transition the ticket to Closed with resolution `Fixed`.
 
 **When to expand vs trim**
 
 - **Single-submission registration** → one table row; everything else as written.
-- **Multi-submission registration** → one row per submission, metadata-only submissions included as Index = No. One ticket.
-- **Late-arriving submission** → add a row with the next batch number, file and link a new CRINTAKE ticket, link its DHDM tracker, and update the context comment's counts. Do not open a second registration ticket.
+- **Multi-submission registration** → one row per submission being indexed; metadata-only submissions are left out. One ticket.
+- **Late-arriving submission** → add a row, file and link a new CRINTAKE ticket, link its DHDM tracker, and update the context comment's counts. Do not open a second registration ticket.
 - **Re-registration after a file correction** → use the template as written; explain the reason in a comment and reference IndexD's `baseid` / `rev` versioning.
 
 **When NOT to use this template**
@@ -161,10 +160,11 @@ Each section header is a Jira wiki `h3.` heading with the emoji and a bold title
 
 **Canonical examples**
 
-**ICDC-4193** (*Data Indexing: COP COTC021 v.3*) and **ICDC-4194** (*Data Indexing: COP COTC022 v.3*). ICDC-4194 carries Gina's slimming edits and is the wording reference. Both have the one-row-per-submission table (ICDC-4193: four rows across two batches, including a metadata-only Publication corrections row; ICDC-4194: three rows, one batch), the three-phase workflow, one spot-check comment per indexed submission, a plain-text study-update context comment, and native links to the study record, the paired load, and each CRINTAKE ticket.
+**ICDC-4193** (*Data Indexing: COP COTC021 v.3*) and **ICDC-4194** (*Data Indexing: COP COTC022 v.3*). ICDC-4194 carries Gina's slimming edits and is the wording reference. Both have the one-row-per-submission table (ICDC-4193: Methylation, Low Pass WGS, Deep WGS; ICDC-4194: Methylation, Low Pass WGS), the three-phase workflow, one spot-check comment per indexed submission, a plain-text study-update context comment, and native links to the study record, the paired load, and each CRINTAKE ticket.
 
 **Changelog**
 
+- **v7 (2026-10-22)**: Table slimmed to three columns: **Submission, Release Package, Sample GUID**. Dropped CRDC Submission ID (embedded in the Release Package directory name and carried by the Data Loading Task), Index? (every row is implicitly indexed, so metadata-only submissions no longer get a row), and Intake batch (the CRINTAKE links carry it). Lockstep with CTDC DO-INDEX v10.
 - **v6 (2026-10-22)**: Realigned with CTDC DO-INDEX v9 (same layout and rules; platform specifics differ). The indexing team is the **DCF** throughout. Added the standing `ICDC Data Related` sprint rule (id 6645), `Relates` links to **each submission's DHDM tracker**, and an explicit no-ticket-keys rule. Close trigger no longer "clears the paired Data Loading Task" (the two run in parallel). Spot-check pass now also requires a non-empty `acl`, and a failure is surfaced on the Data Submission Epic. Study record link is "when one exists". Loading is described as Prefect, not Jenkins. "Study update" replaces "data update". History moved to this changelog.
 - **v5 (2026-10-09)**: Aligned with CTDC IndexD v8. Dropped the 📝 Notes section (4 sections); headers take a bold title and labeled lines use `* *Label*: content`.
 - **v4 (2026-10-08)**: One row per submission (Submission, CRDC Submission ID, Release Package, Index?, Sample GUID, Intake batch) after ICDC-4193 outgrew the five-row field/value table; constants as bare-value bullets; metadata-only rows marked Index = No; one CRINTAKE ticket per handoff batch; one spot-check per indexed submission; descriptions authored in Jira wiki markup; Confirmation & verification phase added.
