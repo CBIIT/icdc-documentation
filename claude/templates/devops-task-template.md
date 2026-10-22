@@ -1,4 +1,4 @@
-### 🛠️ DevOps Task Template (v1.1, mirrors CTDC 7l v1, filled with ICDC info)
+### 🛠️ DevOps Task Template (v1.2, mirrors CTDC 7l v1, filled with ICDC info)
 
 > **Use this template for every ICDC DevOps task**: infrastructure changes, engine or platform upgrades, environment variable changes, bucket or access setup, Prefect worker and pipeline infrastructure, and security remediation on infrastructure. The canonical example is **ICDC-4274 (DevOps: Set up and test the upper-tier Prefect workers for ICDC)**, the first ICDC ticket built on this template, under the Jenkins to Prefect migration epic. CTDC's canonical is CTDC-2261 (an Aurora RDS engine upgrade).
 >
@@ -70,7 +70,7 @@ Each header is a Jira wiki `h3.` heading using the emoji + bold title format sho
    2. File the NCI ServiceNow request for STAGE at https://service.cancer.gov/ncisp, add the TPM (`kuffelgr`) as a watcher, and record it in ServiceNow Requests.
    3. CloudOne applies the change to STAGE in the scheduled window; verify and update Environments.
    4. Repeat for PROD only after STAGE is verified.
-   5. Update the tables as each step completes and notify the TPM.
+   5. Update the tables as each step completes.
 
 7. `h3. ✅ *Definition of Done*`: Labeled bullets, the standard set:
    * `* *Tiers*:` every in-scope tier marked Done in Environments
@@ -78,7 +78,6 @@ Each header is a Jira wiki `h3.` heading using the emoji + bold title format sho
    * `* *ServiceNow*:` every request closed by CloudOne
    * `* *Verification*:` the application or pipeline is confirmed working in each changed tier
    * `* *Documentation*:` any runbook, README, or deployment config reflecting the change is updated
-   * `* *Handoff*:` TPM notified
 
 **Standing emoji set (7 entries)**
 
@@ -94,6 +93,7 @@ Each header is a Jira wiki `h3.` heading using the emoji + bold title format sho
 
 **Required content rules (DevOps Task specific: the universal patterns in `README.md` also apply)**
 
+* *No handoff step or Handoff bullet*: the handoff is the ticket's status change in Jira, so neither the Workflow nor the Definition of Done ends with notifying the TPM.
 * *Never put a secret value in Jira*: not in the description, comments, or attachments. Jira is readable by far more people than the secret should be, and its history keeps every old version forever. Record the variable name and where the value lives; hand the value to CloudOne through the ServiceNow request or the secret store itself. Role ARNs and account IDs are identifiers, not secrets, and may appear.
 * *All four tiers in Environments*: even when only one is in scope.
 * *Upper tiers go through ServiceNow*: no STAGE or PROD row moves to Done without a matching ServiceNow Requests row.
@@ -118,5 +118,6 @@ Each header is a Jira wiki `h3.` heading using the emoji + bold title format sho
 
 **Changelog**
 
+* *v1.2 (2026-10-22)*: Removed the "notify the TPM" clause from the last Workflow step and the *Handoff* Definition of Done bullet; the handoff is the ticket's status change in Jira. CTDC changed in lockstep (v1.1).
 * *v1.1 (2026-10-20)*: Release deployments now point to the new ICDC Release Ticket Templates (`release-ticket-templates.md`). No change to the 7 sections.
 * *v1 (2026-10-13)*: Ported from CTDC's DevOps Task Template (7l v1, 2026-10-07), same 7 sections. ICDC differences: one TPM watcher (`kuffelgr`); ICDC specifics section (Prefect worker sets and the nonprod bucket boundary, Neo4j, Jenkins retired); no link to CTDC's release templates (ICDC has none yet). Canonical ICDC-4274.
