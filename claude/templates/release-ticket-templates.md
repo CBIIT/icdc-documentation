@@ -19,7 +19,7 @@ The deployment tasks are created by the TPM with their structure and links in pl
 | Ticket structure, Release Dashboard link, scan epic link | TPM | Each deployment task (at creation) |
 | Fix Versions | Developers | Their own story, bug, and finding tickets, never the deployment tasks |
 | Service Now Cloud One Ticket Link | DevOps engineer | Each deployment task's Tracking table |
-| Deployment package number | Tech lead | The Release Dashboard, never the tickets |
+| Deployment Package Number | Tech lead | The Release Dashboard, never the tickets |
 | Due dates | TPM | Each deployment task's Due Date field |
 
 **Where the Release Dashboards live**
@@ -61,7 +61,7 @@ Closes after the September <YYYY+1> release is deployed to Prod.
 
 ## Stage / Production deployment tasks
 
-Two tasks per release, identical except the environment word (**Stage** / **Production**).
+Two tasks per release, identical except the environment word (**Stage** / **Production**) and two Production-only phrases that pin Production to the package already verified in Stage (marked below).
 
 **Fields**
 
@@ -75,11 +75,11 @@ Two tasks per release, identical except the environment word (**Stage** / **Prod
 * *Due Date*: the scheduled deployment date for that tier. The Production date must fall no later than the earliest SLA due date of any security finding shipping in the release, and before the next scheduled Prod Invicti scan. If either condition cannot be met, raise it with the TPM before the date is set.
 * *Issue links*: both tasks "relate to" the Invicti scan epic(s) whose findings the release remediates, and the Stage task "blocks" the Production task. Never cite ticket keys in the body.
 
-**Body**: four sections (🎯 Deployment Summary · 🚦 Workflow · 📋 Tracking · ✅ Definition of Done), Jira wiki markup:
+**Body**: four sections (🎯 Deployment Summary · 🚦 Workflow · 📋 Tracking · ✅ Definition of Done), Jira wiki markup. There is no handoff step or Handoff bullet: the handoff is the ticket's status change in Jira.
 
 ```
 h3. 🎯 *Deployment Summary*
-File an NCI ServiceNow ticket so the CloudOne team reserves the date and time to deploy the <Month YYYY> ICDC release to the <Stage | Production> environment.
+File an NCI ServiceNow ticket so the CloudOne team reserves the date and time to deploy the <Month YYYY> monthly release to the ICDC <Stage | Production> environment.
 
 * *Release Dashboard*: [ICDC Monthly Release <Month YYYY>|<Release Dashboard URL>]
 
@@ -87,7 +87,7 @@ h3. 🚦 *Workflow*
 # File the NCI ServiceNow ticket at https://service.cancer.gov/ncisp and add the TPM ({{kuffelgr}}) as a watcher.
 # Create an all-day Outlook calendar invite for the scheduled deployment day (exact time added later) and add the TPM, BE Lead, FE Lead, and CloudOne Engineer.
 # Send the Outlook invite to the assigned CloudOne member and the TPM.
-# Deploy the build to <Stage | Production> on the scheduled date, confirm {{/version}} returns the version recorded in the Release Dashboard, and notify the TPM.
+# Deploy the Deployment Package [Production only: verified in Stage] to <Stage | Production> on the scheduled date and confirm {{/version}} returns the version recorded in the Release Dashboard.
 # Fill in the Tracking table as information becomes available.
 
 h3. 📋 *Tracking*
@@ -96,10 +96,10 @@ h3. 📋 *Tracking*
 
 h3. ✅ *Definition of Done*
 * *ServiceNow*: the Service Now Cloud One ticket is linked in Tracking and closed by CloudOne as successful.
-* *Deployment*: the build is deployed to <Stage | Production> in the scheduled window.
+* *Deployment Package*: the package deployed matches the Deployment Package Number on the Release Dashboard [Production only: and is the same package verified in Stage].
+* *Deployment*: the Deployment Package is deployed to <Stage | Production> in the scheduled window.
 * *Verification*: {{/version}} on <Stage | Production> returns the version recorded in the Release Dashboard, and the application loads and returns data.
 * *Release Dashboard*: the <Stage | Production> deployment date is recorded.
-* *Handoff*: TPM notified.
 ```
 
 ---
@@ -114,7 +114,7 @@ h3. ✅ *Definition of Done*
 
 1. Create the Stage task with a placeholder body, then `jira_update_issue` with the body above, the Due Date, and labels. Repeat for the Production task.
 2. Set the epic link (`customfield_12350`) and Developer (`customfield_23650`) on each and confirm both with `jira_get_issue`.
-3. Swap `<Month YYYY>` and `<Stage | Production>` in the summary and body, and paste the month's Release Dashboard link. The Release Dashboard must always be linked; a deployment task without one is incomplete.
+3. Swap `<Month YYYY>` and `<Stage | Production>` in the summary and body, resolve the two `[Production only: ...]` phrases (keep the words on Production, delete them on Stage), and paste the month's Release Dashboard link. The Release Dashboard must always be linked; a deployment task without one is incomplete.
 4. Link both tasks to each Invicti scan epic the release remediates ("Related To"), and link Stage "Blocks" Production.
 5. Open both tickets in the Jira UI and confirm they render.
 
@@ -124,6 +124,7 @@ At the start of each fiscal year, create the new standing epic before the Octobe
 
 ## Changelog
 
+* *v1.3 (2026-10-22)*: Adopted the wording already in use on ICDC-4291 and ICDC-4292: "monthly release" in the Deployment Summary; "Deployment Package" replaces "the build" in Workflow step 4 and the Definition of Done; new *Deployment Package* Definition of Done bullet tying the deployed package to the Deployment Package Number on the Release Dashboard, with Production also requiring the same package verified in Stage. Removed the *Handoff* Definition of Done bullet and the "notify the TPM" clause from Workflow step 4: the handoff is the ticket's status change in Jira. CTDC updated in lockstep (v4).
 * *v1.2 (2026-10-20)*: Added ✅ Definition of Done as the fourth deployment-task section (matching CTDC v3). Recorded where Release Dashboards live (one folder per calendar year). Epic assignee left to the TPM's direction.
 * *v1.1 (2026-10-20)*: Split the single combined task into separate Stage and Production tasks to match CTDC; Stage blocks Production. Tracking table first column renamed to "Service Now Cloud One Ticket Link" (matching CTDC v3). Canonical ICDC-4291 (Stage) and ICDC-4292 (Production).
 * *v1 (2026-10-20)*: Ported from CTDC's Release Ticket Templates (v2, 2026-10-07). ICDC differences: standing epic is per fiscal year rather than permanent; Release Dashboard link and scan epic link required; ownership table (developers own Fix Versions, DevOps owns ServiceNow links, tech lead owns the package number in the Release Dashboard); Due Date rule tied to the Invicti SLA; version check in the Workflow; no Final Design QA epic (ICDC has not adopted one). Canonical ICDC-4290.
