@@ -168,8 +168,8 @@
     ]
   },
   "team": {
-    "shoutout": "Charles Ngu built the Prefect migration end to end: worker permissions, all three job migrations and the epic. Michael Fleming delivered the IndexD environment variables, JBrowse CORS policy and snapshot bucket sync. Eric Miller took 8 tickets through to Closed, Ambar Rana landed the High Tomcat CVE ahead of its date, Toyo Udosen the Homepage Announcements, and Valentina Epishina held the QA gate.",
-    "whyDisagree": "The Assignee on a closed ICDC ticket is whoever moved it to Closed: this sprint that was mostly Eric (8) and Valentina (QA, 3). Credit comes from the Developer field (customfield_23650): Charles built the four Prefect tickets Eric closed, and Michael Fleming built three more."
+    "shoutout": "Charles Ngu built the Prefect migration end to end: worker permissions, all three job migrations and the epic. Michael Fleming delivered the IndexD environment variables, JBrowse CORS policy and snapshot bucket sync. Ambar Rana landed the High Tomcat CVE ahead of its date and Toyo Udosen shipped the Homepage Announcements. Eric Miller reviewed and closed out the Prefect work, and Valentina Epishina held the QA gate.",
+    "creditNote": "Credit comes from the Jira Developer field (customfield_23650): the person who did the work. The Assignee is usually whoever moved the ticket to Closed, often QA, so it is not charted. A ticket with two developers counts for each; coordination work such as IndexD registration has no Developer by design."
   },
   "carry": {
     "bigNote": "Eleven of them are waiting on review.",

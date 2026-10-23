@@ -47,7 +47,8 @@ Developer field (`customfield_23650`), mapped to display names via `developerNam
 ## What the generator does for you
 
 - Charts on slides 5 and 7 are in **story points**; ticket counts ride in the legend or labels. Slide 3's wheel is **ticket status** (ticket counts, one slice per Jira status); its stat card and breakdown panel carry the points and the pointed coverage.
-- Green means Closed and amber means Carried over. The "What the shape tells us" cards beside the work-type chart always use a neutral NIH Blue stripe.
+- Each Jira status has one color across the deck (the `STATUS` map in `build-deck.js`); slide 7 bars take their status color. Slide 6 charts the Developer field only, and its right-hand card reads `team.creditNote`.
+- Green means Closed and amber means Carried over (amber is never a status color). The "What the shape tells us" cards beside the work-type chart always use a neutral NIH Blue stripe.
 - Bar-chart axes start at 0.
 
 ## Before you write the narrative
