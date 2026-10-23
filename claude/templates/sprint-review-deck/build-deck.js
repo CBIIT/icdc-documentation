@@ -160,10 +160,10 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
   cfg.goals.forEach((g, i) => {
     const [mark, word, col] = GS[gStatus(g)], y = 3.1 + i * gap;
     box(s, 0.6, y, 12.13, rowH); stripe(s, 0.6, y, rowH, col);
-    tb(s, mark, { x: 0.85, y: y + 0.08, w: 0.5, h: 0.4, fontSize: 20, bold: true, color: col, align: 'center', valign: 'middle' });
-    tb(s, word, { x: 0.6, y: y + rowH - 0.28, w: 1.0, h: 0.2, fontSize: 6.5, bold: true, color: col, align: 'center' });
-    tb(s, g.title, { x: 1.55, y: y + 0.07, w: 7.6, h: 0.3, fontFace: H, fontSize: 13, bold: true, color: C.ink });
-    tb(s, g.detail, { x: 1.55, y: y + 0.36, w: 7.6, h: rowH - 0.36, fontSize: 8.5, color: C.muted, valign: 'top' });
+    // one status badge per row (mark + word in a pill), vertically centered: no stacked glyphs that collide on short rows
+    pill(s, `${mark}  ${word}`, 0.82, y + (rowH - 0.28) / 2, 1.15, col, 8);
+    tb(s, g.title, { x: 2.15, y: y + 0.07, w: 7.0, h: 0.3, fontFace: H, fontSize: 13, bold: true, color: C.ink });
+    tb(s, g.detail, { x: 2.15, y: y + 0.36, w: 7.0, h: rowH - 0.36, fontSize: 8.5, color: C.muted, valign: 'top' });
     tb(s, g.refs, { x: 9.3, y: y + 0.07, w: 3.25, h: rowH - 0.14, fontSize: 8.5, bold: true, color: C.blue, align: 'right', valign: 'middle' });
   });
   s.addShape(pres.ShapeType.line, { x: 0.6, y: 6.58, w: 12.13, h: 0, line: { color: C.red, width: 1 } });
