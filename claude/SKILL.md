@@ -690,6 +690,7 @@ claude/
     workflow.md                     ← Team conventions Claude applies automatically.
     data-operations-study-submission-sop.md  ← Data Operations SOP (supports a study submission).
     slack-communication.md          ← Slack communication reference (moved out of SKILL.md Section 14).
+    software-release-playbook.md    ← Software release runbook: phases, gates, go/no-go, close-out.
   templates/
     README.md                                       ← Template inventory + canonical tickets; read first to pick a data-management template.
     data-submission-epic-template.md                ← Data Submission Epic: one epic per study submission.
@@ -732,6 +733,8 @@ claude/
 | `claude/templates/devops-task-template.md` | Drafting or normalizing a DevOps task: infrastructure, Prefect workers, buckets, KMS, security groups, environment variables (7 sections; canonical ICDC-4274) |
 | `claude/templates/general-task-template.md` | Drafting a task no other template covers: backend or API work, spikes, audits and surveys, documentation (4 sections; canonical ICDC-4284) |
 | `claude/conventions/slack-communication.md` | Composing ICDC Slack posts; channels, audiences, and message conventions (moved out of SKILL.md Section 14) |
+| `claude/conventions/software-release-playbook.md` | Planning, running, or closing out a monthly or patch software release |
+| `claude/templates/release-notes-template.md` | Writing the GitHub release notes for a software release (published on `bento-icdc-frontend`, shown on the News page) |
 | `claude/templates/sprint-review-deck/README.md` | Building a Sprint Review + Retro deck; read first, then copy the previous `config.sprintNN.json` |
 
 ### Fetch Strategy by Session Type
