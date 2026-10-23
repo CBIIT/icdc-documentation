@@ -12,7 +12,7 @@ other in the same session. Slide order and content rules: `claude/SKILL.md` §9.
 | `tally.js` | Prints verified counts, story points (by status and type), the resolution-window split and Developer/Assignee tallies. Run it first. |
 | `config.sprintNN.json` | All narrative for one sprint (goals, risks, shout-outs, retro prompts, board URL). Copy the previous sprint's file and edit. |
 | `tickets.sprintNN.json` | Raw Jira pull for the sprint, flattened (schema below). Every number on the deck is computed from this file. |
-| `config.sprint51.json`, `tickets.sprint51.json` (and Sprint 50) | Worked example. |
+| `config.sprint52.json`, `tickets.sprint52.json` (and Sprints 50 and 51) | Worked example. |
 
 ## Run
 
@@ -46,7 +46,7 @@ Developer field (`customfield_23650`), mapped to display names via `developerNam
 
 ## What the generator does for you
 
-- Charts on slides 3, 5 and 7 are in **story points**; ticket counts ride in the legend or labels. Slide 3 prints pointed coverage.
+- Charts on slides 5 and 7 are in **story points**; ticket counts ride in the legend or labels. Slide 3's wheel is **ticket status** (ticket counts, one slice per Jira status); its stat card and breakdown panel carry the points and the pointed coverage.
 - Green means Closed and amber means Carried over. The "What the shape tells us" cards beside the work-type chart always use a neutral NIH Blue stripe.
 - Bar-chart axes start at 0.
 

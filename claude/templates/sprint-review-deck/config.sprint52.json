@@ -1,0 +1,224 @@
+{
+  "project": "ICDC",
+  "excludeTypes": [],
+  "ticketsFile": "tickets.sprint52.json",
+  "sprint": {
+    "number": 52,
+    "jiraId": 8983,
+    "dateRange": "October 1 – October 21, 2026",
+    "dateRangeShort": "October 1 – October 21",
+    "startLong": "October 1",
+    "window": {
+      "start": "2026-10-01T09:00:00-04:00",
+      "end": "2026-10-21T17:00:00-04:00"
+    },
+    "goal": ""
+  },
+  "nextSprint": {
+    "number": 53,
+    "jiraId": 9050,
+    "dateRange": "October 22 to November 11, 2026",
+    "total": 32,
+    "inherited": 21
+  },
+  "meeting": {
+    "dayLong": "Friday, October 23, 2026",
+    "dateLong": "October 23, 2026",
+    "dateISO": "2026-10-23",
+    "time": "11:00 AM ET"
+  },
+  "preparedBy": {
+    "name": "Gina Kuffel",
+    "title": "Senior Technical Project Manager",
+    "org": "Frederick National Laboratory for Cancer Research (FNL)",
+    "supporting": "Supporting NCI / CBIIT"
+  },
+  "developerNames": {
+    "ranaab": "Ambar Rana",
+    "millerer": "Eric Miller",
+    "udosent2": "Toyo Udosen",
+    "nguca": "Charles Ngu",
+    "kuffelgr": "Gina Kuffel",
+    "epishinavv": "Valentina Epishina",
+    "scrufaripp": "Peter Scrufari",
+    "stogsdillhh": "Hannah Stogsdill",
+    "flemingme": "Michael Fleming"
+  },
+  "qaNames": [
+    "Valentina Epishina"
+  ],
+  "agenda": {
+    "subtitle": "55 minutes · review first, retro second · no demos this sprint",
+    "total": "55 minutes",
+    "rows": [
+      {
+        "title": "Sprint 52 by the Numbers",
+        "detail": "Points and tickets: where the 36 tickets landed, and when they closed",
+        "minutes": "5 min"
+      },
+      {
+        "title": "Goal Scorecard",
+        "detail": "Five workstreams scored on what shipped",
+        "minutes": "8 min"
+      },
+      {
+        "title": "Work Type & Team Throughput",
+        "detail": "What got closed, and by whom",
+        "minutes": "7 min"
+      },
+      {
+        "title": "Carry-Over into Sprint 53",
+        "detail": "22 unfinished tickets, 11 of them waiting on review",
+        "minutes": "8 min"
+      },
+      {
+        "title": "Risks & Flags",
+        "detail": "What needs a decision today",
+        "minutes": "7 min"
+      },
+      {
+        "title": "Retrospective: Liked · Lacked · Learned",
+        "detail": "10 min silent brainstorm, then group and vote",
+        "minutes": "20 min"
+      }
+    ]
+  },
+  "numbers": {
+    "carryNote": "21 of 22 pulled into Sprint 53; BE unit tests (4166) went back to backlog",
+    "extraStats": [
+      {
+        "value": "11 of 14",
+        "label": "Closed inside the sprint window",
+        "note": "Oct 1 to Oct 21; 5 of them on Oct 5",
+        "tone": "green"
+      },
+      {
+        "value": "2",
+        "label": "Closed the evening the sprint ended",
+        "note": "ICDC-4083 and 4084 after 5 PM Oct 21: 10 pts",
+        "tone": "MEDIUM"
+      }
+    ],
+    "closedNote": "(5 of the 14 carry no points; ICDC-2808, 5 pts, was cancelled)",
+    "motionNote": "9 were already in review at Sprint 51 close",
+    "holdNote": "(ICDC-4187 MEVAL bucket policy)",
+    "openNote": "(BE unit tests, Figma cleanup, pipeline diagram)",
+    "speakerNote": "Resolution dates: 4027, 4172, 4238, 4250, 4253 Oct 5; 2808 Oct 13 (Cancelled); 4261, 4262 Oct 15; 4256, 4239, 4082 Oct 21 before 5 PM; 4083, 4084 Oct 21 evening. ICDC-4254 is the migration epic (epics carry no resolution). Delivered points include 5 from cancelled ICDC-2808, so built work is 24 of 57 pts."
+  },
+  "scorecard": {
+    "subtitle": "Scored against the five workstreams the sprint carried, not against raw ticket completion",
+    "bannerEyebrow": "Sprint 52 workstreams",
+    "bannerText": "Prefect  ·  File Download  ·  Security  ·  News  ·  Human Relevance & C3DC",
+    "bottomLine": "The Jenkins to Prefect migration is done and both file download bugs are fixed. Security, News and Human Relevance carry, and 9 tickets have now sat in review for two sprints."
+  },
+  "goals": [
+    {
+      "status": "delivered",
+      "title": "Finish the Jenkins to Prefect migration",
+      "detail": "Permissions cleared Oct 5; the three job migrations and snapshot sync closed Oct 21, closing the epic. Teardown and nonprod bucket carry.",
+      "refs": "ICDC-4254 epic closed · 4172 · 4082 · 4083 · 4084 · 4256"
+    },
+    {
+      "status": "delivered",
+      "title": "Fix file download and IndexD access",
+      "detail": "HTML-instead-of-file bug closed Oct 5; View in Browser fixed Oct 21. Env vars now use IndexD; JBrowse CORS policy updated.",
+      "refs": "ICDC-4238 · 4239 · 4261 · 4262"
+    },
+    {
+      "status": "partial",
+      "title": "Meet the security remediation dates",
+      "detail": "High Tomcat CVE closed Oct 5, ahead of Oct 14. Interop GraphQL fix (Medium) is back In Progress, past its Oct 16 date.",
+      "refs": "ICDC-4250 closed · 4213 · 4255 · 4200 · 4215"
+    },
+    {
+      "status": "partial",
+      "title": "Ship the News and Announcements pages",
+      "detail": "Homepage Announcements closed Oct 5. News page build and Publications design are in review for a second sprint.",
+      "refs": "ICDC-4027 closed · 4186 · 4248"
+    },
+    {
+      "status": "partial",
+      "title": "Human Relevance, C3DC interop and DMN",
+      "detail": "C3DC prototype and DMN example-file sync in review; investigator review In Progress. 2022 DMN sidebar story cancelled.",
+      "refs": "ICDC-4242 · 4183 · 4031 · 2808 cancelled"
+    }
+  ],
+  "workType": {
+    "points": [
+      {
+        "tone": "blue",
+        "title": "Tasks: 9 of 28 closed, 19 pts",
+        "detail": "The Prefect migration (4 tasks, 18 pts), Dev GraphQL introspection, the High Tomcat CVE, and three infrastructure changes: IndexD variables, JBrowse CORS and snapshot sync."
+      },
+      {
+        "tone": "blue",
+        "title": "User stories: 2 of 3 closed",
+        "detail": "Homepage Announcements shipped (3 pts). The 2022 DMN sidebar story (5 pts) was cancelled. DMN example-file sync is in review."
+      },
+      {
+        "tone": "blue",
+        "title": "Bugs: 2 of 2 closed",
+        "detail": "Both production file download bugs flagged HIGH at the Sprint 50 review are fixed."
+      },
+      {
+        "tone": "blue",
+        "title": "Epics: migration epic closed",
+        "detail": "ICDC Jenkins to Prefect Migration closed. The COTC021 v.3 and COTC022 v.3 submission epics carry."
+      }
+    ]
+  },
+  "team": {
+    "shoutout": "Charles Ngu built the Prefect migration end to end: worker permissions, all three job migrations and the epic. Michael Fleming delivered the IndexD environment variables, JBrowse CORS policy and snapshot bucket sync. Eric Miller took 8 tickets through to Closed, Ambar Rana landed the High Tomcat CVE ahead of its date, Toyo Udosen the Homepage Announcements, and Valentina Epishina held the QA gate.",
+    "whyDisagree": "The Assignee on a closed ICDC ticket is whoever moved it to Closed: this sprint that was mostly Eric (8) and Valentina (QA, 3). Credit comes from the Developer field (customfield_23650): Charles built the four Prefect tickets Eric closed, and Michael Fleming built three more."
+  },
+  "carry": {
+    "bigNote": "Eleven of them are waiting on review.",
+    "facts": [
+      {
+        "title": "11 of 22 waiting on review",
+        "detail": "9 were already in review when Sprint 51 closed. Synthetic data error handling (4184) has waited since July."
+      },
+      {
+        "title": "Interop GraphQL fix moved back",
+        "detail": "ICDC-4213 went from review to In Progress and is past its Oct 16 date; Critical ICDC-4255 is In Progress with Charles."
+      },
+      {
+        "title": "Prefect cleanup carries",
+        "detail": "Jenkins teardown (4180) and nonprod bucket (4192) In Progress; MEVAL policy (4187) On Hold; pipeline diagram (4257) Open."
+      }
+    ]
+  },
+  "risks": [
+    {
+      "severity": "HIGH",
+      "title": "Interop GraphQL fix is past its date",
+      "detail": "ICDC-4213 (Medium) had an Oct 16 remediation date and moved back to In Progress. ICDC-4255 (Critical) is also In Progress. Both are with Charles and still need Stage and Production deploys through a ServiceNow change request.",
+      "nextStep": "Charles and Ambar give a Production date today; Gina tells NCI Security if it lands after Oct 30."
+    },
+    {
+      "severity": "HIGH",
+      "title": "The review queue is aging, not just long",
+      "detail": "11 of 22 carry-overs are Ready for Review and 9 are there for a second sprint: News page, Publications design, the C3DC prototype, DMN example files and three study close-outs. ICDC-4184 has waited since July.",
+      "nextStep": "decide today: a named reviewer and review-by date for each, starting with 4242 for the Sprint 53 C3DC goal."
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "COTC021/022 v.3 close-out, third sprint",
+      "detail": "The indexing and loading tickets (4193, 4194, 4195) and both submission epics remain open while study details are finalized.",
+      "nextStep": "Philip sets a close-out date so the five close as a batch in Sprint 53."
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Sprint 53 is 66% inherited",
+      "detail": "21 of its 32 tickets carried from Sprint 52, and the sprint commits to a static C3DC interop MVP plus the October monthly release.",
+      "nextStep": "at the Sprint 53 midpoint, confirm the MVP and release still fit; move 4188 or 4257 out if not."
+    }
+  ],
+  "retro": {
+    "boardUrl": "https://retrotool.io/S48LpOfY-LcVLiIBunsew",
+    "timingNote": "Sprint 53 started yesterday, October 22, with the static C3DC interop MVP and the October monthly release as its goal. Action items from today either get folded into Sprint 53 now or deferred to Sprint 54 planning. Decide which as we assign each one.",
+    "liked": "The Jenkins to Prefect migration finally closed and both file download bugs are fixed. Say what made that work.",
+    "lacked": "Nine tickets sat in review for a second sprint and the interop GraphQL fix slipped past its date. Name the real cause.",
+    "learned": "Anything about finishing a long migration, moving work through review, or how a security fix gets from scan to Production."
+  }
+}

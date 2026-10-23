@@ -3,7 +3,7 @@
  * CRDC Sprint Review & Retrospective deck generator (pptxgenjs), shared by ICDC and CTDC.
  * Format baseline: CTDC Sprint 32 / ICDC Sprint 50 decks (Sept 2026), aligned Oct 2026 (ICDC Sprint 51).
  * The same file lives in CBIIT/icdc-documentation and CBIIT/ctdc-documentation: keep the two copies identical.
- * Charts on slides 3, 5 and 7 are in story points (Fibonacci); ticket counts ride in the labels.
+ * Charts on slides 5 and 7 are in story points (Fibonacci); ticket counts ride in the labels. Slide 3's wheel is ticket status (counts).
  *
  * Usage:   node build-deck.js config.sprintNN.json
  * Inputs:  config JSON (all sprint-specific text) + tickets JSON (raw Jira pull, see README.md)
@@ -45,7 +45,6 @@ const P = { committed: d.reduce((a, x) => a + (pts(x) || 0), 0), done: done.redu
 P.carry = P.committed - P.done; P.pct = P.committed ? (100 * P.done / P.committed).toFixed(1) : '0.0';
 const sumPts = arr => Math.round(10 * arr.reduce((a, x) => a + (pts(x) || 0), 0)) / 10;
 const inMotion = x => ['In Progress', 'Ready for Review', 'Ready for QA Testing', 'Testing'].includes(x.status);
-const PS = { done: sumPts(done), motion: sumPts(d.filter(inMotion)), hold: sumPts(d.filter(x => x.status === 'On Hold')), open: sumPts(d.filter(x => ['Open', 'Reopened'].includes(x.status))) };
 const TP = Object.fromEntries(types.map(t => [t, { done: sumPts(done.filter(x => x.type === t)), carry: sumPts(d.filter(x => x.type === t && x.category !== 'Done')) }]));
 const carryPtsByStatus = Object.entries(d.filter(x => x.category !== 'Done').reduce((m, x) => { const k = x.status.replace(' Testing', ''); (m[k] = m[k] || []).push(x); return m; }, {}))
   .map(([k, xs]) => [`${k} (${xs.length})`, sumPts(xs)]).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
@@ -135,10 +134,12 @@ const niceMax = v => Math.ceil(v * 1.15 / (v > 10 ? 2 : 1)) * (v > 10 ? 2 : 1) +
   ];
   brk.forEach((r, i) => s.addText([{ text: r[0] + '   ', options: { bold: true, color: C.ink } }, { text: r[1], options: { color: C.muted } }], { x: 0.8, y: 4.75 + i * 0.3, w: 6.9, h: 0.28, fontFace: B, fontSize: 10.5, isTextBox: true, margin: 0 }));
   tb(s, `Carry-over = ${total} − ${M.done} = ${M.carry} tickets · ${P.carry} pts   |   pointed: ${P.pointed} of ${total} tickets, ${P.pointedDone} of ${M.done} closed`, { x: 0.8, y: 6.3, w: 6.9, h: 0.28, fontSize: 10, bold: true, color: C.amber });
-  s.addChart(pres.ChartType.doughnut, [{ name: `Sprint ${S.number} status`, labels: [`Closed (${M.done})`, `In motion (${M.motion})`, `On hold (${M.hold})`, `Open (${M.open})`], values: [PS.done, PS.motion, PS.hold, PS.open] }], {
-    x: 8.3, y: 1.9, w: 4.4, h: 4.8, holeSize: 55, chartColors: [C.green, C.blue, C.amber, C.muted], showLegend: true, legendPos: 'b', legendFontFace: B, legendFontSize: 9, legendColor: C.ink,
+  // Wheel of ticket status: one slice per Jira status, ticket counts (not points), zero slices dropped
+  const wheel = [['Closed', M.done, C.green], ['Ready for Review', M.rfr, C.blue], ['Ready for QA', M.rfqa, '3A6EA5'], ['In Progress', M.inProg + st('Testing'), '5B8FC7'], ['On Hold', M.hold, C.amber], ['Open', M.open, C.muted]].filter(w => w[1] > 0);
+  s.addChart(pres.ChartType.doughnut, [{ name: `Sprint ${S.number} ticket status`, labels: wheel.map(w => `${w[0]} (${w[1]})`), values: wheel.map(w => w[1]) }], {
+    x: 8.3, y: 1.9, w: 4.4, h: 4.8, holeSize: 55, chartColors: wheel.map(w => w[2]), showLegend: true, legendPos: 'b', legendFontFace: B, legendFontSize: 9, legendColor: C.ink,
     showValue: true, showPercent: false, dataLabelColor: C.white, dataLabelFontFace: B, dataLabelFontSize: 11, dataLabelFontBold: true, dataLabelFormatCode: NOZERO,
-    showTitle: true, title: 'Story points by status (tickets)', titleFontFace: B, titleFontSize: 10, titleColor: C.muted,
+    showTitle: true, title: `Ticket status at sprint close (${total} tickets)`, titleFontFace: B, titleFontSize: 10, titleColor: C.muted,
   });
   s.addNotes(`Story points from customfield_10042: committed ${P.committed}, delivered ${P.done}, carried ${P.carry}; ${P.pointed}/${total} tickets pointed. Computed from ${cfg.ticketsFile}: Closed ${M.done}, Ready for Review ${M.rfr}, In Progress ${M.inProg}, Ready for QA ${M.rfqa}, On Hold ${M.hold}, Open ${M.open} = ${total}. ${cfg.numbers.speakerNote || ''}`);
 }
