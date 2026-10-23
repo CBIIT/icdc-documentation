@@ -169,7 +169,46 @@
   },
   "team": {
     "shoutout": "Charles Ngu built the Prefect migration end to end: worker permissions, all three job migrations and the epic. Michael Fleming fixed View in Browser and delivered the IndexD environment variables, JBrowse CORS policy, snapshot bucket sync and Dev GraphQL introspection. Eric Miller fixed the Critical file download bug, Ambar Rana landed the High Tomcat CVE ahead of its date, Toyo Udosen shipped the Homepage Announcements, and Valentina Epishina held the QA gate.",
-    "creditNote": "Credit comes from the Jira Developer field (customfield_23650): the person who did the work. The Assignee is usually whoever moved the ticket to Closed, often QA, so it is not charted. A ticket with two developers counts for each; coordination work such as IndexD registration has no Developer by design."
+    "creditNote": "Credit comes from the Jira Developer field (customfield_23650): the person who did the work. The Assignee is usually whoever moved the ticket to Closed, often QA, so it is not charted. A ticket with two developers counts for each; coordination work such as IndexD registration has no Developer by design.",
+    "awards": [
+      {
+        "dev": "nguca",
+        "emoji": "🚀",
+        "award": "Jenkins Slayer",
+        "reason": "Took Jenkins to Prefect from blocked to done: worker permissions, all three job migrations, and the migration epic closed."
+      },
+      {
+        "dev": "flemingme",
+        "emoji": "🧰",
+        "award": "Utility Player",
+        "reason": "Five fixes across the stack: IndexD environment variables, JBrowse CORS, snapshot bucket sync, Dev GraphQL introspection and View in Browser."
+      },
+      {
+        "dev": "millerer",
+        "emoji": "📦",
+        "award": "Special Delivery",
+        "reason": "Fixed the Critical bug that served an HTML page instead of the requested file, and reviewed the Prefect work through to Closed."
+      },
+      {
+        "dev": "ranaab",
+        "emoji": "⏱️",
+        "award": "Beat the Clock",
+        "reason": "Closed the High Tomcat CVE on Oct 5, nine days ahead of its Oct 14 remediation date."
+      },
+      {
+        "dev": "udosent2",
+        "emoji": "📣",
+        "award": "Front Page News",
+        "reason": "Shipped the new Homepage Announcements section, the first piece of the News refresh to go live."
+      },
+      {
+        "name": "Valentina Epishina",
+        "stat": "QA gate",
+        "emoji": "🔍",
+        "award": "Gatekeeper",
+        "reason": "Verified and closed the Announcements section, the View in Browser fix and the Tomcat CVE."
+      }
+    ]
   },
   "carry": {
     "bigNote": "Eleven of them are waiting on review.",

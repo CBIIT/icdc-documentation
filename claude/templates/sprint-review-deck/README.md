@@ -47,7 +47,7 @@ Developer field (`customfield_23650`), mapped to display names via `developerNam
 ## What the generator does for you
 
 - Charts on slides 5 and 7 are in **story points**; ticket counts ride in the legend or labels. Slide 3's wheel is **ticket status** (ticket counts, one slice per Jira status); its stat card and breakdown panel carry the points and the pointed coverage.
-- Each Jira status has one color across the deck (the `STATUS` map in `build-deck.js`); slide 7 bars take their status color. Slide 6 charts the Developer field only, and its right-hand card reads `team.creditNote`.
+- Each Jira status has one color across the deck (the `STATUS` map in `build-deck.js`); slide 7 bars take their status color. Slide 6 is an awards wall: `team.awards` = `[{ "dev": "jiraUsername", "emoji": "🚀", "award": "Jenkins Slayer", "reason": "..." }]` in display order; ticket and point stats are computed from the Developer field. An entry without `dev` (e.g. QA) supplies `name` and `stat`. `team.creditNote` goes in the speaker notes.
 - Green means Closed and amber means Carried over (amber is never a status color). The "What the shape tells us" cards beside the work-type chart always use a neutral NIH Blue stripe.
 - Bar-chart axes start at 0.
 

@@ -4,7 +4,7 @@
  * Format baseline: CTDC Sprint 32 / ICDC Sprint 50 decks (Sept 2026), aligned Oct 2026 (ICDC Sprint 51).
  * The same file lives in CBIIT/icdc-documentation and CBIIT/ctdc-documentation: keep the two copies identical.
  * Charts on slides 5 and 7 are in story points (Fibonacci); ticket counts ride in the labels. Slide 3's wheel is ticket status (counts).
- * Statuses use one color each across the deck (STATUS below); slide 6 charts the Developer field only.
+ * Statuses use one color each across the deck (STATUS below); slide 6 is an awards wall credited by the Developer field.
  *
  * Usage:   node build-deck.js config.sprintNN.json
  * Inputs:  config JSON (all sprint-specific text) + tickets JSON (raw Jira pull, see README.md)
@@ -29,8 +29,8 @@ const C = { blue: '20558A', dark: '143458', darkCard: '1E4470', light: 'EAF1F8',
 const H = 'Georgia', B = 'Calibri';
 const SEV = { HIGH: C.red, MEDIUM: C.amber, LOW: C.blue };
 // One color per Jira status, used everywhere a status is drawn (slide 3 wheel, slide 7 bars). Amber is NOT a status
-// color: it means carried over / partial / medium. Blues run deeper the closer a ticket is to Closed.
-const STATUS = { 'Closed': C.green, 'Ready for QA': '00838F', 'Ready for Review': C.blue, 'In Progress': '5B8FC7', 'On Hold': '475569', 'Open': '8494A7' };
+// color: it means carried over / partial / medium. Mid-tone fills so dark ink labels read on every slice and bar.
+const STATUS = { 'Closed': '22C55E', 'Ready for QA': '2DD4BF', 'Ready for Review': 'FACC15', 'In Progress': '60A5FA', 'On Hold': 'A78BFA', 'Open': 'CBD5E1' };
 const statusKey = st => ({ 'Ready for QA Testing': 'Ready for QA', 'Testing': 'In Progress', 'Reopened': 'Open' })[st] || st;
 const statusColor = st => STATUS[statusKey(st)] || C.muted;
 
@@ -77,12 +77,6 @@ const box = (s, x, y, w, h, fill = C.white, line = C.line) => s.addShape(pres.Sh
 const stripe = (s, x, y, h, color, w = 0.06) => s.addShape(pres.ShapeType.rect, { x, y, w, h, fill: { color }, line: { color } });
 const pill = (s, t, x, y, w, color, fs = 9) => { s.addShape(pres.ShapeType.roundRect, { x, y, w, h: 0.28, fill: { color }, line: { color }, rectRadius: 0.05 }); tb(s, t, { x, y, w, h: 0.28, fontSize: fs, bold: true, color: C.white, align: 'center', valign: 'middle' }); };
 const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.red, 0.12); };
-const hbar = (s, data, opt) => s.addChart(pres.ChartType.bar, [{ name: opt.name, labels: data.map(x => x[0]), values: data.map(x => x[1]) }], Object.assign({
-  barDir: 'bar', chartColors: [opt.color], showLegend: false, showValue: true, dataLabelPosition: 'outEnd', dataLabelFontFace: B, dataLabelFontSize: 10, dataLabelColor: C.ink,
-  catAxisLabelFontFace: B, catAxisLabelFontSize: 10, catAxisLabelColor: C.ink, catAxisOrientation: 'maxMin', valAxisLabelFontFace: B, valAxisLabelFontSize: 9, valAxisLabelColor: C.muted,
-  valGridLine: { color: C.line, size: 0.5 }, catGridLine: { style: 'none' }, valAxisMajorUnit: opt.unit || 1, valAxisMinVal: 0, valAxisMaxVal: opt.max, barGapWidthPct: 60,
-}, opt.extra || {}));
-const niceMax = v => Math.ceil(v * 1.15 / (v > 10 ? 2 : 1)) * (v > 10 ? 2 : 1) + 1;
 
 // ================= 1. COVER =================
 {
@@ -143,7 +137,7 @@ const niceMax = v => Math.ceil(v * 1.15 / (v > 10 ? 2 : 1)) * (v > 10 ? 2 : 1) +
   const wheel = [['Closed', M.done], ['Ready for Review', M.rfr], ['Ready for QA', M.rfqa], ['In Progress', M.inProg + st('Testing')], ['On Hold', M.hold], ['Open', M.open]].filter(w => w[1] > 0).map(w => [...w, STATUS[w[0]]]);
   s.addChart(pres.ChartType.doughnut, [{ name: `Sprint ${S.number} ticket status`, labels: wheel.map(w => `${w[0]} (${w[1]})`), values: wheel.map(w => w[1]) }], {
     x: 8.3, y: 1.9, w: 4.4, h: 4.8, holeSize: 55, chartColors: wheel.map(w => w[2]), showLegend: true, legendPos: 'b', legendFontFace: B, legendFontSize: 9, legendColor: C.ink,
-    showValue: true, showPercent: false, dataLabelColor: C.white, dataLabelFontFace: B, dataLabelFontSize: 11, dataLabelFontBold: true, dataLabelFormatCode: NOZERO,
+    showValue: true, showPercent: false, dataLabelColor: C.ink, dataLabelFontFace: B, dataLabelFontSize: 11, dataLabelFontBold: true, dataLabelFormatCode: NOZERO,
     showTitle: true, title: `Ticket status at sprint close (${total} tickets)`, titleFontFace: B, titleFontSize: 10, titleColor: C.muted,
   });
   s.addNotes(`Story points from customfield_10042: committed ${P.committed}, delivered ${P.done}, carried ${P.carry}; ${P.pointed}/${total} tickets pointed. Computed from ${cfg.ticketsFile}: Closed ${M.done}, Ready for Review ${M.rfr}, In Progress ${M.inProg}, Ready for QA ${M.rfqa}, On Hold ${M.hold}, Open ${M.open} = ${total}. ${cfg.numbers.speakerNote || ''}`);
@@ -194,18 +188,29 @@ const niceMax = v => Math.ceil(v * 1.15 / (v > 10 ? 2 : 1)) * (v > 10 ? 2 : 1) +
   });
 }
 
-// ================= 6. WHO DID THE WORK =================
-// Credit is the Developer field (customfield_23650) only. The Assignee at close is usually QA, so it is not charted.
+// ================= 6. WHO DID THE WORK: AWARDS WALL =================
+// One card per person. Credit and the ticket/point stat come from the Developer field (customfield_23650), never the
+// Assignee. cfg.team.awards: [{ dev: 'jiraUsername', emoji, award, reason }] in display order; an entry with no `dev`
+// (e.g. QA) supplies its own `name` and `stat`. Any Developer without an entry gets a generic card so nobody is left off.
 {
-  const s = pres.addSlide(); header(s, 'Team', 'Who Did the Work', 'Closed tickets by Developer: the person who did the work, not the Jira Assignee'); footer(s, 6);
-  tb(s, 'Completed by (Developer field)', { x: 0.6, y: 1.95, w: 12.13, h: 0.3, fontFace: H, fontSize: 13, bold: true, color: C.blue });
-  hbar(s, devC, { name: 'Tickets completed', color: C.green, max: niceMax(devC[0][1]), extra: { x: 0.6, y: 2.25, w: 12.13, h: 2.45 } });
-  box(s, 0.6, 4.85, 6.0, 1.9, C.light, C.light);
-  tb(s, '🏆  Shout-out', { x: 0.85, y: 4.98, w: 5.5, h: 0.32, fontFace: H, fontSize: 14, bold: true, color: C.blue });
-  tb(s, cfg.team.shoutout, { x: 0.85, y: 5.32, w: 5.5, h: 1.35, fontSize: 9.5, color: C.ink, valign: 'top' });
-  box(s, 7.0, 4.85, 5.73, 1.9); stripe(s, 7.0, 4.85, 1.9, C.blue, 0.08);
-  tb(s, 'How credit is counted', { x: 7.3, y: 4.98, w: 5.2, h: 0.32, fontFace: H, fontSize: 14, bold: true, color: C.ink });
-  tb(s, cfg.team.creditNote || cfg.team.whyDisagree, { x: 7.3, y: 5.32, w: 5.2, h: 1.35, fontSize: 9.5, color: C.muted, valign: 'top' });
+  const s = pres.addSlide(); header(s, 'Team', 'Who Did the Work', 'Sprint awards, credited by the Jira Developer field: the person who did the work'); footer(s, 6);
+  const byDev = {}; done.forEach(x => x.dev.forEach(u => { (byDev[u] = byDev[u] || []).push(x); }));
+  const stat = u => { const xs = byDev[u] || [], p = sumPts(xs); return `${xs.length} ticket${xs.length === 1 ? '' : 's'}${p ? ` · ${p} pts` : ''}`; };
+  const cards = (cfg.team.awards || []).map(a => a.dev ? { ...a, name: cfg.developerNames[a.dev] || a.dev, stat: stat(a.dev) } : a);
+  Object.keys(byDev).sort((x, y) => byDev[y].length - byDev[x].length).forEach(u => { if (!cards.some(c => c.dev === u)) cards.push({ dev: u, name: cfg.developerNames[u] || u, stat: stat(u), emoji: '⭐', award: 'Shipped It', reason: byDev[u].map(x => x.key).join(' · ') }); });
+  const n = cards.length, cols = n <= 3 ? n : n <= 6 ? 3 : 4, rows = Math.ceil(n / cols), gx = 0.2, gy = 0.2;
+  const cw = (12.13 - gx * (cols - 1)) / cols, ch = Math.min(2.3, (4.85 - gy * (rows - 1)) / rows), big = ch >= 2;
+  cards.forEach((c, i) => {
+    const x = 0.6 + (i % cols) * (cw + gx), y = 1.9 + Math.floor(i / cols) * (ch + gy), qa = !c.dev;
+    box(s, x, y, cw, ch, C.white, C.line); s.addShape(pres.ShapeType.rect, { x, y, w: cw, h: 0.08, fill: { color: qa ? C.blue : C.green }, line: { color: qa ? C.blue : C.green } });
+    s.addShape(pres.ShapeType.ellipse, { x: x + 0.2, y: y + 0.28, w: 0.78, h: 0.78, fill: { color: C.light }, line: { color: C.light } });
+    tb(s, c.emoji || '⭐', { x: x + 0.2, y: y + 0.28, w: 0.78, h: 0.78, fontSize: 24, align: 'center', valign: 'middle' });
+    tb(s, (c.award || '').toUpperCase(), { x: x + 1.15, y: y + 0.26, w: cw - 1.3, h: 0.3, fontSize: 9, bold: true, color: C.red, charSpacing: 2 });
+    tb(s, c.name, { x: x + 1.15, y: y + 0.54, w: cw - 1.3, h: 0.38, fontFace: H, fontSize: big ? 16 : 14, bold: true, color: C.ink });
+    tb(s, c.stat || '', { x: x + 1.15, y: y + 0.9, w: cw - 1.3, h: 0.24, fontSize: 9.5, bold: true, color: qa ? C.blue : C.green });
+    tb(s, c.reason || '', { x: x + 0.2, y: y + 1.22, w: cw - 0.4, h: ch - 1.32, fontSize: 9.5, color: C.muted, valign: 'top' });
+  });
+  s.addNotes(`Credit: ${cfg.team.creditNote || cfg.team.whyDisagree || 'Developer field (customfield_23650).'} Developer tally: ${devC.map(([k, v]) => `${k} ${v}`).join(', ')}.`);
 }
 
 // ================= 7. CARRY-OVER =================
@@ -215,7 +220,7 @@ const niceMax = v => Math.ceil(v * 1.15 / (v > 10 ? 2 : 1)) * (v > 10 ? 2 : 1) +
   const cmax = ptsMax(carryPtsByStatus[0][1]), clabels = carryPtsByStatus.map(x => x[0]);
   s.addChart(pres.ChartType.bar, carryPtsByStatus.map((x, i) => ({ name: x[0], labels: clabels, values: carryPtsByStatus.map((_, j) => (j === i ? x[1] : 0)) })), {
     x: 0.6, y: 2.2, w: 7.0, h: 4.5, barDir: 'bar', barGrouping: 'stacked', chartColors: carryPtsByStatus.map(x => x[2]), showLegend: false,
-    showValue: true, dataLabelPosition: 'ctr', dataLabelColor: C.white, dataLabelFontFace: B, dataLabelFontSize: 10, dataLabelFontBold: true, dataLabelFormatCode: NOZERO,
+    showValue: true, dataLabelPosition: 'ctr', dataLabelColor: C.ink, dataLabelFontFace: B, dataLabelFontSize: 10, dataLabelFontBold: true, dataLabelFormatCode: NOZERO,
     catAxisLabelFontFace: B, catAxisLabelFontSize: 10, catAxisLabelColor: C.ink, catAxisOrientation: 'maxMin', valAxisLabelFontFace: B, valAxisLabelFontSize: 9, valAxisLabelColor: C.muted,
     valGridLine: { color: C.line, size: 0.5 }, catGridLine: { style: 'none' }, valAxisMinVal: 0, valAxisMaxVal: cmax, valAxisMajorUnit: cmax > 30 ? 10 : 5, barGapWidthPct: 60,
   });
