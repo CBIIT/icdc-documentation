@@ -113,10 +113,10 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
 {
   const s = pres.addSlide(); header(s, `Sprint ${S.number} · ${S.dateRangeShort}`, `Sprint ${S.number} by the Numbers`, `Velocity in story points (Jira Story Points field); ticket count shown alongside`); footer(s, 3);
   box(s, 0.6, 1.95, 3.5, 2.05, C.light, C.light);
-  s.addText([{ text: String(P.done), options: { fontFace: H, fontSize: 60, bold: true, color: C.blue } }, { text: '  of ' + P.committed + ' pts', options: { fontFace: H, fontSize: 22, color: C.muted } }], { x: 0.8, y: 2.05, w: 3.2, h: 1.15, isTextBox: true, margin: 0, valign: 'middle' });
+  s.addText([{ text: String(P.done), options: { fontFace: H, fontSize: 60, bold: true, color: STATUS.Closed } }, { text: '  of ' + P.committed + ' pts', options: { fontFace: H, fontSize: 22, color: C.muted } }], { x: 0.8, y: 2.05, w: 3.2, h: 1.15, isTextBox: true, margin: 0, valign: 'middle' });
   eyebrow(s, 'Story points delivered', 0.8, 3.3, C.ink, 3);
   tb(s, `${P.pct}% of committed points · ${M.done} of ${total} tickets (${M.pct}%)`, { x: 0.8, y: 3.55, w: 3.2, h: 0.25, fontSize: 10, color: C.muted });
-  const stats = [[String(M.carry), 'Carry-over tickets', cfg.numbers.carryNote, C.amber], ...cfg.numbers.extraStats.map(x => [x.value, x.label, x.note, SEV[x.tone] || C[x.tone] || C.green])];
+  const stats = [[String(M.carry), 'Carry-over tickets', cfg.numbers.carryNote, C.amber], ...cfg.numbers.extraStats.map(x => [x.value, x.label, x.note, STATUS[x.tone] || SEV[x.tone] || C[x.tone] || STATUS.Closed])];
   stats.slice(0, 3).forEach((k, i) => {
     const y = 1.95 + i * 0.72;
     box(s, 4.3, y, 3.6, 0.62); stripe(s, 4.3, y, 0.62, k[3]);
@@ -125,13 +125,15 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
   });
   box(s, 0.6, 4.25, 7.3, 2.45, C.light, C.light);
   tb(s, `How the ${total} tickets break down`, { x: 0.8, y: 4.38, w: 6.9, h: 0.3, fontFace: H, fontSize: 14, bold: true, color: C.blue });
-  const brk = [
-    [`Closed: ${M.done} tickets · ${P.done} pts`, cfg.numbers.closedNote || '(accepted and done at sprint close)'],
-    [`In motion: ${M.motion}`, `(Ready for Review ${M.rfr} · In Progress ${M.inProg} · Ready for QA ${M.rfqa}${cfg.numbers.motionNote ? '; ' + cfg.numbers.motionNote : ''})`],
-    [`On hold: ${M.hold}`, cfg.numbers.holdNote || ''],
-    [`Open: ${M.open}`, cfg.numbers.openNote || '(never started)'],
-  ];
-  brk.forEach((r, i) => s.addText([{ text: r[0] + '   ', options: { bold: true, color: C.ink } }, { text: r[1], options: { color: C.muted } }], { x: 0.8, y: 4.75 + i * 0.3, w: 6.9, h: 0.28, fontFace: B, fontSize: 10.5, isTextBox: true, margin: 0 }));
+  // One row per status on the wheel, each with a swatch in its wheel color (Closed rows and cards are always STATUS.Closed)
+  const N = cfg.numbers, notes = { 'Closed': N.closedNote || '(accepted and done at sprint close)', 'Ready for Review': N.reviewNote || N.motionNote || '', 'Ready for QA': N.qaNote || '', 'In Progress': N.inProgressNote || '', 'On Hold': N.holdNote || '', 'Open': N.openNote || '(never started)' };
+  const brk = [['Closed', M.done], ['Ready for Review', M.rfr], ['Ready for QA', M.rfqa], ['In Progress', M.inProg + st('Testing')], ['On Hold', M.hold], ['Open', M.open]].filter(r => r[1] > 0);
+  const rh = Math.min(0.3, 1.5 / brk.length);
+  brk.forEach(([k, v], i) => {
+    const y = 4.75 + i * rh;
+    s.addShape(pres.ShapeType.rect, { x: 0.8, y: y + 0.07, w: 0.14, h: 0.14, fill: { color: STATUS[k] }, line: { color: STATUS[k] } });
+    s.addText([{ text: `${k}: ${v}${k === 'Closed' ? ` tickets · ${P.done} pts` : ''}   `, options: { bold: true, color: C.ink } }, { text: notes[k], options: { color: C.muted } }], { x: 1.02, y, w: 6.7, h: 0.28, fontFace: B, fontSize: 10.5, isTextBox: true, margin: 0 });
+  });
   tb(s, `Carry-over = ${total} − ${M.done} = ${M.carry} tickets · ${P.carry} pts   |   pointed: ${P.pointed} of ${total} tickets, ${P.pointedDone} of ${M.done} closed`, { x: 0.8, y: 6.3, w: 6.9, h: 0.28, fontSize: 10, bold: true, color: C.amber });
   // Wheel of ticket status: one slice per Jira status, ticket counts (not points), zero slices dropped
   const wheel = [['Closed', M.done], ['Ready for Review', M.rfr], ['Ready for QA', M.rfqa], ['In Progress', M.inProg + st('Testing')], ['On Hold', M.hold], ['Open', M.open]].filter(w => w[1] > 0).map(w => [...w, STATUS[w[0]]]);
@@ -175,7 +177,7 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
   const labels = order.map(t => `${t} (${T[t].done} of ${T[t].total})`);
   const maxT = Math.max(...order.map(t => TP[t].done + TP[t].carry));
   s.addChart(pres.ChartType.bar, [{ name: 'Closed (pts)', labels, values: order.map(t => TP[t].done) }, { name: 'Carried over (pts)', labels, values: order.map(t => TP[t].carry) }], {
-    x: 0.6, y: 1.95, w: 7.2, h: 4.8, barDir: 'bar', barGrouping: 'stacked', chartColors: [C.green, C.amber], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: C.white, dataLabelFontFace: B, dataLabelFontSize: 10, dataLabelFormatCode: NOZERO,
+    x: 0.6, y: 1.95, w: 7.2, h: 4.8, barDir: 'bar', barGrouping: 'stacked', chartColors: [STATUS.Closed, C.amber], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: C.ink, dataLabelFontFace: B, dataLabelFontSize: 10, dataLabelFormatCode: NOZERO,
     showLegend: true, legendPos: 'b', legendFontFace: B, legendFontSize: 9, catAxisLabelFontFace: B, catAxisLabelFontSize: 10, catAxisLabelColor: C.ink, catAxisOrientation: 'maxMin', valAxisLabelFontFace: B, valAxisLabelFontSize: 9, valAxisLabelColor: C.muted, valGridLine: { color: C.line, size: 0.5 }, catGridLine: { style: 'none' }, valAxisMinVal: 0, valAxisMaxVal: ptsMax(maxT), valAxisMajorUnit: ptsMax(maxT) > 50 ? 10 : 5, barGapWidthPct: 60,
   });
   box(s, 8.15, 1.95, 4.58, 4.75, C.light, C.light);
@@ -202,7 +204,7 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
   const cw = (12.13 - gx * (cols - 1)) / cols, ch = Math.min(2.3, (4.85 - gy * (rows - 1)) / rows), big = ch >= 2;
   cards.forEach((c, i) => {
     const x = 0.6 + (i % cols) * (cw + gx), y = 1.9 + Math.floor(i / cols) * (ch + gy), qa = !c.dev;
-    box(s, x, y, cw, ch, C.white, C.line); s.addShape(pres.ShapeType.rect, { x, y, w: cw, h: 0.08, fill: { color: qa ? C.blue : C.green }, line: { color: qa ? C.blue : C.green } });
+    box(s, x, y, cw, ch, C.white, C.line); s.addShape(pres.ShapeType.rect, { x, y, w: cw, h: 0.08, fill: { color: qa ? C.blue : STATUS.Closed }, line: { color: qa ? C.blue : STATUS.Closed } });
     s.addShape(pres.ShapeType.ellipse, { x: x + 0.2, y: y + 0.28, w: 0.78, h: 0.78, fill: { color: C.light }, line: { color: C.light } });
     tb(s, c.emoji || '⭐', { x: x + 0.2, y: y + 0.28, w: 0.78, h: 0.78, fontSize: 24, align: 'center', valign: 'middle' });
     tb(s, (c.award || '').toUpperCase(), { x: x + 1.15, y: y + 0.26, w: cw - 1.3, h: 0.3, fontSize: 9, bold: true, color: C.red, charSpacing: 2 });

@@ -90,20 +90,21 @@
         "value": "11 of 14",
         "label": "Closed inside the sprint window",
         "note": "Oct 1 to Oct 21; 5 of them on Oct 5",
-        "tone": "green"
+        "tone": "Closed"
       },
       {
         "value": "2",
         "label": "Closed the evening the sprint ended",
         "note": "ICDC-4083 and 4084 after 5 PM Oct 21: 10 pts",
-        "tone": "MEDIUM"
+        "tone": "Closed"
       }
     ],
     "closedNote": "(5 of the 14 carry no points; ICDC-2808, 5 pts, was cancelled)",
-    "motionNote": "9 were already in review at Sprint 51 close",
     "holdNote": "(ICDC-4187 MEVAL bucket policy)",
     "openNote": "(BE unit tests, Figma cleanup, pipeline diagram)",
-    "speakerNote": "Resolution dates: 4027, 4172, 4238, 4250, 4253 Oct 5; 2808 Oct 13 (Cancelled); 4261, 4262 Oct 15; 4256, 4239, 4082 Oct 21 before 5 PM; 4083, 4084 Oct 21 evening. ICDC-4254 is the migration epic (epics carry no resolution). Delivered points include 5 from cancelled ICDC-2808, so built work is 24 of 57 pts."
+    "speakerNote": "Resolution dates: 4027, 4172, 4238, 4250, 4253 Oct 5; 2808 Oct 13 (Cancelled); 4261, 4262 Oct 15; 4256, 4239, 4082 Oct 21 before 5 PM; 4083, 4084 Oct 21 evening. ICDC-4254 is the migration epic (epics carry no resolution). Delivered points include 5 from cancelled ICDC-2808, so built work is 24 of 57 pts.",
+    "reviewNote": "(9 were already in review at Sprint 51 close)",
+    "inProgressNote": "(Jenkins teardown, nonprod bucket, interop GraphQL fixes, investigator review)"
   },
   "scorecard": {
     "subtitle": "Scored against the five workstreams the sprint carried, not against raw ticket completion",
