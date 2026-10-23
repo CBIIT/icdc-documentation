@@ -1,6 +1,6 @@
 ### 📦 Data Loading Task Template (v2)
 
-> **Use this template for every ICDC data management task that loads a study submission into ICDC (either a new study or a study update to an existing study) and promotes it through Dev → QA → Stage → Prod.** Canonical examples: the COTC030 load (**ICDC-4176**) for a single submission, and the COTC021 v.3 load (**ICDC-4195**) for a study update spanning several submissions. This template covers the **loading-data** sub-function of the team's data management work. It is **not** for changes to the data model itself, and **not** for the paired IndexD registration that mints the file GUIDs this load consumes (that uses the IndexD Registration Task template). Kept in lockstep with CTDC's Data Loading Task template (DO-LOAD v10); the differences are the platform specifics in the anatomy below. See "When NOT to use this template" at the end.
+> **Use this template for every ICDC data management task that loads a study submission into ICDC (either a new study or a study update to an existing study) and promotes it through Dev → QA → Stage → Prod.** Canonical examples: the COTC030 load (**ICDC-4176**) for a single submission, and the COTC021 v.3 load (**ICDC-4195**) for a study update spanning several submissions. This template covers the **loading-data** sub-function of the team's data management work. It is **not** for changes to the data model itself, and **not** for the paired IndexD registration that registers the file GUIDs this load consumes (that uses the IndexD Registration Task template). Kept in lockstep with CTDC's Data Loading Task template (DO-LOAD v10); the differences are the platform specifics in the anatomy below. See "When NOT to use this template" at the end.
 
 **Why this template**
 
@@ -141,7 +141,7 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 
 **When NOT to use this template**
 
-- **IndexD registration (minting GUIDs)** → IndexD Registration Task template, the parallel sibling.
+- **IndexD registration (registering GUIDs)** → IndexD Registration Task template, the parallel sibling.
 - **Data modeling** → Data Modeling for Study Submission (study-driven) or Data Model Update Task (internally-driven).
 - **Software development** → software development template family.
 - **CRDC platform changes** (Fence, IndexD, Submission Portal upgrades) → owned by CRDC platform teams; out of ICDC scope.
