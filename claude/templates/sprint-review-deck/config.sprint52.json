@@ -168,7 +168,7 @@
     ]
   },
   "team": {
-    "shoutout": "Charles Ngu built the Prefect migration end to end: worker permissions, all three job migrations and the epic. Michael Fleming delivered the IndexD environment variables, JBrowse CORS policy and snapshot bucket sync. Ambar Rana landed the High Tomcat CVE ahead of its date and Toyo Udosen shipped the Homepage Announcements. Eric Miller reviewed and closed out the Prefect work, and Valentina Epishina held the QA gate.",
+    "shoutout": "Charles Ngu built the Prefect migration end to end: worker permissions, all three job migrations and the epic. Michael Fleming fixed View in Browser and delivered the IndexD environment variables, JBrowse CORS policy, snapshot bucket sync and Dev GraphQL introspection. Eric Miller fixed the Critical file download bug, Ambar Rana landed the High Tomcat CVE ahead of its date, Toyo Udosen shipped the Homepage Announcements, and Valentina Epishina held the QA gate.",
     "creditNote": "Credit comes from the Jira Developer field (customfield_23650): the person who did the work. The Assignee is usually whoever moved the ticket to Closed, often QA, so it is not charted. A ticket with two developers counts for each; coordination work such as IndexD registration has no Developer by design."
   },
   "carry": {
