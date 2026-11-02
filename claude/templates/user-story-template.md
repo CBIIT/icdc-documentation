@@ -2,15 +2,15 @@
 
 > **Use this template for every ICDC software-development user story.** The canonical example is **ICDC-4244 (Surface matching C3DC human cancer data on the ICDC Human Relevance tab)**: drafted 2026-09-04 as the first application of this template, epic-linked to ICDC-3882 (ICDC Human Relevance) and paired with design task ICDC-4242. Data-submission user stories (the Data Concierge's parent ticket for a study submission) use `data-submission-user-story-template.md` instead.
 >
-> **Status:** v3.1 (2026-11-02): Assignee is left empty at creation unless the TPM names an owner (was the TPM); Jira calls are REST API v2 requests through Claude in Chrome (the Atlassian MCP was retired). CTDC's user story template moved out of its SKILL.md into `claude/templates/user-story-template.md` the same day and gained this template's issue-type rule. v3 (2026-10-13): four sections. The 🎯 Story Summary section is removed: it restated the User Story in other words. The As-a / I-want / So-that statement is the story's card, the Acceptance Criteria are its confirmation, and the Jira Summary field (the ticket title on boards and in search) is the one-line read. The "name the surface" rule moves to the User Story. Scope is replaced by 🚫 Out of Scope (In Scope only restated the Acceptance Criteria), placed directly after the Acceptance Criteria so each exclusion sits next to the behaviors it limits and QA reads it before writing test cases. Out of Scope stays because Acceptance Criteria can only say what must happen, not what is deliberately excluded; without it, engineers build adjacent features, QA fails stories for behavior nobody asked for, and settled questions get re-raised. Acceptance Criteria is one functional list; the Performance & Quality sub-block is removed (the quality bar is a team-wide standard QA checks, not restated per ticket). Testing Requirements is unit tests only. Integration and manual test scenarios belong to QA, who write their own test cases from the Acceptance Criteria; the story no longer prescribes them. CTDC's §7a changed the same day. v2 (2026-10-09): section headers and authoring moved to Jira wiki markup; the Performance & Quality bar is now identical in CTDC (CTDC dropped its cross-browser item). v1 (2026-09-04): ported from CTDC's §7a User Story Template and **slimmed from 7 to 5 sections**: the 🔗 Parent Epic & Context section was dropped (the Epic Link field is the canonical link; restating it in the body is noise) and the 📝 Notes section was dropped (predecessor tickets, design tasks, and decisions are carried by native Jira links and comments). CTDC's §7a was slimmed to the same 5-section shape on the same day so the two projects stay aligned.
+> **Status:** v3.2 (2026-11-02): three sections; 🧪 Testing Requirements removed. QA designs and owns all testing from the Acceptance Criteria, so the story does not prescribe how the work is tested; unit test coverage is a team-wide engineering standard, not restated per story. CTDC §7a v4.2 changed the same day. v3.1 (2026-11-02): Assignee is left empty at creation unless the TPM names an owner (was the TPM); Jira calls are REST API v2 requests through Claude in Chrome (the Atlassian MCP was retired). CTDC's user story template moved out of its SKILL.md into `claude/templates/user-story-template.md` the same day and gained this template's issue-type rule. v3 (2026-10-13): four sections. The 🎯 Story Summary section is removed: it restated the User Story in other words. The As-a / I-want / So-that statement is the story's card, the Acceptance Criteria are its confirmation, and the Jira Summary field (the ticket title on boards and in search) is the one-line read. The "name the surface" rule moves to the User Story. Scope is replaced by 🚫 Out of Scope (In Scope only restated the Acceptance Criteria), placed directly after the Acceptance Criteria so each exclusion sits next to the behaviors it limits and QA reads it before writing test cases. Out of Scope stays because Acceptance Criteria can only say what must happen, not what is deliberately excluded; without it, engineers build adjacent features, QA fails stories for behavior nobody asked for, and settled questions get re-raised. Acceptance Criteria is one functional list; the Performance & Quality sub-block is removed (the quality bar is a team-wide standard QA checks, not restated per ticket). Testing Requirements is unit tests only. Integration and manual test scenarios belong to QA, who write their own test cases from the Acceptance Criteria; the story no longer prescribes them. CTDC's §7a changed the same day. v2 (2026-10-09): section headers and authoring moved to Jira wiki markup; the Performance & Quality bar is now identical in CTDC (CTDC dropped its cross-browser item). v1 (2026-09-04): ported from CTDC's §7a User Story Template and **slimmed from 7 to 5 sections**: the 🔗 Parent Epic & Context section was dropped (the Epic Link field is the canonical link; restating it in the body is noise) and the 📝 Notes section was dropped (predecessor tickets, design tasks, and decisions are carried by native Jira links and comments). CTDC's §7a was slimmed to the same 5-section shape on the same day so the two projects stay aligned.
 
 ## Why this template
 
-User stories are smaller-scope deliverables than epics: they ship and close. The bare As-a/I-want/So-that line is a starting point, but it leaves the engineer without enough structure to know when a story is *done*. This template gives every story the classic framing as flowing prose, an Out of Scope list that prevents adjacent-feature creep, testable Acceptance Criteria, and the unit tests the engineer writes.
+User stories are smaller-scope deliverables than epics: they ship and close. The bare As-a/I-want/So-that line is a starting point, but it leaves the engineer without enough structure to know when a story is *done*. This template gives every story the classic framing as flowing prose, an Out of Scope list that prevents adjacent-feature creep, and testable Acceptance Criteria.
 
-Testing Requirements names the unit tests the engineer writes, because Valentina Epishina is QA-only (SDET, does not write feature code). Integration and manual test scenarios are QA's to design from the Acceptance Criteria, so the story does not prescribe them.
+There is no testing section: QA (Valentina Epishina, SDET) designs every test case from the Acceptance Criteria, and unit test coverage is a team-wide engineering standard, so the story does not prescribe how the work is tested.
 
-## Section order (4 sections, exactly this sequence)
+## Section order (3 sections, exactly this sequence)
 
 Each section header is a Jira wiki `h3.` heading using the emoji + bold title format shown. Do not omit, reorder, or merge sections. If a section genuinely has no content, state so explicitly ("None at this time") rather than dropping the header.
 
@@ -20,17 +20,13 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 
 3. `h3. 🚫 *Out of Scope*`: Bullet list of work this story deliberately does not do: adjacent features, behaviors someone might reasonably expect, and questions already settled. Describe each excluded item in words; do not cite the Jira key of the ticket that covers it (add a `Relates` link instead). If there are none, state "None at this time." There is no In Scope list: the Acceptance Criteria are the definition of what the story delivers, and an In Scope list only restates them less precisely.
 
-4. `h3. 🧪 *Testing Requirements*`: One sub-block:
-   - **Unit Tests**: isolated behaviors (parsers, URL builders, reducers, utilities)
-
-## Standing emoji set (4 entries)
+## Standing emoji set (3 entries)
 
 | Section | Emoji |
 |---|---|
 | User Story | 👤 |
 | Acceptance Criteria | ✅ |
 | Out of Scope | 🚫 |
-| Testing Requirements | 🧪 |
 
 ## Required content rules
 
@@ -39,7 +35,7 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 - **Epic Link set on the ticket itself** via `customfield_12350` (SKILL.md Section 3). There is no Parent Epic line in the body.
 - **No Jira ticket keys anywhere in the body.** Related tickets (design task, requirements task, siblings, follow-ons) are `Relates` issue links; Jira's Links panel is the single source. No Notes section, no cross-reference lines.
 - **Acceptance Criteria are testable**: one observable behavior per item.
-- **Testing Requirements is the developer's unit test checklist before "Ready for QA."** Not optional. No Integration or Manual QA sub-blocks: QA writes those test cases from the Acceptance Criteria.
+- **No testing section.** QA designs and owns all test cases, written from the Acceptance Criteria; the story does not prescribe how the work is tested. Unit test coverage is a team-wide engineering standard, like the quality bar, and is not restated per story (TPM decision, 2026-11-02).
 - **Leave Assignee empty at creation** unless the TPM names an owner; the engineer is assigned when the story is pulled into a sprint. Populate the Developer field (`customfield_23650`) with the implementing engineer when known.
 - **Jira wiki authoring** (nothing converts Markdown, so what is sent is stored exactly; see `claude/templates/README.md`, "Universal patterns"): `h3. {emoji} *Title*` headers; `* *Label*: content` labeled lines; `*` bullets and `#` numbered lists at column 0; `*bold*`; `{{monospace}}`; tables `||header||` / `|cell|`; links `[text|url]`; curly braces escaped as `\{...\}`. Blank line after every heading. After pushing, read the description back and confirm it starts with `h3.`, not `###`.
 
@@ -52,6 +48,6 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 
 ## When to expand vs trim
 
-- **Fewer than 5 Acceptance Criteria** → keep all 4 sections; the structure earns its keep by giving the engineer a checklist.
-- **Documentation or copy change with no code path** → Unit Tests says "None at this time"; QA verifies against the Acceptance Criteria.
+- **Fewer than 5 Acceptance Criteria** → keep all 3 sections; the structure earns its keep by giving the engineer and QA a checklist.
+- **Documentation or copy change with no code path** → same 3 sections; QA verifies against the Acceptance Criteria.
 - **Spike or research task** → wrong shape; use a free-form Task with explicit deliverables.
