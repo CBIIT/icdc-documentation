@@ -41,9 +41,13 @@ One per federal fiscal year (October through September), so the epic stays small
 * *Assignee*: DevOps Lead or TPM, as the TPM directs
 * *Labels*: `release`, `deployment`, `devops`
 
+**Card line first.** Line 1 of the body is the card line: one plain sentence, 140 characters or fewer, no markup, emoji, or ticket keys, followed by one blank line and then the 🎯 heading. It is what the Federal Leadership epic Kanban board shows on the card, the same rule as the lean epic template.
+
 Body (Jira wiki markup). The Release Dashboards link points to the current calendar year's folder; update it in January.
 
 ```
+Tracks every ICDC monthly software release in federal FY<YY>, from Deployment Package through Production.
+
 h3. 🎯 *Purpose*
 Tracks the monthly ICDC production release cycle for federal FY<YY> (October <YYYY> through September <YYYY+1>). The Deployment Package, Stage, and Production tasks for each release live under this epic.
 
@@ -167,6 +171,7 @@ At the start of each fiscal year, create the new standing epic before the Octobe
 
 ## Changelog
 
+* *v1.6 (2026-11-02)*: Standing release epic gains a card line (line 1 of the body), matching CTDC.
 * *v1.5 (2026-10-22)*: Dates live on the Release Dashboard only: release tickets carry no Due Date and no date in their body, because deployment dates change and a copied date goes stale. The Invicti SLA rule for the Production date now applies to the date set on the Release Dashboard. Ownership table row renamed to "Deployment dates". CTDC changed in lockstep (v7).
 * *v1.4 (2026-10-22)*: Added the **Deployment Package task**: the Tech Lead identifies every microservice version and records the Deployment Package Number on the Release Dashboard; it blocks both deployment tasks. Canonical ICDC-4296 (October 2026). Ownership table and creation steps updated to match. Stated that tickets are created from this spec, not cloned. CTDC changed in lockstep (v6), and also dropped its Jira clone-source tickets so both projects use the same create-from-spec model.
 * *v1.3 (2026-10-22)*: Adopted the wording already in use on ICDC-4291 and ICDC-4292: "monthly release" in the Deployment Summary; "Deployment Package" replaces "the build" in Workflow step 4 and the Definition of Done; new *Deployment Package* Definition of Done bullet tying the deployed package to the Deployment Package Number on the Release Dashboard, with Production also requiring the same package verified in Stage. Removed the *Handoff* Definition of Done bullet and the "notify the TPM" clause from Workflow step 4: the handoff is the ticket's status change in Jira. CTDC updated in lockstep (v4).
