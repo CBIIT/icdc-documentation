@@ -60,15 +60,15 @@ Each header is `h3. {emoji} *Title*` with the emoji shown. All five are required
 * *Disposition tasks close as Won't Fix*: with the label `false-positive` or `risk-accepted` and a comment containing the justification exactly as sent to NCI Security.
 * *Regressions reopen, never clone*: if a Closed task's finding reappears, transition it back to Open, add a comment naming the report and environment that re-observed it, and keep the original due date unless NCI Security resets it.
 * *One PR per task*: standard ICDC convention. The PR link goes in a comment, not the body.
-* *Jira wiki authoring* (connector Markdown translation is off, so what is sent is stored exactly; see `claude/templates/README.md`, "Universal patterns"): `h3. {emoji} *Title*` headers; `* *Label*: content` labeled lines; `*` bullets and `#` numbered lists at column 0; `*bold*`; `{{monospace}}`; tables `||header||` / `|cell|`; links `[text|url]`; curly braces escaped as `\{...\}`. Blank line after every heading. After pushing, read the description back and confirm it starts with `h3.`, not `###`.
+* *Jira wiki authoring* (nothing converts Markdown, so what is sent is stored exactly; see `claude/templates/README.md`, "Universal patterns"): `h3. {emoji} *Title*` headers; `* *Label*: content` labeled lines; `*` bullets and `#` numbered lists at column 0; `*bold*`; `{{monospace}}`; tables `||header||` / `|cell|`; links `[text|url]`; curly braces escaped as `\{...\}`. Blank line after every heading. After pushing, read the description back and confirm it starts with `h3.`, not `###`.
 
 **Writing-and-publishing workflow**
 
 1. Triage per the SOP: severity, environments, root cause, remedy, disposition candidate, due date.
-2. `jira_create_issue` with `issue_type = "Task"`, the summary above, a placeholder description, labels, priority. Leave Unassigned.
-3. `jira_update_issue` with the full body and the `sla-due-YYYY-MM-DD` label (`duedate` is rejected on this screen scheme).
-4. `jira_update_issue` with `{"customfield_12350": "<epic key>"}` to link the parent epic (separate call; the `epicKey` parameter does not work reliably on this instance).
-5. If a companion deployment-config task is needed, create it the same way, then `jira_create_issue_link` with `link_type = "Blocks"`, `inward_issue_key = <companion>`, `outward_issue_key = <finding task>` (verified: this renders as the finding task "is blocked by" the companion).
+2. `POST /rest/api/2/issue` with `"issuetype": {"name": "Task"}`, the summary above, a placeholder description, labels, priority. Leave Unassigned.
+3. `PUT /rest/api/2/issue/<KEY>` with the full body and the `sla-due-YYYY-MM-DD` label (`duedate` is rejected on this screen scheme).
+4. `PUT /rest/api/2/issue/<KEY>` with `{"customfield_12350": "<epic key>"}` to link the parent epic (separate call; never rely on an `epicKey`-style shortcut).
+5. If a companion deployment-config task is needed, create it the same way, then `POST /rest/api/2/issueLink` with `{"type": {"name": "Blocks"}, "inwardIssue": {"key": "<companion>"}, "outwardIssue": {"key": "<finding task>"}}` (verified: this renders as the finding task "is blocked by" the companion).
 6. Post the PR link as a plain-text comment when it opens; QA closes the task with resolution Fixed after confirming on the observed tier(s).
 
 **Worked example (September 2026 High)**

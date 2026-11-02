@@ -89,15 +89,15 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 - **The whole review is local.** Local Neo4j + local OpenSearch + the Dev frontend pointed at them; never the shared Dev / QA / Stage / Prod environments.
 - **Review Findings is the completion record**: there is no separate signoff table. A clean review (no outstanding findings) is the close trigger.
 - **No WBS label and no SOP reference**: ICDC has neither for this task at present.
-- **Jira wiki authoring** (connector Markdown translation is off, so what is sent is stored exactly; see `claude/templates/README.md`, "Universal patterns"): `h3. {emoji} *Title*` headers; `* *Label*: content` labeled lines; `*` bullets and `#` numbered lists at column 0; `*bold*`; `{{monospace}}`; tables `||header||` / `|cell|`; links `[text|url]`; curly braces escaped as `\{...\}`. Blank line after every heading. After pushing, read the description back and confirm it starts with `h3.`, not `###`.
+- **Jira wiki authoring** (nothing converts Markdown, so what is sent is stored exactly; see `claude/templates/README.md`, "Universal patterns"): `h3. {emoji} *Title*` headers; `* *Label*: content` labeled lines; `*` bullets and `#` numbered lists at column 0; `*bold*`; `{{monospace}}`; tables `||header||` / `|cell|`; links `[text|url]`; curly braces escaped as `\{...\}`. Blank line after every heading. After pushing, read the description back and confirm it starts with `h3.`, not `###`.
 
 **Writing-and-publishing workflow**
 
 1. Confirm the submission exists in the CRDC Submission Portal and its loading TSVs are downloadable. (A Release Package is **not** required: this review runs before one exists.)
 2. Confirm this is a pre-load review, not the actual load, IndexD registration, or modeling.
 3. Identify the Data Submission Epic and the paired Data Loading Task (add the `Relates` link after creation).
-4. Create the review task via `jira_create_issue` with `issue_type = "Task"`, a short placeholder description, the Data Submission Epic via `customfield_12350`, and the `Data-Concierge` label. Leave it unassigned at creation; the assignee is set later during sprint triage or when work begins.
-5. Push the full body via `jira_update_issue` (two-step create-then-update).
+4. Create the review task via `POST /rest/api/2/issue` with `"issuetype": {"name": "Task"}`, a short placeholder description, the Data Submission Epic via `customfield_12350`, and the `Data-Concierge` label. Leave it unassigned at creation; the assignee is set later during sprint triage or when work begins.
+5. Push the full body via `PUT /rest/api/2/issue/<KEY>` (two-step create-then-update).
 6. Add the `Relates` link to the paired Data Loading Task.
 7. Verify the rendered description with a UI screenshot.
 8. As the review runs, the reviewer fills the Review Findings table. **A clean review closes the task and clears the load.**

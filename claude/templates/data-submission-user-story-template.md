@@ -73,7 +73,7 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 - **No AWS bucket / Release Package location on the story**: loading-only, lives on the Data Loading task.
 - **Links consolidated into Study Submission Details**: no separate Document & Folder References section.
 - **`NA` for genuinely-inapplicable fields, `TBD` for pending ones.**
-- **Jira wiki authoring** (connector Markdown translation is off, so what is sent is stored exactly; see `claude/templates/README.md`, "Universal patterns"): `h3. {emoji} *Title*` headers; `* *Label*: content` labeled lines; `*` bullets and `#` numbered lists at column 0; `*bold*`; `{{monospace}}`; tables `||header||` / `|cell|`; links `[text|url]`; curly braces escaped as `\{...\}`. Blank line after every heading. After pushing, read the description back and confirm it starts with `h3.`, not `###`.
+- **Jira wiki authoring** (nothing converts Markdown, so what is sent is stored exactly; see `claude/templates/README.md`, "Universal patterns"): `h3. {emoji} *Title*` headers; `* *Label*: content` labeled lines; `*` bullets and `#` numbered lists at column 0; `*bold*`; `{{monospace}}`; tables `||header||` / `|cell|`; links `[text|url]`; curly braces escaped as `\{...\}`. Blank line after every heading. After pushing, read the description back and confirm it starts with `h3.`, not `###`.
 
 **Linking conventions**
 
@@ -90,8 +90,8 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 **Writing-and-publishing workflow**
 
 1. Confirm the study-integration epic (ICDC-3342) exists for the epic link.
-2. Two-step create: `jira_create_issue` with a one-line placeholder, then `jira_update_issue` with the full Jira wiki body. Same pattern as every other ICDC template.
-3. **Do not hand-edit the description in the Jira UI afterward**: re-push via `jira_update_issue`; the wiki editor eats underscores and mangles monospace.
+2. Two-step create: `POST /rest/api/2/issue` with a one-line placeholder, then `PUT /rest/api/2/issue/<KEY>` with the full Jira wiki body. Same pattern as every other ICDC template.
+3. **Do not hand-edit the description in the Jira UI afterward**: re-push via `PUT /rest/api/2/issue/<KEY>`; the wiki editor eats underscores and mangles monospace.
 4. Render-verify in the Jira UI, and read the description back to confirm it starts with `h3.`, not `###`.
 5. Add the native links above as the modeling/indexing/loading tasks come into being.
 

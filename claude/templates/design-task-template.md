@@ -74,9 +74,9 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 ## Writing-and-publishing workflow
 
 1. Confirm the user story exists (in the ICDC User Story template shape: `claude/templates/user-story-template.md`) before finalizing the design task. The design deliverables must enable the story's AC; if the AC is not stable, the design scope is not stable either.
-2. Create via `jira_create_issue` with `issue_type = "Task"`, a placeholder description, and the designer assigned; then `jira_update_issue` with the full Jira wiki body and `{"customfield_12350": "ICDC-XXXX"}` in `additional_fields`. Read the description back to confirm it stored as wiki markup.
-3. Add the `Relates` link to the user story (and to a requirements task if one exists) via `jira_create_issue_link`.
-4. Verify the rendered description with a UI screenshot from the user: the wiki source returned by `jira_get_issue` is not a reliable render preview.
+2. Create via `POST /rest/api/2/issue` with `"issuetype": {"name": "Task"}`, a placeholder description, and the designer assigned; then `PUT /rest/api/2/issue/<KEY>` with the full Jira wiki body and `{"customfield_12350": "ICDC-XXXX"}` in `fields`. Read the description back to confirm it stored as wiki markup.
+3. Add the `Relates` link to the user story (and to a requirements task if one exists) via `POST /rest/api/2/issueLink`.
+4. Verify the rendered description with a UI screenshot from the user: the wiki source returned by `GET /rest/api/2/issue/<KEY>` is not a reliable render preview.
 
 ## When to expand vs trim
 

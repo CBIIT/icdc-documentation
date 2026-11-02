@@ -71,7 +71,7 @@ One per release, created first; it blocks both deployment tasks.
 
 * *Summary*: `Identify the <Month YYYY> monthly release Deployment Package`. Patch release: `Identify the <Month YYYY> patch release Deployment Package`.
 * *Type*: Task
-* *Epic Link*: the current fiscal year's standing epic, set with a follow-up `jira_update_issue` on `customfield_12350`.
+* *Epic Link*: the current fiscal year's standing epic, set with a follow-up `PUT /rest/api/2/issue/<KEY>` on `customfield_12350`.
 * *Assignee*: Tech Lead, Ambar Rana (`ambar.rana@nih.gov`).
 * *Developer* (`customfield_23650`): `[{"name": "ranaab"}]`.
 * *Labels*: `release`, `deployment`
@@ -110,7 +110,7 @@ Two tasks per release, identical except the environment word (**Stage** / **Prod
 
 * *Summary*: `Deploy <Month YYYY> monthly release to ICDC <Stage | Production>`. Patch release: `Deploy <Month YYYY> patch release to ICDC <Stage | Production>`.
 * *Type*: Task
-* *Epic Link*: the current fiscal year's standing epic, set with a follow-up `jira_update_issue` on `customfield_12350`.
+* *Epic Link*: the current fiscal year's standing epic, set with a follow-up `PUT /rest/api/2/issue/<KEY>` on `customfield_12350`.
 * *Assignee*: DevOps Lead, Charles Ngu (`charles.ngu@nih.gov`).
 * *Developer* (`customfield_23650`): `[{"name": "nguca"}]`. The field rejects a bare username string.
 * *Labels*: `release`, `deployment`, `devops`
@@ -155,8 +155,8 @@ h3. ✅ *Definition of Done*
 
 ## Creating each month's tasks
 
-1. Create the Deployment Package task, then the Stage and Production tasks, each with a placeholder body; then `jira_update_issue` each with the body above and labels. Leave Due Date empty.
-2. Set the epic link (`customfield_12350`) and Developer (`customfield_23650`) on each and confirm both with `jira_get_issue`.
+1. Create the Deployment Package task, then the Stage and Production tasks, each with a placeholder body; then `PUT /rest/api/2/issue/<KEY>` each with the body above and labels. Leave Due Date empty.
+2. Set the epic link (`customfield_12350`) and Developer (`customfield_23650`) on each and confirm both with `GET /rest/api/2/issue/<KEY>`.
 3. Swap `<Month YYYY>` and `<Stage | Production>` in the summary and body, resolve the two `[Production only: ...]` phrases (keep the words on Production, delete them on Stage), and paste the month's Release Dashboard link. The Release Dashboard must always be linked; a release task without one is incomplete.
 4. Link the Deployment Package task "Blocks" the Stage task and "Blocks" the Production task; link both deployment tasks to each Invicti scan epic the release remediates ("Related To"); and link Stage "Blocks" Production.
 5. Open all three tickets in the Jira UI and confirm they render.

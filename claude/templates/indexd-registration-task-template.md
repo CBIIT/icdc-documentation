@@ -121,11 +121,11 @@ Each section header is a Jira wiki `h3.` heading with the emoji and a bold title
 - **Parent Epic field set via `customfield_12350`** to the study's Data Submission Epic.
 - **`Data-Concierge` label is mandatory** on this task, set at creation via `labels`. The paired Data Loading Task carries no label.
 - **Leave the ticket Unassigned at creation.** The Developer field is not required: indexing is Data Concierge coordination, not engineering.
-- **Sprint: always add the ticket to the standing `ICDC Data Related` sprint at creation** (board 574, sprint id 6645). Never leave it in the backlog or place it in a numbered development sprint; pass the new key to `jira_add_issues_to_sprint` right after creation.
+- **Sprint: always add the ticket to the standing `ICDC Data Related` sprint at creation** (board 574, sprint id 6645). Never leave it in the backlog or place it in a numbered development sprint; pass the new key to `POST /rest/agile/1.0/sprint/<sprintId>/issue` right after creation.
 - **`Relates` link to each submission's Data Hub tracking ticket (DHDM-XXX).** DHDM tracks per submission, so a multi-submission registration links several DHDM tickets.
 - **`Relates` link to the paired Data Loading Task** when it exists (registration as inward issue, load as outward). Never `Blocks`: the two run in parallel.
 - **`Relates` link to the study record when one exists** (for example ICDC-3206 for COTC021). ICDC-only; the Study tickets are a deprecated onboarding system and new studies may not have one.
-- **Native "Related To" link to each CRINTAKE ticket** once it is filed (`jira_create_issue_link`, registration as inward issue). A free-text CRINTAKE key is not sufficient, and a remote link is reserved for targets outside this Jira.
+- **Native "Related To" link to each CRINTAKE ticket** once it is filed (`POST /rest/api/2/issueLink`, registration as inward issue). A free-text CRINTAKE key is not sufficient, and a remote link is reserved for targets outside this Jira.
 - **No other ticket keys in the body.** The epic, study record, DHDM trackers, CRINTAKE tickets, and paired load are all carried by the Epic Link and native links.
 - **No em dashes** in the ticket body or comments; use colons, semicolons, commas, or parentheses.
 - **Description format is Jira wiki markup, authored directly** (the update path stores Markdown literally on this instance). Headings `h3. 🎯 *Title*`; labeled lines `* *Label*: content`; inline code `{{value}}`; numbered lists `#`; bullets `*`; links `[text|url]`; tables `||header||` and `|cell|`. Blank line after every heading, between a bold phase label and its list, and between sections. No in-cell line breaks. After pushing, read the description back and confirm it starts with `h3.`, not `###`.
@@ -136,9 +136,9 @@ Each section header is a Jira wiki `h3.` heading with the emoji and a bold title
 1. Confirm each Release Package exists in `nci-cbiit-caninedatacommons-dev`. If they don't yet, the ticket can still be created with PLACEHOLDER cells. Surface open questions on the Data Submission Epic, not the Task.
 2. Confirm this is IndexD registration, not data loading or modeling.
 3. Identify the Data Submission Epic, each submission's DHDM tracker, the paired Data Loading Task, and the study record if one exists.
-4. Create via `jira_create_issue` with `issue_type = "Task"`, the title from the convention above, a short placeholder description, the parent epic via `customfield_12350`, and the `Data-Concierge` label. Leave it Unassigned.
-5. Push the full description via `jira_update_issue` in Jira wiki markup; read it back to confirm it stored as wiki markup.
-6. Add the ticket to the `ICDC Data Related` sprint (id 6645) via `jira_add_issues_to_sprint`.
+4. Create via `POST /rest/api/2/issue` with `"issuetype": {"name": "Task"}`, the title from the convention above, a short placeholder description, the parent epic via `customfield_12350`, and the `Data-Concierge` label. Leave it Unassigned.
+5. Push the full description via `PUT /rest/api/2/issue/<KEY>` in Jira wiki markup; read it back to confirm it stored as wiki markup.
+6. Add the ticket to the `ICDC Data Related` sprint (id 6645) via `POST /rest/agile/1.0/sprint/<sprintId>/issue`.
 7. Add the `Relates` links: each submission's DHDM tracker, the paired Data Loading Task, and the study record if one exists.
 8. Post the study-update context comment (file counts, file-type breakdown) as plain text, then verify the rendered description with a UI screenshot.
 9. As the work progresses, add a "Related To" link to each CRINTAKE ticket once filed, and add a row for any late-arriving submission.

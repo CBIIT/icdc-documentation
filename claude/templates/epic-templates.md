@@ -42,16 +42,16 @@ Each section header is a Jira wiki `h3.` heading using the emoji + bold title fo
 - **Card line first.** Line 1 is the card line, exactly one sentence of 140 characters or fewer, then a blank line.
 - **Under 600 words** for the five sections (the card line is not counted). Count before pushing.
 - **No ticket keys in the body.** Related work is named in prose; the Epic Link field and Jira's Links panel carry the relationships.
-- **Grounded before drafting.** Verify the live UI with Playwright for anything user-facing, and read the canonical repo for the mechanism in the Description. Child ticket summaries are not a substitute.
+- **Grounded before drafting.** Verify the live UI in Claude in Chrome for anything user-facing, and read the canonical repo for the mechanism in the Description. Child ticket summaries are not a substitute.
 - **Open access stated where it matters.** ICDC is open access: the public application requires no login. Say so wherever a CTDC pattern might import controlled-access framing.
 - **Underscored identifiers in `{{...}}` monospace** and **curly braces escaped as `\{...\}`** (see "Authoring format").
 - **Not evergreen.** Feature and yearly improvement epics close; only the standing data epic in 7e-D stays Open.
 
 **Writing-and-publishing workflow**
 
-1. **Verify** the hosting surface (Playwright on `https://caninecommons.cancer.gov`, hash routes such as `#/explore`) and the canonical repo before drafting.
+1. **Verify** the hosting surface (Claude in Chrome on `https://caninecommons.cancer.gov`, hash routes such as `#/explore`) and the canonical repo before drafting.
 2. **Draft** the card line and all 5 sections in Jira wiki markup. Check the word count.
-3. **Push**: for a new epic, `jira_create_issue` (`issue_type = "Epic"`, a one-line placeholder description, `customfield_12351` set to the summary, priority Major), then `jira_update_issue` with the description in `additional_fields` as `{"description": "..."}`. Never touch `labels` unless deliberately changing them.
+3. **Push**: for a new epic, `POST /rest/api/2/issue` (`"issuetype": {"name": "Epic"}`, a one-line placeholder description, `customfield_12351` set to the summary, priority Major), then `PUT /rest/api/2/issue/<KEY>` with the description in `fields` as `{"description": "..."}`. Never touch `labels` unless deliberately changing them.
 4. **Move children** by setting `{"customfield_12350": "ICDC-XXXX"}` on each child, then confirm with `"Epic Link" = ICDC-XXXX`.
 5. **Verify the render with a UI screenshot** from the user; wiki source is not a render preview.
 6. **Close the epic** (transition `Closed`, no resolution) with a short comment naming the release, once every child ticket is Closed.
@@ -107,7 +107,7 @@ When an epic touches data movement, name the correct pathway from Section 2:
 - **Data Model** (the YAML schema content) and **Data Model Navigator / DMN** (the React tool that renders it) are not the same thing. Versioning applies to the Data Model, not the DMN. Never write "DMN v2.0".
 
 **Epic posture defaults**
-- **Priority:** Major (set via MCP, not the description).
+- **Priority:** Major (set in the create or update request, not the description).
 - **Status and lifecycle:** Open while child work is in flight; **Closed** when the epic is delivered or retired. Epics are not evergreen containers (TPM decision, 2026-10-09: page-level and functional-area standing epics are retired in favor of feature epics and yearly area improvement epics). Close via the `Closed` transition (id 31 on the epic workflow both projects share since 2026-10-01); **no resolution is set or required on epics**. An epic is either Open or Closed: the children's resolutions record how the work ended, and the closing comment states whether the epic was **delivered** (name the release) or **retired** (why). To find open epics, query `statusCategory != Done`, never `resolution = Unresolved` (closed epics carry no resolution, so resolution-based filters would count them as open). TPM decision, 2026-10-13.
 - **Assignee:** Unassigned, unless directed otherwise. Child tickets carry the actual ownership.
 - **Labels:** Preserve any existing labels. Do not add or remove labels in epic passes unless deliberately changing them.
@@ -116,12 +116,12 @@ When an epic touches data movement, name the correct pathway from Section 2:
 - The quality bar (Section 508 and WCAG 2.1 AA accessibility, ICDC design system conformance, page performance) is a team-wide standard that QA checks on every story and release. It is not written into user stories, tasks, or epics (TPM decision, 2026-10-13).
 
 **Verification & ground truth**
-- **User-facing work:** verify the live UI with Playwright (`browser_navigate` + `browser_snapshot`) before drafting. Production is `https://caninecommons.cancer.gov` and routes are hash-based (`#/home`, `#/explore`, `#/studies`, `#/study/\{clinical_study_designation\}`, `#/fileCentricCart`).
+- **User-facing work:** verify the live UI in Claude in Chrome (open the page, then read it with `get_page_text` or `read_page`) before drafting. Production is `https://caninecommons.cancer.gov` and routes are hash-based (`#/home`, `#/explore`, `#/studies`, `#/study/\{clinical_study_designation\}`, `#/fileCentricCart`).
 - **Services, infrastructure, security, data:** verify against the source repo, deployed config, or live system before drafting. See Section 2's "Verify Before You Write: Architecture Claims Discipline" rule.
-- **Rendering:** the rendered Jira UI is the only ground truth; wiki source from `jira_get_issue` looks identical for working and broken tickets.
+- **Rendering:** the rendered Jira UI is the only ground truth; wiki source from `GET /rest/api/2/issue/<KEY>` looks identical for working and broken tickets.
 
 **Authoring format (Jira wiki, since 2026-10-09)**
-- **The `description` field takes Jira wiki markup, stored exactly as sent.** The shared Jira connector runs with `DISABLE_JIRA_MARKUP_TRANSLATION=true`, so nothing converts Markdown (raw `###` and `**` appear on the page if sent). See `claude/templates/README.md`, "Universal patterns", for the full list.
+- **The `description` field takes Jira wiki markup, stored exactly as sent.** Jira is written through the REST API v2 from a signed-in `tracker.nci.nih.gov` tab in Claude in Chrome (the Atlassian MCP and its Docker container were retired on 2026-11-02), so nothing converts Markdown (raw `###` and `**` appear on the page if sent). Write requests need the headers `X-Atlassian-Token: no-check` and `Content-Type: application/json`. See `claude/templates/README.md`, "Universal patterns", for the full list.
 
   | Want | Write (Jira wiki) |
   |---|---|
@@ -135,9 +135,9 @@ When an epic touches data movement, name the correct pathway from Section 2:
 - Bullets and numbered items are flush-left at column 0.
 - **Curly-brace rule (universal).** Anywhere curly braces appear in description text, escape them: `\{study_code\}`, not `{study_code}`. The only exception is the `{{monospace}}` and `[text|url]` wiki syntax itself.
 
-**MCP write notes (why the curly-brace rule exists)**
+**Write notes (why the curly-brace rule exists)**
 
-The Jira wiki renderer treats `{...}` as **macro syntax** (`{code}`, `{noformat}`, `{panel}`, `{color}`). An unknown macro name like `{study_code}` corrupts the parser state for the surrounding block, and the damage propagates forward: headers render as literal `h3.` text, bullets lose their list context, and paragraphs fracture at the `{...}`. If a render breaks, re-check the source for any unescaped `{...}` first; as a last resort, re-paste the description through the Jira web UI. Priority, summary, custom fields, status transitions, and labels write reliably through `jira_update_issue` because they do not pass through the wiki renderer.
+The Jira wiki renderer treats `{...}` as **macro syntax** (`{code}`, `{noformat}`, `{panel}`, `{color}`). An unknown macro name like `{study_code}` corrupts the parser state for the surrounding block, and the damage propagates forward: headers render as literal `h3.` text, bullets lose their list context, and paragraphs fracture at the `{...}`. If a render breaks, re-check the source for any unescaped `{...}` first; as a last resort, re-paste the description through the Jira web UI. Priority, summary, custom fields, status transitions, and labels write reliably through `PUT /rest/api/2/issue/<KEY>` because they do not pass through the wiki renderer.
 
 **Risk format (7e-D and any epic that needs one)**
 
