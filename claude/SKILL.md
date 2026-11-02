@@ -15,17 +15,15 @@ description: "Operational knowledge base for the ICDC Sprint Command Center Clau
 
 ## 1. Session Recovery & Infrastructure
 
-### 🐳 Docker / MCP Recovery
+### 🌐 Jira Access Recovery
 
-If any MCP tool (Jira/Atlassian, etc.) is unavailable or returns a connection error, **Docker is not running** on the user's machine. Do not attempt workarounds, do not ask for manual data. Surface the issue immediately:
+Jira (`https://tracker.nci.nih.gov`, Jira Data Center) is reached through **Claude in Chrome** using the user's own signed-in session; the REST API v2 is called with `fetch('/rest/api/2/...')` from inside a signed-in tracker tab. There is no Atlassian MCP and no Docker container (both retired 2026-11-02; see `claude/architecture/jira-atlassian-mcp-legacy.md`).
 
-> "🐳 **Docker doesn't appear to be running.** The Jira/Atlassian MCP container needs to be active. Please start Docker and restore the container, then let me know when it's back up and I'll pick up right where we left off."
+If Jira can't be reached (no browser tools, the extension is disconnected, or pages redirect to the NIH login page), do not attempt workarounds and do not ask for pasted ticket data. Surface the issue immediately:
 
-Wait for the user to confirm Docker is running before retrying any Jira operations.
+> "🌐 I can't reach Jira right now. Please make sure Chrome is open with the Claude in Chrome extension connected, and that you're signed in to tracker.nci.nih.gov. Let me know when it's ready and I'll pick up right where we left off."
 
-### 🔄 MCP Session Initialization
-
-After any session gap or cold start, **re-initialize the Atlassian MCP connection before the first tool call**. If tools fail on the first attempt, the fix is to refresh the project session and resend the message — do not retry in a loop or attempt workarounds.
+Wait for the user to confirm before retrying any Jira operations. A `GET /rest/api/2/myself` response can be served from the browser cache, so confirm a session with a fetch that uses `cache: 'no-store'` from a real tracker page rather than by opening that URL directly.
 
 ---
 
@@ -37,24 +35,24 @@ Full domain reference has moved to `claude/architecture/domain-context.md`; read
 
 ## 3. ⚠️ ICDC-Specific Jira Quirks
 
-> **Atlassian MCP retired (2026-11-02).** Tool names such as `jira_update_issue` below date from the MCP connector. Jira is now called through the REST API v2 from a signed-in Claude in Chrome tab; `claude/architecture/jira-atlassian-mcp-legacy.md` maps each MCP tool to its REST call and keeps the MCP-only quirks in case the connector is reinstated.
+> **How calls are made (since 2026-11-02).** Every call below is a Jira REST API v2 request made with `fetch` from a signed-in `tracker.nci.nih.gov` tab in Claude in Chrome. Write requests (`POST`/`PUT`) need the headers `X-Atlassian-Token: no-check` and `Content-Type: application/json`. The Atlassian MCP call shapes these replaced, and the MCP-only quirks, are kept in `claude/architecture/jira-atlassian-mcp-legacy.md` in case the connector is reinstated.
 >
 
 These are known behavioral differences in the ICDC Jira instance. Follow precisely — deviating from these patterns causes silent failures.
 
 ### Epic Linking — Custom Field Required
 
-The ICDC Jira instance uses a **non-standard custom field** for epic linking. The standard `epicKey` parameter does not work reliably.
+The ICDC Jira instance uses a **non-standard custom field** for epic linking. An `epicKey`-style shortcut does not set it; set the field itself.
 
 **Correct pattern for linking a child ticket to an epic:**
-1. Create the issue normally with `jira_create_issue`
-2. Immediately follow up with `jira_update_issue` using:
+1. Create the issue normally with `POST /rest/api/2/issue`
+2. Immediately follow up with `PUT /rest/api/2/issue/<KEY>` using:
    ```json
    { "customfield_12350": "ICDC-XXXX" }
    ```
-3. For batch-created issues (`jira_batch_create_issues`), the epic link also does **not** apply at creation time — every ticket in the batch needs the individual `jira_update_issue` follow-up with `customfield_12350`.
+3. For tickets created in a batch, give every ticket the same individual `PUT /rest/api/2/issue/<KEY>` follow-up with `customfield_12350`.
 
-**Never assume epic linking worked without verifying** — always confirm with a follow-up `jira_get_issue` check if there's any doubt.
+**Never assume epic linking worked without verifying**: always confirm with a follow-up `GET /rest/api/2/issue/<KEY>` check if there's any doubt.
 
 ### Developer Field — `customfield_23650` for All Issue Types
 
@@ -317,7 +315,7 @@ Run these checks before each standup:
 **Always verify Jira totals in code before building charts, narrative, or deck content.** Never hand-count from a JSON dump.
 
 **Required workflow:**
-1. Pull the sprint/release/epic tickets with a single `jira_search`
+1. Pull the sprint/release/epic tickets with a single `GET /rest/api/2/search` call (page with `startAt`)
 2. Write a short Node or Python script that reads the raw JSON, tallies by status / type / assignee, and prints counts
 3. Use those verified counts to populate the deck, doc, or Slack message
 4. Never guess or eyeball the totals from chat or JSON
@@ -325,7 +323,7 @@ Run these checks before each standup:
 **Why this matters:** Confusing "In Progress" with "In Progress + Ready for Review + Ready for QA + Testing" is easy when they're all `In Progress` category. Confusing "Reopened" with "Open" is easy. Hand-counting a 40-ticket sprint across 8 statuses is where mistakes land in stakeholder materials.
 
 **Also verify before building:**
-- **Sprint name** — the sprint being reviewed is NOT the active sprint (active = next one). Use `jira_get_sprints_from_board` with board `574` to confirm dates match the meeting date.
+- **Sprint name**: the sprint being reviewed is NOT the active sprint (active = next one). Use `GET /rest/agile/1.0/board/574/sprint` to confirm dates match the meeting date.
 - **Ticket counts per metric** — total, done, carry-over, by status, by type, by assignee. All should sum correctly.
 - **Release scope** — cross-reference GitHub release notes against Jira `fixVersion` query. Gaps reveal tagging hygiene issues.
 - **Developer field, not Assignee** — see Section 3 (Jira Quirks). On ICDC the Assignee on a closed ticket is often QA; the Developer field (`customfield_23650`, canonical for all issue types) is the source of truth for who built it.
@@ -603,7 +601,7 @@ Each prep sheet contains:
 
 ### 10c. Goal Scorecard Framing
 
-Always pull the sprint goal from Jira (`jira_get_sprints_from_board`, then check the `goal` field on the sprint object). Score each goal against the real outcome in the sprint:
+Always pull the sprint goal from Jira (`GET /rest/agile/1.0/board/574/sprint`, then check the `goal` field on the sprint object). Score each goal against the real outcome in the sprint:
 
 | Marker | Meaning |
 |---|---|
