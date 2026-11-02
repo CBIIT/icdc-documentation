@@ -37,6 +37,9 @@ Full domain reference has moved to `claude/architecture/domain-context.md`; read
 
 ## 3. ⚠️ ICDC-Specific Jira Quirks
 
+> **Atlassian MCP retired (2026-11-02).** Tool names such as `jira_update_issue` below date from the MCP connector. Jira is now called through the REST API v2 from a signed-in Claude in Chrome tab; `claude/architecture/jira-atlassian-mcp-legacy.md` maps each MCP tool to its REST call and keeps the MCP-only quirks in case the connector is reinstated.
+>
+
 These are known behavioral differences in the ICDC Jira instance. Follow precisely — deviating from these patterns causes silent failures.
 
 ### Epic Linking — Custom Field Required
