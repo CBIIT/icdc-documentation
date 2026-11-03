@@ -6,7 +6,7 @@
 
 **Which template to use**
 
-Check the specific templates first. A user-facing change is a **user story**; Figma work is a **design task**; infrastructure, environment variables, buckets, or upper-tier changes are a **DevOps task**; study data, IndexD, and data model work use the **data management templates**; scan findings use the **Invicti templates**; release promotions use the **release templates**. This template is for everything else, and only for that.
+Check the specific templates first. Something broken is a **bug**; a user-facing change is a **user story**; Figma work is a **design task**; infrastructure, environment variables, buckets, or upper-tier changes are a **DevOps task**; study data, IndexD, and data model work use the **data management templates**; scan findings use the **Invicti templates**; release promotions use the **release templates**. This template is for everything else, and only for that.
 
 **Section order (4 sections, exactly this sequence)**
 

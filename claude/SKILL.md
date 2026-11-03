@@ -116,7 +116,7 @@ ICDC data-management work has two sub-functions, and each has its own templates 
 
 ### Issue Types
 - **Confirmed working:** `Epic`, `Task`, `User Story` (the type name is `User Story`, not `Story`; confirmed on ICDC-4233 / ICDC-4244)
-- **Bugs:** Use `Task` with a `[BUG]` prefix in the summary if the Bug issue type is unavailable
+- **Bugs:** Issue type `Bug`, written on `claude/templates/bug-template.md`; no `[BUG]` prefix on the summary
 
 ### Assignee Format
 - Use full email address: e.g., `ambar.rana@nih.gov`
@@ -416,7 +416,7 @@ The epic template lives in `claude/templates/epic-templates.md`: one lean templa
 
 ## 8. Ticket Writing Standards
 
-> **User stories and design tasks have dedicated templates**: `claude/templates/user-story-template.md` (canonical ICDC-4244) and `claude/templates/design-task-template.md` (canonical ICDC-4242). The generic formats below are for plain Tasks, Bugs, and security findings. Two rules apply to every ticket body regardless of template: never cite other Jira ticket keys in the description (Jira's Links panel carries them), and never use em dashes (use colons, e.g. `* *Label*: content`). Every description and comment is authored in Jira wiki markup (`h3. 🎯 *Title*` headers, `*bold*`, `#` numbered lists, `||h||` tables), because the Jira connector stores exactly what it is sent; see `claude/templates/README.md`, "Universal patterns."
+> **User stories, design tasks, and bugs have dedicated templates**: `claude/templates/user-story-template.md` (canonical ICDC-4244), `claude/templates/design-task-template.md` (canonical ICDC-4242), and `claude/templates/bug-template.md` (canonical ICDC-4312). The generic formats below are for plain Tasks and security findings. Two rules apply to every ticket body regardless of template: never cite other Jira ticket keys in the description (Jira's Links panel carries them), and never use em dashes (use colons, e.g. `* *Label*: content`). Every description and comment is authored in Jira wiki markup (`h3. 🎯 *Title*` headers, `*bold*`, `#` numbered lists, `||h||` tables), because the Jira connector stores exactly what it is sent; see `claude/templates/README.md`, "Universal patterns."
 
 ### Task Format (primary issue type for ICDC)
 ```
@@ -437,26 +437,7 @@ The epic template lives in `claude/templates/epic-templates.md`: one lean templa
 The epic goes in the Epic Link field (`customfield_12350`) and related tickets in Jira's Links panel; neither is written in the body. Design references (Figma, specs) go in as external links.
 
 ### Bug Format
-```
-*Environment*: [Dev / QA / Stage / Prod]
-*Severity*: [Critical / High / Medium / Low]
-
-*Steps to Reproduce*
-# 
-# 
-# 
-
-*Expected Behavior*
-[What should happen]
-
-*Actual Behavior*
-[What actually happens]
-
-*Screenshots/Logs*
-[Attach or paste]
-```
-
-Authored in Jira wiki markup (stored exactly as sent). The epic is set through the Epic Link field (`customfield_12350`), never written in the body. ICDC and CTDC use this identical bug format.
+Bugs use the dedicated template, `claude/templates/bug-template.md` (v1, 2026-11-03, canonical ICDC-4312): 🐞 Bug Summary (with Environment, Severity, and Reported in bullets) · 🔁 Steps to Reproduce · ✅ Expected Behavior · ❌ Actual Behavior · 📋 Logs & Screenshots. It replaced the plain-label format that used to live here. ICDC and CTDC use the identical template.
 
 ### Security Finding Format
 Invicti findings use the dedicated template, `claude/templates/invicti-finding-task-template.md`. For other sources (manual review, dependency scan):
