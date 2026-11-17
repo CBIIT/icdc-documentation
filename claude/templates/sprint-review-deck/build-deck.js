@@ -56,8 +56,17 @@ const carryPtsByStatus = Object.entries(d.filter(x => x.category !== 'Done').red
 const ptsMax = v => Math.max(5, Math.ceil(v * 1.15 / 5) * 5);
 const NOZERO = '[=0]"";General';
 const S = cfg.sprint, N1 = cfg.nextSprint;
-// Optional velocity slide (3b) from Jira's Velocity Chart; when present every later slide number shifts by one
+// Velocity slide (4) from Jira's Velocity Chart is REQUIRED for ICDC and CTDC (decided Nov 2026); VS shifts later slide numbers
 const VS = Array.isArray(cfg.velocity?.sprints) && cfg.velocity.sprints.length ? 1 : 0;
+if (!VS) throw new Error('cfg.velocity is required: pull the Jira Velocity Chart (see README) before building the deck');
+// Scope creep = points added after sprint start: tickets added mid-sprint (their points) + re-estimates on tickets already in it.
+// From Jira's Sprint Report (issueKeysAddedDuringSprint, estimateStatistic vs currentEstimateStatistic). Computed, never typed.
+const SC = cfg.velocity.scopeCreep || { added: [], reestimated: [], unpointedAdded: [] };
+SC.added = SC.added || []; SC.reestimated = SC.reestimated || []; SC.unpointedAdded = SC.unpointedAdded || [];
+SC.points = Math.round(10 * (SC.added.reduce((t, x) => t + (x.points || 0), 0) + SC.reestimated.reduce((t, x) => t + (x.to - x.from), 0))) / 10;
+SC.start = cfg.velocity.sprints[cfg.velocity.sprints.length - 1].committed;
+if (Math.round(10 * (SC.start + SC.points)) !== Math.round(10 * P.committed)) console.warn(`WARNING scope creep does not reconcile: ${SC.start} at start + ${SC.points} creep != ${P.committed} at close`);
+const SCtext = [...SC.added.filter(x => x.points).map(x => `${x.key} added mid-sprint (${x.points} pt${x.points === 1 ? '' : 's'})`), ...SC.reestimated.map(x => `${x.key} re-estimated ${x.from} to ${x.to} (+${x.to - x.from})`)].join(' · ');
 // goal status: 'delivered' | 'partial' | 'not_started' (legacy boolean `delivered` still accepted)
 const gStatus = g => g.status || (g.delivered ? 'delivered' : 'partial');
 const GS = { delivered: ['✓', 'DELIVERED', C.green], partial: ['▲', 'PARTIAL', C.amber], not_started: ['✗', 'NOT STARTED', C.red] };
@@ -117,7 +126,8 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
   box(s, 0.6, 1.95, 3.5, 2.05, C.light, C.light);
   s.addText([{ text: String(P.done), options: { fontFace: H, fontSize: 60, bold: true, color: STATUS.Closed } }, { text: '  of ' + P.committed + ' pts', options: { fontFace: H, fontSize: 22, color: C.muted } }], { x: 0.8, y: 2.05, w: 3.2, h: 1.15, isTextBox: true, margin: 0, valign: 'middle' });
   eyebrow(s, 'Story points delivered', 0.8, 3.3, C.ink, 3);
-  tb(s, `${P.pct}% of committed points · ${M.done} of ${total} tickets (${M.pct}%)`, { x: 0.8, y: 3.55, w: 3.2, h: 0.25, fontSize: 10, color: C.muted });
+  tb(s, `${P.pct}% of committed points · ${M.done} of ${total} tickets (${M.pct}%)`, { x: 0.8, y: 3.52, w: 3.2, h: 0.22, fontSize: 10, color: C.muted });
+  if (SC.points) tb(s, `${P.committed} = ${SC.start} committed at start + ${SC.points} pts scope creep`, { x: 0.8, y: 3.74, w: 3.2, h: 0.22, fontSize: 9.5, bold: true, color: C.amber });
   const stats = [[String(M.carry), 'Carry-over tickets', cfg.numbers.carryNote, C.amber], ...cfg.numbers.extraStats.map(x => [x.value, x.label, x.note, STATUS[x.tone] || SEV[x.tone] || C[x.tone] || STATUS.Closed])];
   stats.slice(0, 3).forEach((k, i) => {
     const y = 1.95 + i * 0.72;
@@ -148,11 +158,11 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
 }
 
 
-// ================= 3b. VELOCITY (optional: cfg.velocity) =================
+// ================= 4. VELOCITY TREND (required: cfg.velocity) =================
 // Source: Jira Velocity Chart for the board, /rest/greenhopper/1.0/rapid/charts/velocity?rapidViewId=<board>.
 // cfg.velocity = { pulled: 'YYYY-MM-DD', sprints: [{ name: 'Sprint 47', committed: 70, completed: 24 }, ...] oldest first, points: [{ title, detail }] }
 // "Commitment" is Jira's points at sprint start; "Completed" is points closed by sprint close. Averages computed here.
-if (VS) {
+{
   const V = cfg.velocity, vs = V.sprints, n = vs.length, r1 = x => Math.round(10 * x) / 10;
   const avg = (a, k) => r1(a.reduce((t, x) => t + x[k], 0) / a.length), last3 = vs.slice(-3), cur = vs[n - 1];
   const s = pres.addSlide(); header(s, `Velocity · last ${n} sprints`, 'Velocity Trend', `Story points committed at sprint start vs. completed by sprint close, from the Jira Velocity Chart (pulled ${V.pulled})`); footer(s, 4);
@@ -166,22 +176,23 @@ if (VS) {
     [String(cur.completed), `Sprint ${S.number} completed`, `of ${cur.committed} committed at sprint start (${Math.round(100 * cur.completed / cur.committed)}%)`, STATUS.Closed],
     [String(avg(last3, 'completed')), 'Average completed, last 3 sprints', `${last3.map(x => x.completed).join(' · ')} pts`, C.blue],
     [String(avg(vs, 'completed')), `Average completed, last ${n} sprints`, `vs. ${avg(vs, 'committed')} pts committed on average`, C.blue],
+    [`+${SC.points}`, 'Scope creep after sprint start', (SCtext || 'No points added after sprint start') + (SC.unpointedAdded.length ? `; ${SC.unpointedAdded.length} more added unpointed` : ''), C.amber],
   ];
   cards.forEach((k, i) => {
-    const y = 1.95 + i * 0.72;
+    const y = 1.95 + i * 0.68;
     box(s, 8.5, y, 4.23, 0.62); stripe(s, 8.5, y, 0.62, k[3]);
     s.addText([{ text: k[0] + '   ', options: { fontFace: H, fontSize: 15, bold: true, color: k[3] } }, { text: k[1], options: { fontFace: B, fontSize: 10, bold: true, color: C.ink } }], { x: 8.7, y: y + 0.05, w: 3.95, h: 0.3, isTextBox: true, margin: 0, valign: 'middle' });
     tb(s, k[2], { x: 8.7, y: y + 0.36, w: 3.95, h: 0.22, fontSize: 8, color: C.muted });
   });
-  box(s, 8.5, 4.2, 4.23, 2.5, C.light, C.light);
-  tb(s, 'What the trend tells us', { x: 8.7, y: 4.3, w: 3.9, h: 0.32, fontFace: H, fontSize: 13, bold: true, color: C.blue });
+  box(s, 8.5, 4.72, 4.23, 1.98, C.light, C.light);
+  tb(s, 'What the trend tells us', { x: 8.7, y: 4.8, w: 3.9, h: 0.3, fontFace: H, fontSize: 13, bold: true, color: C.blue });
   (V.points || []).slice(0, 3).forEach((p, i) => {
-    const y = 4.72 + i * 0.64;
-    stripe(s, 8.7, y, 0.52, C.blue);
+    const y = 5.17 + i * 0.5;
+    stripe(s, 8.7, y, 0.44, C.blue);
     tb(s, p.title, { x: 8.88, y, w: 3.75, h: 0.24, fontSize: 9.5, bold: true, color: C.ink });
-    tb(s, p.detail, { x: 8.88, y: y + 0.24, w: 3.75, h: 0.34, fontSize: 8, color: C.muted, valign: 'top' });
+    tb(s, p.detail, { x: 8.88, y: y + 0.23, w: 3.75, h: 0.22, fontSize: 8, color: C.muted, valign: 'top' });
   });
-  s.addNotes(`Jira Velocity Chart, board ${V.board || ''}, pulled ${V.pulled}: ${vs.map(x => `${x.name} ${x.committed}/${x.completed}`).join('; ')}. Commitment is Jira's story points at sprint start; slide 3 counts points on every ticket in the sprint at close, so the two can differ when scope changes mid-sprint. ${V.note || ''}`);
+  s.addNotes(`Jira Velocity Chart, board ${V.board || ''}, pulled ${V.pulled}: ${vs.map(x => `${x.name} ${x.committed}/${x.completed}`).join('; ')}. Commitment is Jira's story points at sprint start; slide 3 counts points on every ticket in the sprint at close, the difference is scope creep: ${SCtext || 'none'}${SC.unpointedAdded.length ? '; added unpointed: ' + SC.unpointedAdded.join(', ') : ''}. ${V.note || ''}`);
 }
 
 // ================= 4. GOAL SCORECARD =================

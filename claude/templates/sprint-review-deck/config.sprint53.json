@@ -105,7 +105,7 @@
     "inProgressNote": "(Data Retriever, DMN compare spike, Figma cleanup, investigator review, two submission epics)",
     "holdNote": "(Human Relevance story, Explore page bug, MEVAL policy)",
     "openNote": "(includes ICDC-4312 reopened: Stage Prefect OpenSearch timeouts)",
-    "speakerNote": "Resolution dates: 4031, 4184, 4285 Oct 23; 4259, 4309 Oct 28; 4213 Oct 30; 4291 Nov 2; 4292 Nov 4; 4299, 4296 Nov 9; 4180 Nov 10. ICDC-4311 carries a Nov 2 resolution date from its Ready for QA transition and is not counted as Done. Open count includes ICDC-4312 (Reopened). No new studies were released this sprint (confirmed by Gina)."
+    "speakerNote": "Resolution dates: 4031, 4184, 4285 Oct 23; 4259, 4309 Oct 28; 4213 Oct 30; 4291 Nov 2; 4292 Nov 4; 4299, 4296 Nov 9; 4180 Nov 10. ICDC-4311 carries a Nov 2 resolution date from its Ready for QA transition and is not counted as Done. Open count includes ICDC-4312 (Reopened). No new studies were released this sprint (confirmed by Gina). ICDC-4031 (DMN example files) closed Done Oct 23, but the work is an investigation and proof of concept: Data-Model-Navigator PR 177 is open and unmerged, ICDC import validation and Navigator integration are pending."
   },
   "scorecard": {
     "subtitle": "Scored against the two sprint goals and three supporting workstreams, not against raw ticket completion",
@@ -135,8 +135,8 @@
     {
       "status": "partial",
       "title": "Clear the aged review queue",
-      "detail": "Synthetic data error handling (waiting since July), the Shiny migration and DMN example-file sync closed Oct 23. News page and Publications design are in review for a third sprint.",
-      "refs": "ICDC-4184 · 4285 · 4031 closed · 4186 · 4248"
+      "detail": "Synthetic data error handling (waiting since July) and the Shiny migration closed Oct 23. DMN example files closed as an investigation only; News page and Publications design are in review for a third sprint.",
+      "refs": "ICDC-4184 · 4285 closed · 4031 · 4186 · 4248"
     },
     {
       "status": "partial",
@@ -155,7 +155,7 @@
       {
         "tone": "blue",
         "title": "User stories: 1 of 2 closed",
-        "detail": "DMN example files now stay in sync with the model (5 pts). The Human Relevance story (8 pts) is On Hold waiting on the backend."
+        "detail": "DMN example files closed as a proof of concept (5 pts); the PR is unmerged and nothing is in Navigator yet. Human Relevance (8 pts) is On Hold on the backend."
       },
       {
         "tone": "blue",
@@ -170,7 +170,7 @@
     ]
   },
   "team": {
-    "shoutout": "Charles Ngu deployed the October release to Stage and Production and terminated the Jenkins servers. Ambar Rana closed the interop GraphQL fix on its date, cleared synthetic data error handling after four months in review, finished the reference genome spike and assembled the deployment package. Toyo Udosen got the DMN example files in sync with the model, and Valentina Epishina held the QA gate.",
+    "shoutout": "Charles Ngu deployed the October release to Stage and Production and terminated the Jenkins servers. Ambar Rana closed the interop GraphQL fix on its date, cleared synthetic data error handling after four months in review, finished the reference genome spike and assembled the deployment package. Toyo Udosen proved out synthetic DMN example files with a working proof of concept, and Valentina Epishina held the QA gate.",
     "creditNote": "Credit comes from the Jira Developer field (customfield_23650): the person who did the work. The Assignee is usually whoever moved the ticket to Closed, often QA, so it is not charted. A ticket with two developers counts for each; coordination work such as IndexD registration has no Developer by design.",
     "awards": [
       {
@@ -187,9 +187,9 @@
       },
       {
         "dev": "udosent2",
-        "emoji": "🧭",
-        "award": "In Sync",
-        "reason": "DMN example files now always match the data model, so users never download a stale example."
+        "emoji": "🧪",
+        "award": "Proof of Concept",
+        "reason": "Proved synthetic DMN example files can be generated: export tool, 12 passing tests. Navigator integration is next."
       },
       {
         "name": "Valentina Epishina",
@@ -304,6 +304,27 @@
         "detail": "Every one of them carried from Sprint 53: well above the 28 pt recent average."
       }
     ],
-    "note": "Sprint 53 commitment is 62 in the Velocity Chart vs. 65 on slide 3: 3 pts were added after the sprint started. Sprint 54 point total (46) pulled from Jira on Nov 17."
+    "note": "Scope creep from the Jira Sprint Report (pulled Nov 17). Sprint 54 point total (46) pulled from Jira on Nov 17.",
+    "scopeCreep": {
+      "added": [
+        {
+          "key": "ICDC-4259",
+          "points": 1
+        }
+      ],
+      "reestimated": [
+        {
+          "key": "ICDC-4297",
+          "from": 3,
+          "to": 5
+        }
+      ],
+      "unpointedAdded": [
+        "ICDC-4308",
+        "ICDC-4309",
+        "ICDC-4311",
+        "ICDC-4312"
+      ]
+    }
   }
 }
