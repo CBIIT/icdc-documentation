@@ -1,0 +1,253 @@
+{
+  "project": "ICDC",
+  "excludeTypes": [],
+  "ticketsFile": "tickets.sprint53.json",
+  "sprint": {
+    "number": 53,
+    "jiraId": 9050,
+    "dateRange": "October 22 – November 11, 2026",
+    "dateRangeShort": "October 22 – November 11",
+    "startLong": "October 22",
+    "window": {
+      "start": "2026-10-22T09:00:00-04:00",
+      "end": "2026-11-11T17:00:00-05:00"
+    },
+    "goal": "Static MVP of C3DC Interop · October monthly release"
+  },
+  "nextSprint": {
+    "number": 54,
+    "jiraId": 9114,
+    "dateRange": "November 12 to December 2, 2026",
+    "total": 29,
+    "inherited": 26
+  },
+  "meeting": {
+    "dayLong": "Tuesday, November 17, 2026",
+    "dateLong": "November 17, 2026",
+    "dateISO": "2026-11-17",
+    "time": "12:00 PM ET"
+  },
+  "preparedBy": {
+    "name": "Gina Kuffel",
+    "title": "Senior Technical Project Manager",
+    "org": "Frederick National Laboratory for Cancer Research (FNL)",
+    "supporting": "Supporting NCI / CBIIT"
+  },
+  "developerNames": {
+    "ranaab": "Ambar Rana",
+    "millerer": "Eric Miller",
+    "udosent2": "Toyo Udosen",
+    "nguca": "Charles Ngu",
+    "kuffelgr": "Gina Kuffel",
+    "epishinavv": "Valentina Epishina",
+    "scrufaripp": "Peter Scrufari",
+    "stogsdillhh": "Hannah Stogsdill",
+    "flemingme": "Michael Fleming"
+  },
+  "qaNames": [
+    "Valentina Epishina"
+  ],
+  "agenda": {
+    "subtitle": "55 minutes · review first, retro second · no demos this sprint",
+    "total": "55 minutes",
+    "rows": [
+      {
+        "title": "Sprint 53 by the Numbers",
+        "detail": "Points and tickets: where the 37 tickets landed, and when they closed",
+        "minutes": "5 min"
+      },
+      {
+        "title": "Goal Scorecard",
+        "detail": "The two sprint goals and three supporting workstreams, scored on what shipped",
+        "minutes": "8 min"
+      },
+      {
+        "title": "Work Type & Team Throughput",
+        "detail": "What got closed, and by whom",
+        "minutes": "7 min"
+      },
+      {
+        "title": "Carry-Over into Sprint 54",
+        "detail": "26 unfinished tickets, 11 of them waiting on review",
+        "minutes": "8 min"
+      },
+      {
+        "title": "Risks & Flags",
+        "detail": "What needs a decision today",
+        "minutes": "7 min"
+      },
+      {
+        "title": "Retrospective: Liked · Lacked · Learned",
+        "detail": "10 min silent brainstorm, then group and vote",
+        "minutes": "20 min"
+      }
+    ]
+  },
+  "numbers": {
+    "carryNote": "All 26 pulled into Sprint 54",
+    "extraStats": [
+      {
+        "value": "11 of 11",
+        "label": "Closed inside the sprint window",
+        "note": "Oct 22 to Nov 11; 3 of them on Oct 23",
+        "tone": "Closed"
+      },
+      {
+        "value": "Nov 4",
+        "label": "October release live in Production",
+        "note": "Stage Nov 2, Production Nov 4",
+        "tone": "Closed"
+      }
+    ],
+    "closedNote": "(4 of the 11 carry no points)",
+    "reviewNote": "(News page and Publications design for a third sprint)",
+    "qaNote": "(ICDC-4311 File Service URL_SRC to IndexD, Critical)",
+    "inProgressNote": "(Data Retriever, DMN compare spike, Figma cleanup, investigator review, two submission epics)",
+    "holdNote": "(Human Relevance story, Explore page bug, MEVAL policy)",
+    "openNote": "(includes ICDC-4312 reopened: Stage Prefect OpenSearch timeouts)",
+    "speakerNote": "Resolution dates: 4031, 4184, 4285 Oct 23; 4259, 4309 Oct 28; 4213 Oct 30; 4291 Nov 2; 4292 Nov 4; 4299, 4296 Nov 9; 4180 Nov 10. ICDC-4311 carries a Nov 2 resolution date from its Ready for QA transition and is not counted as Done. Open count includes ICDC-4312 (Reopened). No new studies were released this sprint (confirmed by Gina)."
+  },
+  "scorecard": {
+    "subtitle": "Scored against the two sprint goals and three supporting workstreams, not against raw ticket completion",
+    "bannerEyebrow": "Sprint 53 goal",
+    "bannerText": "C3DC Interop MVP  ·  October Release  ·  Security  ·  Review Queue  ·  Prefect & JBrowse",
+    "bottomLine": "The October release is live in Production. The C3DC interop MVP did not ship: the Human Relevance story is on hold waiting on the backend Data Retriever, and it carries into Sprint 54."
+  },
+  "goals": [
+    {
+      "status": "delivered",
+      "title": "Ship the October monthly release",
+      "detail": "Deployment package identified; deployed to Stage Nov 2 and Production Nov 4.",
+      "refs": "ICDC-4296 · 4291 · 4292"
+    },
+    {
+      "status": "partial",
+      "title": "Static MVP of C3DC interop",
+      "detail": "Nothing shipped. The Human Relevance story is On Hold waiting on the backend Data Retriever (In Progress); the C3DC prototype is in review and investigator review is In Progress.",
+      "refs": "ICDC-4244 · 4297 · 4242 · 4183"
+    },
+    {
+      "status": "partial",
+      "title": "Close the interop security findings",
+      "detail": "Interop GraphQL introspection fix (Medium) closed Oct 30. The Node.js introspection variable and both Invicti rescans are in review.",
+      "refs": "ICDC-4213 closed · 4255 · 4200 · 4215"
+    },
+    {
+      "status": "partial",
+      "title": "Clear the aged review queue",
+      "detail": "Synthetic data error handling (waiting since July), the Shiny migration and DMN example-file sync closed Oct 23. News page and Publications design are in review for a third sprint.",
+      "refs": "ICDC-4184 · 4285 · 4031 closed · 4186 · 4248"
+    },
+    {
+      "status": "partial",
+      "title": "Prefect cleanup and JBrowse",
+      "detail": "Jenkins servers terminated and the reference genome spike closed. Stage Prefect OpenSearch flows still time out; the JBrowse BAM fix is in review.",
+      "refs": "ICDC-4180 · 4299 closed · 4312 · 4263 · 4192"
+    }
+  ],
+  "workType": {
+    "points": [
+      {
+        "tone": "blue",
+        "title": "Tasks: 8 of 28 closed, 13 pts",
+        "detail": "The October release (deployment package, Stage and Production), Jenkins teardown, the interop GraphQL fix, the reference genome spike, and both synthetic data tasks."
+      },
+      {
+        "tone": "blue",
+        "title": "User stories: 1 of 2 closed",
+        "detail": "DMN example files now stay in sync with the model (5 pts). The Human Relevance story (8 pts) is On Hold waiting on the backend."
+      },
+      {
+        "tone": "blue",
+        "title": "Bugs: 2 of 5 closed",
+        "detail": "The Studies page image collection tooltip and the News social media posts are fixed. JBrowse BAM tracks is in review; Explore page blank areas is On Hold; Stage Prefect timeouts reopened."
+      },
+      {
+        "tone": "blue",
+        "title": "Epics: COTC021/022 v.3 carry",
+        "detail": "Both submission epics stay open while study details are finalized. No new studies were released this sprint."
+      }
+    ]
+  },
+  "team": {
+    "shoutout": "Charles Ngu deployed the October release to Stage and Production and terminated the Jenkins servers. Ambar Rana closed the interop GraphQL fix on its date, cleared synthetic data error handling after four months in review, finished the reference genome spike and assembled the deployment package. Toyo Udosen got the DMN example files in sync with the model, and Valentina Epishina held the QA gate.",
+    "creditNote": "Credit comes from the Jira Developer field (customfield_23650): the person who did the work. The Assignee is usually whoever moved the ticket to Closed, often QA, so it is not charted. A ticket with two developers counts for each; coordination work such as IndexD registration has no Developer by design.",
+    "awards": [
+      {
+        "dev": "nguca",
+        "emoji": "🚢",
+        "award": "Release Captain",
+        "reason": "Took the October release to Stage on Nov 2 and Production on Nov 4, then terminated the Jenkins servers."
+      },
+      {
+        "dev": "ranaab",
+        "emoji": "🧹",
+        "award": "Clean Sweep",
+        "reason": "Closed the interop GraphQL fix on Oct 30, cleared a ticket waiting since July, and finished the reference genome spike."
+      },
+      {
+        "dev": "udosent2",
+        "emoji": "🧭",
+        "award": "In Sync",
+        "reason": "DMN example files now always match the data model, so users never download a stale example."
+      },
+      {
+        "name": "Valentina Epishina",
+        "stat": "QA gate",
+        "emoji": "🔍",
+        "award": "Gatekeeper",
+        "reason": "Verified and closed both release deployments, the interop GraphQL fix and the News social media fix."
+      }
+    ]
+  },
+  "carry": {
+    "bigNote": "Eleven of them are waiting on review.",
+    "facts": [
+      {
+        "title": "11 of 26 waiting on review",
+        "detail": "News page (4186) and Publications design (4248) are in review for a third sprint; the C3DC prototype (4242) is in review for a second."
+      },
+      {
+        "title": "C3DC MVP chain carries",
+        "detail": "Data Retriever (4297) In Progress; the Human Relevance story (4244, 8 pts) is On Hold until it lands."
+      },
+      {
+        "title": "File Service to IndexD in QA",
+        "detail": "Critical ICDC-4311 (URL_SRC to INDEXD in Stage and Prod) is Ready for QA Testing."
+      }
+    ]
+  },
+  "risks": [
+    {
+      "severity": "HIGH",
+      "title": "Stage Prefect OpenSearch flows time out",
+      "detail": "ICDC-4312 reopened Nov 12: Production flows now work, but Stage still hits the connection timeout. Stage indexing has to work before the next study load can be verified.",
+      "nextStep": "Charles gives a root cause and fix date today; Eric re-tests Stage once it lands."
+    },
+    {
+      "severity": "HIGH",
+      "title": "C3DC interop MVP slipped a sprint",
+      "detail": "It was a Sprint 53 goal. The Human Relevance story (8 pts) is On Hold waiting on the backend Data Retriever, and the prototype is still in review.",
+      "nextStep": "decide today: Eric gives a Data Retriever date, and the team confirms the MVP as a Sprint 54 goal."
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "The review queue is still aging",
+      "detail": "11 of 26 carry-overs are Ready for Review again. News page and Publications design are on their third sprint in review.",
+      "nextStep": "a named reviewer and review-by date for 4186, 4248 and 4242 before this meeting ends."
+    },
+    {
+      "severity": "MEDIUM",
+      "title": "Sprint 54 is 90% inherited",
+      "detail": "26 of its 29 tickets carried from Sprint 53, leaving little room for new work.",
+      "nextStep": "at the Sprint 54 midpoint, Gina and the team confirm scope; move 4188 or 4257 out if the MVP needs room."
+    }
+  ],
+  "retro": {
+    "boardUrl": "https://retrotool.io/n03umQynyPQP6MMUX0_jn",
+    "timingNote": "Sprint 54 started November 12 and is already in motion. Action items from today either get folded into Sprint 54 now or deferred to Sprint 55 planning. Decide which as we assign each one.",
+    "liked": "The October release went out on schedule and long-waiting tickets finally closed. Say what made that work.",
+    "lacked": "The C3DC interop MVP did not ship and the same tickets sat in review again. Name the real cause.",
+    "learned": "Anything about sequencing frontend work behind backend work, moving work through review, or debugging environment-specific failures."
+  }
+}
