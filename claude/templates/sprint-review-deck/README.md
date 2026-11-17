@@ -42,6 +42,7 @@ Developer field (`customfield_23650`), mapped to display names via `developerNam
 - `sprint.goal`: the Jira sprint goal, verbatim. When set, the scorecard banner quotes it; when empty, the banner shows `scorecard.bannerText` (the workstreams).
 - `goals[].status`: `delivered` (✓ green), `partial` (▲ amber) or `not_started` (✗ red). Up to five rows. The older boolean `delivered` still works.
 - `risks[].severity`: `HIGH` or `MEDIUM` only; the build fails on anything else. Three to five rows; HIGH rows are sorted first.
+- `velocity` (optional): adds a Velocity Trend slide after the Numbers slide. Pull it from Jira's Velocity Chart endpoint `/rest/greenhopper/1.0/rapid/charts/velocity?rapidViewId=<board>` (`velocityStatEntries[id].estimated.value` = commitment, `.completed.value` = completed). Shape: `{ "board": 574, "pulled": "Nov 17, 2026", "sprints": [{ "name": "Sprint 47", "committed": 70, "completed": 24 }], "points": [{ "title", "detail" }], "note" }`, oldest sprint first; averages are computed. Commitment is points at sprint start, so it can differ from slide 3's at-close total. Omit the key and the deck is unchanged.
 - `agenda`: meeting length is per project (ICDC 55 minutes, CTDC 60).
 
 ## What the generator does for you

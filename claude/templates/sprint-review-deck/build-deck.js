@@ -56,6 +56,8 @@ const carryPtsByStatus = Object.entries(d.filter(x => x.category !== 'Done').red
 const ptsMax = v => Math.max(5, Math.ceil(v * 1.15 / 5) * 5);
 const NOZERO = '[=0]"";General';
 const S = cfg.sprint, N1 = cfg.nextSprint;
+// Optional velocity slide (3b) from Jira's Velocity Chart; when present every later slide number shifts by one
+const VS = Array.isArray(cfg.velocity?.sprints) && cfg.velocity.sprints.length ? 1 : 0;
 // goal status: 'delivered' | 'partial' | 'not_started' (legacy boolean `delivered` still accepted)
 const gStatus = g => g.status || (g.delivered ? 'delivered' : 'partial');
 const GS = { delivered: ['✓', 'DELIVERED', C.green], partial: ['▲', 'PARTIAL', C.amber], not_started: ['✗', 'NOT STARTED', C.red] };
@@ -145,11 +147,48 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
   s.addNotes(`Story points from customfield_10042: committed ${P.committed}, delivered ${P.done}, carried ${P.carry}; ${P.pointed}/${total} tickets pointed. Computed from ${cfg.ticketsFile}: Closed ${M.done}, Ready for Review ${M.rfr}, In Progress ${M.inProg}, Ready for QA ${M.rfqa}, On Hold ${M.hold}, Open ${M.open} = ${total}. ${cfg.numbers.speakerNote || ''}`);
 }
 
+
+// ================= 3b. VELOCITY (optional: cfg.velocity) =================
+// Source: Jira Velocity Chart for the board, /rest/greenhopper/1.0/rapid/charts/velocity?rapidViewId=<board>.
+// cfg.velocity = { pulled: 'YYYY-MM-DD', sprints: [{ name: 'Sprint 47', committed: 70, completed: 24 }, ...] oldest first, points: [{ title, detail }] }
+// "Commitment" is Jira's points at sprint start; "Completed" is points closed by sprint close. Averages computed here.
+if (VS) {
+  const V = cfg.velocity, vs = V.sprints, n = vs.length, r1 = x => Math.round(10 * x) / 10;
+  const avg = (a, k) => r1(a.reduce((t, x) => t + x[k], 0) / a.length), last3 = vs.slice(-3), cur = vs[n - 1];
+  const s = pres.addSlide(); header(s, `Velocity · last ${n} sprints`, 'Velocity Trend', `Story points committed at sprint start vs. completed by sprint close, from the Jira Velocity Chart (pulled ${V.pulled})`); footer(s, 4);
+  const labels = vs.map(x => x.name), maxV = Math.max(...vs.map(x => Math.max(x.committed, x.completed)));
+  s.addChart(pres.ChartType.bar, [{ name: 'Commitment (pts)', labels, values: vs.map(x => x.committed) }, { name: 'Completed (pts)', labels, values: vs.map(x => x.completed) }], {
+    x: 0.6, y: 1.95, w: 7.6, h: 4.8, barDir: 'col', barGrouping: 'clustered', chartColors: [C.pale, STATUS.Closed], showValue: true, dataLabelPosition: 'outEnd', dataLabelColor: C.ink, dataLabelFontFace: B, dataLabelFontSize: 9, dataLabelFormatCode: 'General',
+    showLegend: true, legendPos: 'b', legendFontFace: B, legendFontSize: 9, catAxisLabelFontFace: B, catAxisLabelFontSize: 9, catAxisLabelColor: C.ink, valAxisLabelFontFace: B, valAxisLabelFontSize: 9, valAxisLabelColor: C.muted,
+    valGridLine: { color: C.line, size: 0.5 }, catGridLine: { style: 'none' }, valAxisMinVal: 0, valAxisMaxVal: ptsMax(maxV), valAxisMajorUnit: ptsMax(maxV) > 50 ? 20 : 10, barGapWidthPct: 50,
+  });
+  const cards = [
+    [String(cur.completed), `Sprint ${S.number} completed`, `of ${cur.committed} committed at sprint start (${Math.round(100 * cur.completed / cur.committed)}%)`, STATUS.Closed],
+    [String(avg(last3, 'completed')), 'Average completed, last 3 sprints', `${last3.map(x => x.completed).join(' · ')} pts`, C.blue],
+    [String(avg(vs, 'completed')), `Average completed, last ${n} sprints`, `vs. ${avg(vs, 'committed')} pts committed on average`, C.blue],
+  ];
+  cards.forEach((k, i) => {
+    const y = 1.95 + i * 0.72;
+    box(s, 8.5, y, 4.23, 0.62); stripe(s, 8.5, y, 0.62, k[3]);
+    s.addText([{ text: k[0] + '   ', options: { fontFace: H, fontSize: 15, bold: true, color: k[3] } }, { text: k[1], options: { fontFace: B, fontSize: 10, bold: true, color: C.ink } }], { x: 8.7, y: y + 0.05, w: 3.95, h: 0.3, isTextBox: true, margin: 0, valign: 'middle' });
+    tb(s, k[2], { x: 8.7, y: y + 0.36, w: 3.95, h: 0.22, fontSize: 8, color: C.muted });
+  });
+  box(s, 8.5, 4.2, 4.23, 2.5, C.light, C.light);
+  tb(s, 'What the trend tells us', { x: 8.7, y: 4.3, w: 3.9, h: 0.32, fontFace: H, fontSize: 13, bold: true, color: C.blue });
+  (V.points || []).slice(0, 3).forEach((p, i) => {
+    const y = 4.72 + i * 0.64;
+    stripe(s, 8.7, y, 0.52, C.blue);
+    tb(s, p.title, { x: 8.88, y, w: 3.75, h: 0.24, fontSize: 9.5, bold: true, color: C.ink });
+    tb(s, p.detail, { x: 8.88, y: y + 0.24, w: 3.75, h: 0.34, fontSize: 8, color: C.muted, valign: 'top' });
+  });
+  s.addNotes(`Jira Velocity Chart, board ${V.board || ''}, pulled ${V.pulled}: ${vs.map(x => `${x.name} ${x.committed}/${x.completed}`).join('; ')}. Commitment is Jira's story points at sprint start; slide 3 counts points on every ticket in the sprint at close, so the two can differ when scope changes mid-sprint. ${V.note || ''}`);
+}
+
 // ================= 4. GOAL SCORECARD =================
 {
   const jiraGoal = (S.goal || '').trim();
   const sub = cfg.scorecard.subtitle || (jiraGoal ? 'Scored against the sprint goal recorded in Jira' : `Scored against the ${cfg.goals.length} workstreams the sprint carried, not against raw ticket completion`);
-  const s = pres.addSlide(); header(s, 'Goal Scorecard', `Sprint ${S.number} Goal Scorecard`, sub); footer(s, 4);
+  const s = pres.addSlide(); header(s, 'Goal Scorecard', `Sprint ${S.number} Goal Scorecard`, sub); footer(s, 4 + VS);
   box(s, 0.6, 1.95, 12.13, 0.95, C.light, C.light);
   eyebrow(s, jiraGoal ? `Sprint ${S.number} goal (Jira)` : (cfg.scorecard.bannerEyebrow || `Sprint ${S.number} workstreams`), 0.85, 2.08, C.muted, 8);
   tb(s, jiraGoal ? `“${jiraGoal}”` : cfg.scorecard.bannerText, { x: 0.85, y: 2.36, w: 8.6, h: 0.4, fontFace: H, fontSize: 14, bold: true, italic: true, color: C.ink, valign: 'middle' });
@@ -172,7 +211,7 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
 
 // ================= 5. WORK TYPE =================
 {
-  const s = pres.addSlide(); header(s, 'Throughput', 'Breakdown by Work Type', `Story points closed vs. carried, by issue type: ${P.committed} pts across ${total} tickets (ticket counts in the labels)`); footer(s, 5);
+  const s = pres.addSlide(); header(s, 'Throughput', 'Breakdown by Work Type', `Story points closed vs. carried, by issue type: ${P.committed} pts across ${total} tickets (ticket counts in the labels)`); footer(s, 5 + VS);
   const order = types.sort((a, b) => (TP[b].done + TP[b].carry) - (TP[a].done + TP[a].carry) || T[b].total - T[a].total);
   const labels = order.map(t => `${t} (${T[t].done} of ${T[t].total})`);
   const maxT = Math.max(...order.map(t => TP[t].done + TP[t].carry));
@@ -195,7 +234,7 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
 // Assignee. cfg.team.awards: [{ dev: 'jiraUsername', emoji, award, reason }] in display order; an entry with no `dev`
 // (e.g. QA) supplies its own `name` and `stat`. Any Developer without an entry gets a generic card so nobody is left off.
 {
-  const s = pres.addSlide(); header(s, 'Team', 'Who Did the Work', 'Sprint awards, credited by the Jira Developer field: the person who did the work'); footer(s, 6);
+  const s = pres.addSlide(); header(s, 'Team', 'Who Did the Work', 'Sprint awards, credited by the Jira Developer field: the person who did the work'); footer(s, 6 + VS);
   const byDev = {}; done.forEach(x => x.dev.forEach(u => { (byDev[u] = byDev[u] || []).push(x); }));
   const stat = u => { const xs = byDev[u] || [], p = sumPts(xs); return `${xs.length} ticket${xs.length === 1 ? '' : 's'}${p ? ` · ${p} pts` : ''}`; };
   const cards = (cfg.team.awards || []).map(a => a.dev ? { ...a, name: cfg.developerNames[a.dev] || a.dev, stat: stat(a.dev) } : a);
@@ -217,7 +256,7 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
 
 // ================= 7. CARRY-OVER =================
 {
-  const s = pres.addSlide(); header(s, 'Looking ahead', `Carry-Over into Sprint ${N1.number}`, `Sprint ${N1.number} is already running: ${N1.dateRange}`); footer(s, 7);
+  const s = pres.addSlide(); header(s, 'Looking ahead', `Carry-Over into Sprint ${N1.number}`, `Sprint ${N1.number} is already running: ${N1.dateRange}`); footer(s, 7 + VS);
   tb(s, 'Unfinished story points at close, by status (tickets in parentheses)', { x: 0.6, y: 1.95, w: 7, h: 0.3, fontSize: 10, color: C.muted, align: 'center' });
   const cmax = ptsMax(carryPtsByStatus[0][1]), clabels = carryPtsByStatus.map(x => x[0]);
   s.addChart(pres.ChartType.bar, carryPtsByStatus.map((x, i) => ({ name: x[0], labels: clabels, values: carryPtsByStatus.map((_, j) => (j === i ? x[1] : 0)) })), {
@@ -240,7 +279,7 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
 
 // ================= 8. RISKS =================
 {
-  const s = pres.addSlide(); header(s, 'Risks & Flags', 'What Needs a Decision Today', 'Colour-coded by urgency: each one has a named next step'); footer(s, 8);
+  const s = pres.addSlide(); header(s, 'Risks & Flags', 'What Needs a Decision Today', 'Colour-coded by urgency: each one has a named next step'); footer(s, 8 + VS);
   const n = cfg.risks.length, gap = n <= 4 ? 1.22 : 0.98, rh = n <= 4 ? 1.08 : 0.88;
   cfg.risks.forEach((r, i) => {
     const y = 1.95 + i * gap, col = SEV[r.severity] || C.amber;
@@ -273,7 +312,7 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
 
 // ================= 10. RETRO BOARD =================
 {
-  const s = pres.addSlide(); header(s, 'Retro board', 'Open the Board and Start Dropping Cards', '10 minutes, silent: the timer starts when everyone is in'); footer(s, 10);
+  const s = pres.addSlide(); header(s, 'Retro board', 'Open the Board and Start Dropping Cards', '10 minutes, silent: the timer starts when everyone is in'); footer(s, 10 + VS);
   const url = cfg.retro.boardUrl;
   box(s, 0.6, 2.05, 12.13, 1.55, C.light, C.light);
   eyebrow(s, `retrotool.io  ·  Sprint ${S.number} board`, 0.9, 2.2, C.muted, 8);

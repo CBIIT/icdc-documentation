@@ -53,7 +53,7 @@
     "rows": [
       {
         "title": "Sprint 53 by the Numbers",
-        "detail": "Points and tickets: where the 37 tickets landed, and when they closed",
+        "detail": "Points and tickets for Sprint 53, plus the seven-sprint velocity trend",
         "minutes": "5 min"
       },
       {
@@ -249,5 +249,61 @@
     "liked": "The October release went out on schedule and long-waiting tickets finally closed. Say what made that work.",
     "lacked": "The C3DC interop MVP did not ship and the same tickets sat in review again. Name the real cause.",
     "learned": "Anything about sequencing frontend work behind backend work, moving work through review, or debugging environment-specific failures."
+  },
+  "velocity": {
+    "board": 574,
+    "pulled": "Nov 17, 2026",
+    "sprints": [
+      {
+        "name": "Sprint 47",
+        "committed": 70,
+        "completed": 24
+      },
+      {
+        "name": "Sprint 48",
+        "committed": 66,
+        "completed": 0
+      },
+      {
+        "name": "Sprint 49",
+        "committed": 69,
+        "completed": 10
+      },
+      {
+        "name": "Sprint 50",
+        "committed": 81.5,
+        "completed": 5
+      },
+      {
+        "name": "Sprint 51",
+        "committed": 87.5,
+        "completed": 36.5
+      },
+      {
+        "name": "Sprint 52",
+        "committed": 64,
+        "completed": 29
+      },
+      {
+        "name": "Sprint 53",
+        "committed": 62,
+        "completed": 19
+      }
+    ],
+    "points": [
+      {
+        "title": "We commit about 4x what we finish",
+        "detail": "Seven-sprint average: 71.4 pts committed, 17.6 completed."
+      },
+      {
+        "title": "Completion is up since Sprint 51",
+        "detail": "The last 3 sprints averaged 28.2 pts, against 9.8 for Sprints 47 to 50."
+      },
+      {
+        "title": "Sprint 54 already holds 46 pts",
+        "detail": "Every one of them carried from Sprint 53: well above the 28 pt recent average."
+      }
+    ],
+    "note": "Sprint 53 commitment is 62 in the Velocity Chart vs. 65 on slide 3: 3 pts were added after the sprint started. Sprint 54 point total (46) pulled from Jira on Nov 17."
   }
 }
