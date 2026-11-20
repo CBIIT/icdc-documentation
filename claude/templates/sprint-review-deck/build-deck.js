@@ -11,8 +11,10 @@
  * Output:  <project>_Sprint<N>_Review_Retro_<meetingDateISO>.pptx in the current directory
  *
  * Every number on the deck is computed from tickets.json; the config carries only narrative.
- * Slide order is fixed (SKILL.md §9c). Demo / release slides are intentionally absent: add them only
- * when something is confirmed deployed to QA/Stage and a release actually shipped.
+ * Slide order is fixed (CTDC SKILL.md §11c, ICDC §9c): Cover · Agenda · Numbers · Velocity · Goal Scorecard · Work Type ·
+ * Who Did the Work · Carry-Over · Team Announcements · [Data Loading on the Horizon] · [Presenter Intro per demo slot] ·
+ * Retro break · Retro board. Bracketed slides come from cfg.horizon and cfg.demos; demo slides are always the last
+ * slides before the retro. Every number describes the sprint as of close: nothing that closed afterward.
  */
 const fs = require('fs');
 const path = require('path');
@@ -62,19 +64,26 @@ if (!VS) throw new Error('cfg.velocity is required: pull the Jira Velocity Chart
 // Scope creep = points added after sprint start: tickets added mid-sprint (their points) + re-estimates on tickets already in it.
 // From Jira's Sprint Report (issueKeysAddedDuringSprint, estimateStatistic vs currentEstimateStatistic). Computed, never typed.
 const SC = cfg.velocity.scopeCreep || { added: [], reestimated: [], unpointedAdded: [] };
-SC.added = SC.added || []; SC.reestimated = SC.reestimated || []; SC.unpointedAdded = SC.unpointedAdded || [];
+SC.added = SC.added || []; SC.reestimated = SC.reestimated || []; SC.unpointedAdded = SC.unpointedAdded || []; SC.removed = SC.removed || [];
 SC.points = Math.round(10 * (SC.added.reduce((t, x) => t + (x.points || 0), 0) + SC.reestimated.reduce((t, x) => t + (x.to - x.from), 0))) / 10;
+// Tickets removed from the sprint after it started (Sprint Report puntedIssues that were in the start commitment)
+SC.removedPts = Math.round(10 * SC.removed.reduce((t, x) => t + (x.points || 0), 0)) / 10;
+SC.net = Math.round(10 * (SC.points - SC.removedPts)) / 10;
 SC.start = cfg.velocity.sprints[cfg.velocity.sprints.length - 1].committed;
-if (Math.round(10 * (SC.start + SC.points)) !== Math.round(10 * P.committed)) console.warn(`WARNING scope creep does not reconcile: ${SC.start} at start + ${SC.points} creep != ${P.committed} at close`);
+if (Math.round(10 * (SC.start + SC.net)) !== Math.round(10 * P.committed)) console.warn(`WARNING scope creep does not reconcile: ${SC.start} at start + ${SC.points} creep - ${SC.removedPts} removed != ${P.committed} at close`);
 const SCtext = [...SC.added.filter(x => x.points).map(x => `${x.key} added mid-sprint (${x.points} pt${x.points === 1 ? '' : 's'})`), ...SC.reestimated.map(x => `${x.key} re-estimated ${x.from} to ${x.to} (+${x.to - x.from})`)].join(' · ');
 // goal status: 'delivered' | 'partial' | 'not_started' (legacy boolean `delivered` still accepted)
 const gStatus = g => g.status || (g.delivered ? 'delivered' : 'partial');
 const GS = { delivered: ['✓', 'DELIVERED', C.green], partial: ['▲', 'PARTIAL', C.amber], not_started: ['✗', 'NOT STARTED', C.red] };
 const goalsDelivered = cfg.goals.filter(g => gStatus(g) === 'delivered').length;
 // risks: HIGH and MEDIUM only (no green INFO: green means Closed), HIGH first, 3 to 5 rows
-cfg.risks.forEach(r => { if (!['HIGH', 'MEDIUM'].includes(r.severity)) throw new Error(`risk severity must be HIGH or MEDIUM, got ${r.severity}`); });
-cfg.risks.sort((a, b) => (a.severity === 'HIGH' ? 0 : 1) - (b.severity === 'HIGH' ? 0 : 1));
-if (cfg.risks.length < 3 || cfg.risks.length > 5) console.warn(`warning: ${cfg.risks.length} risks; the standard is 3 to 5`);
+// Slide 9 is Team Announcements (rule 2026-11-20). cfg.announcements: [{ label, title, detail, nextStep }]; label is a short topic tag
+// (e.g. "CMB V6", "MEVAL"). Older configs with cfg.risks[{ severity }] still build: the severity becomes the tag.
+const ANN = cfg.announcements || cfg.risks || [];
+if (!ANN.length || ANN.length > 5) throw new Error('cfg.announcements needs 1 to 5 items');
+ANN.forEach(r => { if (!r.label && !['HIGH', 'MEDIUM'].includes(r.severity)) throw new Error(`announcement "${r.title}" needs a label (topic tag)`); });
+if (!cfg.announcements) ANN.sort((a, b) => (a.severity === 'HIGH' ? 0 : 1) - (b.severity === 'HIGH' ? 0 : 1));
+if (ANN.length < 3) console.warn(`warning: ${ANN.length} announcements; the standard is 3 to 5`);
 
 // ---------- primitives ----------
 const pres = new pptxgen();
@@ -127,26 +136,34 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
   s.addText([{ text: String(P.done), options: { fontFace: H, fontSize: 60, bold: true, color: STATUS.Closed } }, { text: '  of ' + P.committed + ' pts', options: { fontFace: H, fontSize: 22, color: C.muted } }], { x: 0.8, y: 2.05, w: 3.2, h: 1.15, isTextBox: true, margin: 0, valign: 'middle' });
   eyebrow(s, 'Story points delivered', 0.8, 3.3, C.ink, 3);
   tb(s, `${P.pct}% of committed points · ${M.done} of ${total} tickets (${M.pct}%)`, { x: 0.8, y: 3.52, w: 3.2, h: 0.22, fontSize: 10, color: C.muted });
-  if (SC.points) tb(s, `${P.committed} = ${SC.start} committed at start + ${SC.points} pts scope creep`, { x: 0.8, y: 3.74, w: 3.2, h: 0.22, fontSize: 9.5, bold: true, color: C.amber });
-  const stats = [[String(M.carry), 'Carry-over tickets', cfg.numbers.carryNote, C.amber], ...cfg.numbers.extraStats.map(x => [x.value, x.label, x.note, STATUS[x.tone] || SEV[x.tone] || C[x.tone] || STATUS.Closed])];
-  stats.slice(0, 3).forEach((k, i) => {
-    const y = 1.95 + i * 0.72;
-    box(s, 4.3, y, 3.6, 0.62); stripe(s, 4.3, y, 0.62, k[3]);
-    s.addText([{ text: k[0] + '   ', options: { fontFace: H, fontSize: 15, bold: true, color: k[3] } }, { text: k[1], options: { fontFace: B, fontSize: 10, bold: true, color: C.ink } }], { x: 4.5, y: y + 0.05, w: 3.3, h: 0.3, isTextBox: true, margin: 0, valign: 'middle' });
-    tb(s, k[2], { x: 4.5, y: y + 0.36, w: 3.3, h: 0.22, fontSize: 8, color: C.muted });
+  // Stat cards (rule 2026-11-20, CTDC Sprint 35): the sprint's own totals only. Tickets in the sprint, Closed, Carry-over,
+  // then Scope creep as its own card whenever points were added after the start. Never "closed since" or before/inside/after splits.
+  const N = cfg.numbers || {}, N1 = cfg.nextSprint;
+  const stats = [
+    [String(total), 'Tickets in the sprint', `${M.done} closed + ${M.carry} carried over`, C.blue],
+    [String(M.done), 'Closed', `${P.done} of ${P.committed} story points`, STATUS.Closed],
+    [String(M.carry), 'Carry-over tickets', N.carryNote || (N1.inherited === M.carry ? `All ${M.carry} moved into Sprint ${N1.number}` : `${N1.inherited} of ${M.carry} are in Sprint ${N1.number}`), C.amber],
+  ];
+  if (SC.points) stats.push([`+${SC.points}`, 'Scope creep (story points)', `${SC.added.length} tickets added mid-sprint` + (SC.removedPts ? `; ${SC.removed.length} removed (${SC.removedPts} pts)` : '') + `: ${SC.start} at start → ${P.committed}`, C.red]);
+  const nS = stats.length, pitch = nS > 3 ? 2.15 / 4 : 0.72, chh = nS > 3 ? 0.46 : 0.62;
+  stats.forEach((k, i) => {
+    const y = 1.95 + i * pitch;
+    box(s, 4.3, y, 3.6, chh); stripe(s, 4.3, y, chh, k[3]);
+    s.addText([{ text: k[0] + '   ', options: { fontFace: H, fontSize: nS > 3 ? 14 : 15, bold: true, color: k[3] } }, { text: k[1], options: { fontFace: B, fontSize: 10, bold: true, color: C.ink } }], { x: 4.5, y: y + (nS > 3 ? 0.02 : 0.05), w: 3.3, h: nS > 3 ? 0.26 : 0.3, isTextBox: true, margin: 0, valign: 'middle' });
+    tb(s, k[2], { x: 4.5, y: y + (nS > 3 ? 0.27 : 0.36), w: 3.3, h: nS > 3 ? 0.17 : 0.22, fontSize: 8, color: C.muted });
   });
+  // Breakdown table: Status · Tickets · Story points, one row per wheel status, each row filled in EXACTLY its wheel color
   box(s, 0.6, 4.25, 7.3, 2.45, C.light, C.light);
   tb(s, `How the ${total} tickets break down`, { x: 0.8, y: 4.38, w: 6.9, h: 0.3, fontFace: H, fontSize: 14, bold: true, color: C.blue });
-  // One row per status on the wheel, each with a swatch in its wheel color (Closed rows and cards are always STATUS.Closed)
-  const N = cfg.numbers, notes = { 'Closed': N.closedNote || '(accepted and done at sprint close)', 'Ready for Review': N.reviewNote || N.motionNote || '', 'Ready for QA': N.qaNote || '', 'In Progress': N.inProgressNote || '', 'On Hold': N.holdNote || '', 'Open': N.openNote || '(never started)' };
   const brk = [['Closed', M.done], ['Ready for Review', M.rfr], ['Ready for QA', M.rfqa], ['In Progress', M.inProg + st('Testing')], ['On Hold', M.hold], ['Open', M.open]].filter(r => r[1] > 0);
-  const rh = Math.min(0.3, 1.5 / brk.length);
-  brk.forEach(([k, v], i) => {
-    const y = 4.75 + i * rh;
-    s.addShape(pres.ShapeType.rect, { x: 0.8, y: y + 0.07, w: 0.14, h: 0.14, fill: { color: STATUS[k] }, line: { color: STATUS[k] } });
-    s.addText([{ text: `${k}: ${v}${k === 'Closed' ? ` tickets · ${P.done} pts` : ''}   `, options: { bold: true, color: C.ink } }, { text: notes[k], options: { color: C.muted } }], { x: 1.02, y, w: 6.7, h: 0.28, fontFace: B, fontSize: 10.5, isTextBox: true, margin: 0 });
-  });
-  tb(s, `Carry-over = ${total} − ${M.done} = ${M.carry} tickets · ${P.carry} pts   |   pointed: ${P.pointed} of ${total} tickets, ${P.pointedDone} of ${M.done} closed`, { x: 0.8, y: 6.3, w: 6.9, h: 0.28, fontSize: 10, bold: true, color: C.amber });
+  const keyOf = x => x.category === 'Done' ? 'Closed' : statusKey(x.status);
+  const ptsOf = k => Math.round(10 * d.filter(x => keyOf(x) === k).reduce((a, x) => a + (pts(x) || 0), 0)) / 10;
+  const cell = (text, o = {}) => ({ text: String(text), options: { fontFace: B, fontSize: 10.5, color: C.ink, valign: 'middle', margin: [0, 0.08, 0, 0.08], ...o } }); // table margins are inches
+  const hdr = ['Status', 'Tickets', 'Story points'].map((h, j) => cell(h, { bold: true, color: C.white, fill: { color: C.blue }, align: j ? 'center' : 'left' }));
+  const rows = brk.map(([k, v]) => { const f = { fill: { color: STATUS[k] } }; return [cell(k, { bold: true, ...f }), cell(v, { align: 'center', ...f }), cell(ptsOf(k), { align: 'center', ...f })]; });
+  const tot = [cell('Total', { bold: true, fill: { color: C.white } }), cell(total, { bold: true, align: 'center', fill: { color: C.white } }), cell(P.committed, { bold: true, align: 'center', fill: { color: C.white } })];
+  if (Math.round(10 * brk.reduce((a, [k]) => a + ptsOf(k), 0)) !== Math.round(10 * P.committed)) console.warn('WARNING slide 3 table points do not add up to the at-close total');
+  s.addTable([hdr, ...rows, tot], { x: 0.8, y: 4.75, w: 6.9, colW: [3.5, 1.7, 1.7], rowH: Math.min(0.24, 1.85 / (rows.length + 2)), border: { type: 'solid', pt: 0.75, color: C.white } });
   // Wheel of ticket status: one slice per Jira status, ticket counts (not points), zero slices dropped
   const wheel = [['Closed', M.done], ['Ready for Review', M.rfr], ['Ready for QA', M.rfqa], ['In Progress', M.inProg + st('Testing')], ['On Hold', M.hold], ['Open', M.open]].filter(w => w[1] > 0).map(w => [...w, STATUS[w[0]]]);
   s.addChart(pres.ChartType.doughnut, [{ name: `Sprint ${S.number} ticket status`, labels: wheel.map(w => `${w[0]} (${w[1]})`), values: wheel.map(w => w[1]) }], {
@@ -176,7 +193,7 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
     [String(cur.completed), `Sprint ${S.number} completed`, `of ${cur.committed} committed at sprint start (${Math.round(100 * cur.completed / cur.committed)}%)`, STATUS.Closed],
     [String(avg(last3, 'completed')), 'Average completed, last 3 sprints', `${last3.map(x => x.completed).join(' · ')} pts`, C.blue],
     [String(avg(vs, 'completed')), `Average completed, last ${n} sprints`, `vs. ${avg(vs, 'committed')} pts committed on average`, C.blue],
-    [`+${SC.points}`, 'Scope creep after sprint start', (SCtext || 'No points added after sprint start') + (SC.unpointedAdded.length ? `; ${SC.unpointedAdded.length} more added unpointed` : ''), C.amber],
+    [`+${SC.points}`, 'Scope creep after sprint start', SC.summary || ((SCtext || 'No points added after sprint start') + (SC.unpointedAdded.length ? `; ${SC.unpointedAdded.length} more added unpointed` : '') + (SC.removedPts ? `; ${SC.removedPts} pts removed (${SC.removed.length} tickets)` : '')), C.amber],
   ];
   cards.forEach((k, i) => {
     const y = 1.95 + i * 0.68;
@@ -192,7 +209,7 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
     tb(s, p.title, { x: 8.88, y, w: 3.75, h: 0.24, fontSize: 9.5, bold: true, color: C.ink });
     tb(s, p.detail, { x: 8.88, y: y + 0.23, w: 3.75, h: 0.22, fontSize: 8, color: C.muted, valign: 'top' });
   });
-  s.addNotes(`Jira Velocity Chart, board ${V.board || ''}, pulled ${V.pulled}: ${vs.map(x => `${x.name} ${x.committed}/${x.completed}`).join('; ')}. Commitment is Jira's story points at sprint start; slide 3 counts points on every ticket in the sprint at close, the difference is scope creep: ${SCtext || 'none'}${SC.unpointedAdded.length ? '; added unpointed: ' + SC.unpointedAdded.join(', ') : ''}. ${V.note || ''}`);
+  s.addNotes(`Jira Velocity Chart, board ${V.board || ''}, pulled ${V.pulled}: ${vs.map(x => `${x.name} ${x.committed}/${x.completed}`).join('; ')}. Commitment is Jira's story points at sprint start; slide 3 counts points on every ticket in the sprint at close, the difference is scope creep: ${SCtext || 'none'}${SC.removed.length ? '; removed after start: ' + SC.removed.map(x => `${x.key} (${x.points})`).join(', ') : ''}${SC.unpointedAdded.length ? '; added unpointed: ' + SC.unpointedAdded.join(', ') : ''}. ${V.note || ''}`);
 }
 
 // ================= 4. GOAL SCORECARD =================
@@ -223,12 +240,15 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
 // ================= 5. WORK TYPE =================
 {
   const s = pres.addSlide(); header(s, 'Throughput', 'Breakdown by Work Type', `Story points closed vs. carried, by issue type: ${P.committed} pts across ${total} tickets (ticket counts in the labels)`); footer(s, 5 + VS);
-  const order = types.sort((a, b) => (TP[b].done + TP[b].carry) - (TP[a].done + TP[a].carry) || T[b].total - T[a].total);
+  const order0 = types.sort((a, b) => (TP[b].done + TP[b].carry) - (TP[a].done + TP[a].carry) || T[b].total - T[a].total);
+  const order = order0.slice().reverse(); // first category draws at the bottom: biggest type on top, value axis stays at the bottom
   const labels = order.map(t => `${t} (${T[t].done} of ${T[t].total})`);
   const maxT = Math.max(...order.map(t => TP[t].done + TP[t].carry));
   s.addChart(pres.ChartType.bar, [{ name: 'Closed (pts)', labels, values: order.map(t => TP[t].done) }, { name: 'Carried over (pts)', labels, values: order.map(t => TP[t].carry) }], {
     x: 0.6, y: 1.95, w: 7.2, h: 4.8, barDir: 'bar', barGrouping: 'stacked', chartColors: [STATUS.Closed, C.amber], showValue: true, dataLabelPosition: 'ctr', dataLabelColor: C.ink, dataLabelFontFace: B, dataLabelFontSize: 10, dataLabelFormatCode: NOZERO,
-    showLegend: true, legendPos: 'b', legendFontFace: B, legendFontSize: 9, catAxisLabelFontFace: B, catAxisLabelFontSize: 10, catAxisLabelColor: C.ink, catAxisOrientation: 'maxMin', valAxisLabelFontFace: B, valAxisLabelFontSize: 9, valAxisLabelColor: C.muted, valGridLine: { color: C.line, size: 0.5 }, catGridLine: { style: 'none' }, valAxisMinVal: 0, valAxisMaxVal: ptsMax(maxT), valAxisMajorUnit: ptsMax(maxT) > 50 ? 10 : 5, barGapWidthPct: 60,
+    showLegend: true, legendPos: 'b', legendFontFace: B, legendFontSize: 9, catAxisLabelFontFace: B, catAxisLabelFontSize: 10, catAxisLabelColor: C.ink, valAxisLabelFontFace: B, valAxisLabelFontSize: 9, valAxisLabelColor: C.muted, valGridLine: { color: C.line, size: 0.5 }, catGridLine: { style: 'none' }, valAxisMinVal: 0, valAxisMaxVal: ptsMax(maxT), valAxisMajorUnit: ptsMax(maxT) > 50 ? 10 : 5, barGapWidthPct: 60,
+    showValAxisTitle: true, valAxisTitle: 'Story points', valAxisTitleFontFace: B, valAxisTitleFontSize: 10, valAxisTitleColor: C.ink,
+    showCatAxisTitle: true, catAxisTitle: 'Issue type (tickets closed of total)', catAxisTitleFontFace: B, catAxisTitleFontSize: 10, catAxisTitleColor: C.ink,
   });
   box(s, 8.15, 1.95, 4.58, 4.75, C.light, C.light);
   tb(s, 'What the shape tells us', { x: 8.4, y: 2.1, w: 4.1, h: 0.35, fontFace: H, fontSize: 15, bold: true, color: C.blue });
@@ -258,12 +278,15 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
     s.addShape(pres.ShapeType.ellipse, { x: x + 0.2, y: y + 0.28, w: 0.78, h: 0.78, fill: { color: C.light }, line: { color: C.light } });
     tb(s, c.emoji || '⭐', { x: x + 0.2, y: y + 0.28, w: 0.78, h: 0.78, fontSize: 24, align: 'center', valign: 'middle' });
     tb(s, (c.award || '').toUpperCase(), { x: x + 1.15, y: y + 0.26, w: cw - 1.3, h: 0.3, fontSize: 9, bold: true, color: C.red, charSpacing: 2 });
-    tb(s, c.name, { x: x + 1.15, y: y + 0.54, w: cw - 1.3, h: 0.38, fontFace: H, fontSize: big ? 16 : 14, bold: true, color: C.ink });
+    tb(s, c.name, { x: x + 1.15, y: y + 0.54, w: cw - 1.3, h: 0.38, fontFace: H, fontSize: big ? 16 : cols >= 4 ? 12 : 14, bold: true, color: C.ink });
     tb(s, c.stat || '', { x: x + 1.15, y: y + 0.9, w: cw - 1.3, h: 0.24, fontSize: 9.5, bold: true, color: qa ? C.blue : C.green });
     tb(s, c.reason || '', { x: x + 0.2, y: y + 1.22, w: cw - 0.4, h: ch - 1.32, fontSize: 9.5, color: C.muted, valign: 'top' });
   });
   s.addNotes(`Credit: ${cfg.team.creditNote || cfg.team.whyDisagree || 'Developer field (customfield_23650).'} Developer tally: ${devC.map(([k, v]) => `${k} ${v}`).join(', ')}.`);
 }
+
+const DM = (cfg.demos || []).length; // demo slots (built just before the retro break)
+const HZ = cfg.horizon ? 1 : 0; // optional Data Loading on the Horizon slide, after announcements
 
 // ================= 7. CARRY-OVER =================
 {
@@ -288,19 +311,59 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
   });
 }
 
-// ================= 8. RISKS =================
+// ================= 8. TEAM ANNOUNCEMENTS =================
+// Framed as announcements, not a decision list: blue topic tag, Georgia title, muted detail, bold blue "What's next:".
 {
-  const s = pres.addSlide(); header(s, 'Risks & Flags', 'What Needs a Decision Today', 'Colour-coded by urgency: each one has a named next step'); footer(s, 8 + VS);
-  const n = cfg.risks.length, gap = n <= 4 ? 1.22 : 0.98, rh = n <= 4 ? 1.08 : 0.88;
-  cfg.risks.forEach((r, i) => {
-    const y = 1.95 + i * gap, col = SEV[r.severity] || C.amber;
+  const s = pres.addSlide();
+  header(s, 'Announcements', 'Team Announcements', `What everyone should know going into the rest of Sprint ${cfg.nextSprint.number}`); footer(s, 8 + VS);
+  const n = ANN.length, gap = n <= 4 ? 1.22 : 0.98, rh = n <= 4 ? 1.08 : 0.88;
+  ANN.forEach((r, i) => {
+    const y = 1.95 + i * gap, col = r.label ? C.blue : (SEV[r.severity] || C.amber);
     box(s, 0.6, y, 12.13, rh); stripe(s, 0.6, y, rh, col);
-    pill(s, r.severity, 0.85, y + rh / 2 - 0.14, 0.85, col, 8);
+    pill(s, r.label || r.severity, 0.85, y + rh / 2 - 0.14, 0.85, col, 8);
     tb(s, r.title, { x: 1.9, y: y + 0.12, w: 6.8, h: 0.32, fontFace: H, fontSize: 12.5, bold: true, color: C.ink });
     tb(s, r.detail, { x: 1.9, y: y + 0.46, w: 6.8, h: rh - 0.5, fontSize: 9, color: C.muted, valign: 'top' });
-    tb(s, 'Next step: ' + r.nextStep, { x: 8.95, y: y + 0.12, w: 3.6, h: rh - 0.24, fontSize: 9, bold: true, color: C.blue, valign: 'middle' });
+    tb(s, "What's next: " + r.nextStep, { x: 8.95, y: y + 0.12, w: 3.6, h: rh - 0.24, fontSize: 9, bold: true, color: C.blue, valign: 'middle' });
   });
 }
+
+// ================= OPTIONAL: DATA LOADING ON THE HORIZON =================
+// cfg.horizon: { title, subtitle, rows: [{ stage, study, coming, status, epic }], note }. Absent = no slide.
+if (cfg.horizon) {
+  const Hz = cfg.horizon, s = pres.addSlide();
+  header(s, 'Data loading', Hz.title || 'Data Loading on the Horizon', Hz.subtitle || ''); footer(s, 9 + VS);
+  const stageCol = { 'NEXT UP': C.blue, 'FURTHER OUT': C.muted };
+  const cell = (t, o = {}) => ({ text: String(t), options: { fontFace: B, fontSize: 10, color: C.ink, valign: 'middle', margin: [0, 0.08, 0, 0.08], ...o } });
+  const hdr = ['Stage', 'Study', "What's coming", 'Where it stands', 'Epic'].map(h => cell(h, { bold: true, color: C.white, fill: { color: C.blue } }));
+  const rows = Hz.rows.map((r, i) => {
+    const f = { fill: { color: i % 2 ? C.white : C.light } };
+    return [cell(r.stage, { ...f, bold: true, fontSize: 8.5, color: stageCol[r.stage] || C.ink, charSpacing: 1 }), cell(r.study, { ...f, bold: true, fontFace: H, fontSize: 11 }), cell(r.coming, { ...f, color: C.muted, fontSize: 9.5 }), cell(r.status, { ...f, fontSize: 9.5 }), cell(r.epic, { ...f, bold: true, color: C.blue, fontSize: 9.5 })];
+  });
+  const rh = Math.min(0.62, 4.3 / (rows.length + 0.6));
+  s.addTable([hdr, ...rows], { x: 0.6, y: 1.95, w: 12.13, colW: [1.25, 2.75, 3.75, 3.33, 1.05], rowH: [0.36, ...rows.map(() => rh)], border: { type: 'solid', pt: 0.75, color: C.line } });
+  if (Hz.note) tb(s, Hz.note, { x: 0.6, y: 6.5, w: 12.13, h: 0.3, fontSize: 9, italic: true, color: C.muted });
+}
+
+// ================= OPTIONAL: PRESENTER INTRO (SKILL.md §11e), one per cfg.demos slot; always the last slides before the retro =================
+// cfg.demos: [{ title, why, minutes, presenters: [{ role, name, focus }], see: [..], tickets }]. Absent = no slide.
+(cfg.demos || []).forEach((dm, i) => {
+  const s = pres.addSlide(); footer(s, 8 + VS + HZ + 1 + i);
+  eyebrow(s, `Slot ${i + 1}`, 0.6, 0.45); tb(s, `${dm.minutes} MINUTES`, { x: 9.73, y: 0.45, w: 3.0, h: 0.25, fontSize: 9.5, bold: true, color: C.muted, charSpacing: 2.5, align: 'right' });
+  tb(s, dm.title, { x: 0.6, y: 0.72, w: 12.1, h: 0.7, fontFace: H, fontSize: 32, bold: true, color: C.ink });
+  tb(s, dm.why, { x: 0.6, y: 1.42, w: 12.1, h: 0.32, fontSize: 12, italic: true, color: C.blue });
+  const ps = dm.presenters.slice(0, 2), ph = ps.length > 1 ? 2.2 : 2.6;
+  ps.forEach((p, j) => {
+    const y = 2.05 + j * (ph + 0.2);
+    box(s, 0.6, y, 5.2, ph, C.light, C.light); stripe(s, 0.6, y, ph, C.blue);
+    eyebrow(s, p.role, 0.9, y + 0.25, C.red, 4.7);
+    tb(s, p.name, { x: 0.9, y: y + 0.55, w: 4.7, h: 0.5, fontFace: H, fontSize: 22, bold: true, color: C.ink });
+    tb(s, p.focus, { x: 0.9, y: y + 1.1, w: 4.7, h: ph - 1.25, fontSize: 11, color: C.muted, valign: 'top' });
+  });
+  tb(s, "What you'll see", { x: 6.3, y: 2.05, w: 6.4, h: 0.4, fontFace: H, fontSize: 16, bold: true, color: C.blue });
+  s.addText(dm.see.map(t => ({ text: t, options: { bullet: { code: '25A0' }, breakLine: true, paraSpaceAfter: 16 } })), { x: 6.3, y: 2.6, w: 6.4, h: 3.6, fontFace: B, fontSize: 13, color: C.ink, valign: 'top', isTextBox: true, margin: 0 });
+  s.addText([{ text: 'Tickets  ', options: { color: C.muted } }, { text: dm.tickets, options: { bold: true, color: C.blue } }], { x: 6.3, y: 6.35, w: 6.4, h: 0.3, fontFace: B, fontSize: 10, align: 'right', isTextBox: true, margin: 0 });
+  if (dm.notes) s.addNotes(dm.notes);
+});
 
 // ================= 9. RETRO BREAK =================
 {
@@ -323,7 +386,7 @@ const darkBg = s => { s.background = { color: C.dark }; stripe(s, 0, 0, 7.5, C.r
 
 // ================= 10. RETRO BOARD =================
 {
-  const s = pres.addSlide(); header(s, 'Retro board', 'Open the Board and Start Dropping Cards', '10 minutes, silent: the timer starts when everyone is in'); footer(s, 10 + VS);
+  const s = pres.addSlide(); header(s, 'Retro board', 'Open the Board and Start Dropping Cards', '10 minutes, silent: the timer starts when everyone is in'); footer(s, 10 + VS + DM + HZ);
   const url = cfg.retro.boardUrl;
   box(s, 0.6, 2.05, 12.13, 1.55, C.light, C.light);
   eyebrow(s, `retrotool.io  ·  Sprint ${S.number} board`, 0.9, 2.2, C.muted, 8);
