@@ -83,8 +83,8 @@ Each section header is a Jira wiki `h3.` heading with the emoji and a bold title
 
 4. `h3. 🧪 *Verification*`: How ICDC confirms the registration worked. Labeled bullets (`* *Label*: content`):
 
-   - *Spot-check method*: for every row in the table, pick one GUID from that submission's indexd.tsv manifest, resolve it at `https://nci-crdc.datacommons.io/index/<guid>`, enter the tested GUID in that row's Sample GUID cell, and paste the returned IndexD record into a comment on this ticket, labeled with the submission name. A pass returns the record with `urls` pointing to the expected object-files location, a non-empty `acl`, and non-empty `size` and `hashes`.
-   - *Why one per submission*: each submission has its own manifest, so a pass on one says nothing about the others.
+   - *Spot-check method*: for every row in the table, test at least one GUID from that submission's indexd.tsv manifest; the Data Concierge may test more at their discretion, but testing every GUID is not required. Resolve each tested GUID at `https://nci-crdc.datacommons.io/index/<guid>`, enter one tested GUID in that row's Sample GUID cell, and paste the returned IndexD record into a comment on this ticket, labeled with the submission name. A pass returns the record with `urls` pointing to the expected object-files location, a non-empty `acl`, and non-empty `size` and `hashes`.
+   - *Why at least one per submission*: each submission has its own manifest, so a pass on one says nothing about the others.
    - *If a check fails*: do not close. Reopen the relevant CRINTAKE ticket with the GUID and the resolution-endpoint response, coordinate the fix with the DCF, and surface the issue on the Data Submission Epic.
 
    **Timing note (for the assignee, not the ticket body):** a GUID resolves only after the submission is marked Complete in the CRDC Submission Portal, when the object files move to the production bucket. Hand off as soon as the Release Package exists; run the spot-checks after Complete.
@@ -165,6 +165,7 @@ Each section header is a Jira wiki `h3.` heading with the emoji and a bold title
 
 **Changelog**
 
+- **v8.2 (2026-11-23)** (no shape change): Verification clarified: the spot-check is **at least one GUID** per indexed submission, and testing additional GUIDs is at the Data Concierge's discretion. Testing every GUID is not required.
 - **v8.1 (2026-10-22)** (no shape change): Corrected who creates the GUIDs. The **CRDC Data Hub generates them** when it processes a submission, and they ship in the Release Package's indexd.tsv; the DCF registers them in IndexD and serves the files through presigned URLs. "Minting" wording replaced with "registering" throughout, including the Registration Summary examples. Lockstep with CTDC DO-INDEX v11.1.
 - **v8 (2026-10-22)**: Restored the **CRDC Submission ID** column, after Submission: **Submission, CRDC Submission ID, Release Package, Sample GUID**. The ID is the key the Data Hub and the CRDC Submission Portal use, and having it in its own column keeps the IndexD table lined up with the Data Loading Task's table, which already carries it. Lockstep with CTDC DO-INDEX v11.
 - **v7 (2026-10-22)**: Table slimmed to three columns: **Submission, Release Package, Sample GUID**. Dropped CRDC Submission ID (embedded in the Release Package directory name and carried by the Data Loading Task), Index? (every row is implicitly indexed, so metadata-only submissions no longer get a row), and Intake batch (the CRINTAKE links carry it). Lockstep with CTDC DO-INDEX v10. The Sample GUID cell records the GUID actually tested in the spot-check, entered when the spot-check runs (PLACEHOLDER until then).
