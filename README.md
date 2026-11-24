@@ -14,7 +14,7 @@ This repository contains documentation, operational guides, and AI workflow know
 - [`bento-icdc-backend`](https://github.com/CBIIT/bento-icdc-backend) — Spring Boot backend
 - [`icdc-dataloader`](https://github.com/CBIIT/icdc-dataloader) — Data ingestion pipeline
 - [`icdc-model-tool`](https://github.com/CBIIT/icdc-model-tool) — Data model representations and build tools
-- [`icdc-deployments`](https://github.com/CBIIT/icdc-deployments) — Deployment configurations
+- [`icdc-deployment`](https://github.com/CBIIT/icdc-deployment) — Deployment configurations
 - [`icdc-devops`](https://github.com/CBIIT/icdc-devops) — DevOps infrastructure
 
 ## Maintainers

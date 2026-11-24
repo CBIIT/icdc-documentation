@@ -325,7 +325,7 @@ Run these checks before each standup:
 **Also verify before building:**
 - **Sprint name**: the sprint being reviewed is NOT the active sprint (active = next one). Use `GET /rest/agile/1.0/board/574/sprint` to confirm dates match the meeting date.
 - **Ticket counts per metric** — total, done, carry-over, by status, by type, by assignee. All should sum correctly.
-- **Release scope** — cross-reference GitHub release notes against Jira `fixVersion` query. Gaps reveal tagging hygiene issues.
+- **Release scope**: one Fix Version per Production release (`ICDC <Month YYYY>`, `ICDC <Month YYYY> Patch`). Cross-reference the release notes against `fixVersion = "ICDC <Month YYYY>"` and the microservice versions against `versions.yaml` in `CBIIT/icdc-deployment`. Gaps reveal tagging hygiene issues.
 - **Developer field, not Assignee** — see Section 3 (Jira Quirks). On ICDC the Assignee on a closed ticket is often QA; the Developer field (`customfield_23650`, canonical for all issue types) is the source of truth for who built it.
 
 ---
@@ -362,8 +362,8 @@ On ICDC, Developer is the source of truth — Assignee is often QA who closed th
 
 ### 🚀 Release Scope (if a release shipped in this sprint)
 - Versions shipped (FE, BE, Data Retriever, Interop, Dataloader, DMN if applicable)
-- Tickets by fixVersion
-- Data gaps worth naming (versions without Jira tickets; tickets shipped without fixVersion tags)
+- Tickets in the release's Fix Version
+- Data gaps worth naming (a changed microservice version with no ticket pull request in that repository; tickets shipped without the release Fix Version)
 
 ### ✅ Completed Work
 [table: key | summary | type | developer | assignee]

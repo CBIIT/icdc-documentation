@@ -8,7 +8,7 @@
 
 The Release Dashboard is the *checklist* for one release and the release tickets are its *record*. Neither, alone, walks a release manager phase by phase from kickoff to close with the gates, RACI, and rollback spelled out. This playbook is that runbook, written down so the process is durable, diffable in git, and legible to a new team member on day one.
 
-**Operating context.** Part of the ICDC operational skill (`CBIIT/icdc-documentation → claude/SKILL.md`). Jira project key **ICDC** on `tracker.nci.nih.gov`. The development team is the **Essential Software Inc (ESI)** subcontractor under FNL/BACS (NCI prime); **federal leadership sits in NCI/CBIIT**. Jira-driven steps (scope pull, Fix Version hygiene, the version merge) require the **Docker/Atlassian MCP container running**; if it is down, release data work stops until restored (SKILL.md §1).
+**Operating context.** Part of the ICDC operational skill (`CBIIT/icdc-documentation → claude/SKILL.md`). Jira project key **ICDC** on `tracker.nci.nih.gov`. The development team is the **Essential Software Inc (ESI)** subcontractor under FNL/BACS (NCI prime); **federal leadership sits in NCI/CBIIT**. Jira-driven steps (Fix Version setup, scope pull, Fix Version hygiene) run through Jira in the TPM's signed-in browser session; if Jira cannot be reached, release data work stops until access is restored.
 
 **Software releases vs. data releases.** Strictly separate; never conflated. This playbook covers *software* (versioned application microservices). Study loads, OpenSearch index rebuilds, and data model versions (published on `CBIIT/icdc-model-tool`) are *data* releases with their own tasks and SOP (`data-operations-study-submission-sop.md`). Data work may run in parallel but does not gate a software release.
 
@@ -35,9 +35,13 @@ The Release Dashboard is the *checklist* for one release and the release tickets
 
 ### Internal releases, Fix Versions, and release notes
 
-- **Every build is an internal release**: a beta Docker build handed to QA, named `major.minor.patch.jenkins-build-number`.
-- Every Jira issue in a build is stamped with that build's **Fix Version**, per microservice, creating a durable map between completed issues and the build that carried them.
-- When the release candidate is chosen, **all prior internal-release versions are merged in Jira** into the single final version for that release. The merged Fix Versions are the scope of the official release notes.
+- **Every build is an internal release**: a beta Docker build handed to QA, named `major.minor.patch.jenkins-build-number`. Builds are not Jira versions.
+- **One Jira Fix Version per Production release**, named for the release, never for a microservice or a package: `ICDC <Month YYYY>` for a monthly release, `ICDC <Month YYYY> Patch` for an out-of-band release. The TPM creates it in Phase 0, leaves its dates empty (dates live on the Release Dashboard), and marks it *Released* when the Production deployment closes.
+- **Stamping**: every story, bug, and finding ticket whose code ships in the release gets that release's Fix Version when it enters a QA build. After the Release Candidate is cut, new `develop` work gets the *next* release's Fix Version; release-blocker fixes on the RC keep the current one. A ticket that slips is moved to the next release's Fix Version, never left on both.
+- **The Fix Version is the scope of the release notes.** There is no version merge: the scope is one Fix Version from the start.
+- **Microservice versions are not Jira versions.** Each service's version lives in its git tag, its Docker image, and `/version`; the deployment package's `versions.yaml` in `CBIIT/icdc-deployment` pins the exact version of every service, and the Deployment Package task records it on the Release Dashboard. Which service a ticket changed is shown by its pull request (one ticket, one pull request).
+- **The Deployment Package Number is not a Jira version either.** It is the Frontend version plus a package build counter, and it changes whenever DevOps rebuilds the package, even with no code change, so it identifies a deployment, not a release.
+- *Why one release-level Fix Version*: per-microservice Fix Versions meant four or five versions per release plus internal versions to merge, and tickets were regularly tagged to the wrong service or the wrong release. One release-level Fix Version can be created before work starts and gives the release notes a single query. Per-microservice Fix Versions already in Jira stay as history.
 
 ### Beta → Release Candidate → Gamma
 
@@ -120,7 +124,7 @@ Not every microservice bumps every release; the Release Dashboard records the ex
 | **File Service** | `CBIIT/bento-files` | File download service |
 | **Interop** | `CBIIT/bento-icdc-interoperation` | Node.js service; outbound Cancer Genomics Cloud (CGC) export |
 | **Data Retriever** | `CBIIT/crdc-icdc-data-retriever` | Python ETL on a Jenkins schedule; writes external-node data (IDC, TCIA) to OpenSearch |
-| **Deployments** | `CBIIT/icdc-deployments` | Deployment configurations (not a versioned microservice) |
+| **Deployments** | `CBIIT/icdc-deployment` | Deployment configurations and `versions.yaml`, which pins every microservice version in each Deployment Package (not a versioned microservice) |
 | **OpenSearch backup** | *(internal)* | Snapshot version when a restore is required; also the rollback point |
 
 **Where release notes live:** GitHub releases on **`CBIIT/bento-icdc-frontend`**, written from the [Release Notes Template](../templates/release-notes-template.md). The ICDC **News** page loads them from GitHub, so publishing the release also publishes it on the site.
@@ -177,7 +181,7 @@ One linear ladder, no skips: **Dev → QA → Stage → Prod** (`workflow.md`). 
 ## 🌿 Versioning & Branching (Gitflow)
 
 - **Feature work:** each ticket in its own branch off `develop`; its PR merges back, the ticket moves to *Ready for Review* (Tech Lead), and merges on approval.
-- **Build:** the Tech Lead reviews all *Ready for Review* issues, stamps the Fix Version, builds `develop` into a Docker image, deploys to QA, and moves issues to *Ready for QA Testing* (QA Lead).
+- **Build:** the Tech Lead reviews all *Ready for Review* issues, stamps the release's Fix Version, builds `develop` into a Docker image, deploys to QA, and moves issues to *Ready for QA Testing* (QA Lead).
 - **Release Candidate:** cut from `develop` after Feature Freeze; stabilized on the RC branch.
 - **Blocker fixes:** a new branch from the most recent released-version branch, named `x.y.(z+1)`; PR, new build, QA. **Resets the QA clock.**
 - **Close-out merge:** the RC is merged into **`main`** and tagged with the version, merged back into **`develop`**, and the release branch is deleted.
@@ -203,8 +207,9 @@ One linear ladder, no skips: **Dev → QA → Stage → Prod** (`workflow.md`). 
 
 ### Phase 0: Planning & Kickoff *(TPM)*
 1. Clone the month's Release Dashboard into the calendar-year folder; set the four milestone dates, with Production before the next Invicti Production scan and no later than the earliest open finding's SLA due date.
-2. Create the Deployment Package, Stage, and Production tasks from the release ticket spec, linked to the Invicti scan epic(s) the release remediates.
-3. Confirm scope with the Fix Version query (`release-notes-template.md`, Deriving the scope). *(MCP required.)*
+2. Create the release's Jira Fix Version, `ICDC <Month YYYY>`, with no dates.
+3. Create the Deployment Package, Stage, and Production tasks from the release ticket spec, linked to the Invicti scan epic(s) the release remediates.
+4. Confirm scope with the Fix Version query (`release-notes-template.md`, Deriving the scope).
 
 **Gate → Phase 1: FEATURE FREEZE.** All user stories complete; no new feature work.
 
@@ -264,8 +269,8 @@ One linear ladder, no skips: **Dev → QA → Stage → Prod** (`workflow.md`). 
 1. **Engineering:** create the **GitHub tag** for the release on `bento-icdc-frontend`.
 2. **Engineering:** merge the RC into **`main`** (tagged) **and `develop`**; **delete the release branch**.
 3. **Engineering:** OpenSearch restore **only if required**; verify data alignment.
-4. **TPM:** **merge the internal-release Fix Versions in Jira** into the final release version; write and publish the **release notes** on `bento-icdc-frontend` from the [Release Notes Template](../templates/release-notes-template.md), then confirm they render on the ICDC **News** page.
-5. **TPM:** run the release tagging hygiene check: every shipped ticket has a Fix Version, and every microservice version in the release notes has tagged tickets or is an infrastructure-only bump. **Verify before you count** (SKILL.md §7b).
+4. **TPM:** mark the release's **Fix Version Released** in Jira; write and publish the **release notes** on `bento-icdc-frontend` from the [Release Notes Template](../templates/release-notes-template.md), then confirm they render on the ICDC **News** page.
+5. **TPM:** run the release tagging hygiene check: every shipped ticket carries the release's Fix Version (and no other release's), and every microservice whose version changed in `versions.yaml` has at least one ticket in the Fix Version whose pull request is in that service's repository, or is an infrastructure-only bump. **Verify before you count** (SKILL.md §7b).
 6. **TPM:** update the remediated Invicti scan epic(s) with the release that carried each fix.
 7. **TPM:** courtesy email to the leadership list: **FNL:** Todd Pihl, John Otridge, Mark Jensen; **CBIIT:** Erika Kim, Tanja Davidsen, Esmeralda Casas-Silva.
 8. **TPM:** production announcement in the NCI CRDC `#tech_channel`.
@@ -300,8 +305,8 @@ A hotfix patches **production** outside the monthly cycle; a security finding wh
 
 - The Tech Lead creates a **`hotfix_branch`** from **`main`** (not `develop`).
 - **Version**: each microservice the hotfix changes takes the next patch number of the version **running in Production**: `x.y.z` becomes `x.y.(z+1)`. Microservices the hotfix does not change keep their versions. Example: with Frontend `4.3.0.528` and Backend `14.15.1.3` in Production, a hotfix to both ships as Frontend `4.3.1.<build>` and Backend `14.15.2.<build>`.
-- **Never ship a hotfix by bumping only the build number.** A build-only bump hides the change: the release notes title collides with the release it patched, and Jira cannot tell the hotfix apart from that release.
-- **Jira Fix Version**: create one for each new hotfix version and stamp the hotfix tickets with it, not with the next scheduled release's version.
+- **Never ship a hotfix by bumping only the build number.** A build-only bump hides the change: the release notes title collides with the release it patched, and `/version` cannot tell the hotfix apart from that release.
+- **Jira Fix Version**: the TPM creates one Fix Version for the patch release, `ICDC <Month YYYY> Patch` (add ` 2` for a second patch in the same month), and the hotfix tickets are stamped with it, not with the next monthly release's Fix Version.
 - On completion, merge into **both `main` and `develop`**; tag `main` with `x.y.(z+1)`. `develop` stays on its own minor line, so the merge does not change its version.
 - DevOps deploys up the ladder, fast-tracked, with QA smoke verification at each tier.
 - **Release notes**: a patch release gets its own GitHub release notes from the Release Notes Template (`../templates/release-notes-template.md`), titled `ICDC v.x.y.(z+1)`, published before the next monthly release's notes so the News page shows the newest release.
@@ -367,3 +372,4 @@ A hotfix patches **production** outside the monthly cycle; a security finding wh
 |---|---|---|
 | v1 (2026-10-23) | Ported from the CTDC Software Release Playbook (v10). Same gates (Feature Freeze, Code Freeze, Katalon regression on QA and Stage, Final Design QA), Gitflow, go/no-go, and close-out, confirmed by the TPM. ICDC differences: monthly Invicti-driven cadence with patch releases, ICDC roster and repos, no Auth service, `/version` checks, release notes on `bento-icdc-frontend` rendered on the News page, release tickets linked to Invicti scan epics. | Gina Kuffel |
 | v2 (2026-11-24) | Version rules added to Semantic Versioning (kept in lockstep with CTDC playbook v11): each monthly release opens the next minor line on `develop`; patch numbers on a released line are reserved for release-blocker fixes and hotfixes; every Production deployment changes at least the patch; unchanged microservices keep their version. Hot Fixes now covers per-microservice patch numbering, no build-only bumps, a Fix Version per hotfix version, and release notes for every patch release. Gitflow gains the next-cycle step. Prompted by the August 2026 hotfix shipping as `4.3.0.530` and `14.15.1.4`. | Gina Kuffel |
+| v3 (2026-11-24) | One Jira Fix Version per Production release (`ICDC <Month YYYY>`, `ICDC <Month YYYY> Patch`), created by the TPM in Phase 0 and marked Released at close-out; replaces per-microservice and per-build Fix Versions and the version merge. Microservice versions live in git tags, `/version`, and the deployment package's `versions.yaml`; the Deployment Package Number is not a Jira version. Phase 0, Gitflow, Phase 8 steps 4 and 5, and Hot Fixes updated; deployment repository name corrected to `CBIIT/icdc-deployment`. Kept in lockstep with CTDC playbook v12. | Gina Kuffel |

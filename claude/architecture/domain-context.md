@@ -15,7 +15,7 @@ The **Integrated Canine Data Commons (ICDC)** is part of the NCI's Cancer Resear
   - `bento-icdc-interoperation` — Node.js service. **As of Release 4.3.0.528, its active role is the outbound CGC export** (`storeManifest` GraphQL mutation → S3 upload → CloudFront pre-signed URL → Seven Bridges). The legacy `studiesByProgram` / `studyLinks` queries in this repo are now dead code after the FE cutover in ICDC-4022.
   - `icdc-dataloader`: Data ingestion pipeline. Home of `loader.py`, the Python loader the Prefect data loading pipeline runs to load ICDC study data from approved source files.
   - `icdc-model-tool` — Data model representations and build tools
-  - `icdc-deployments` — Deployment configurations
+  - `icdc-deployment` — Deployment configurations
   - `icdc-devops` — DevOps infrastructure
 - **Sister project:** Clinical and Translational Data Commons (CTDC) — same ecosystem, separate Jira project
 - **Jira project key:** `ICDC`

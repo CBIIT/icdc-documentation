@@ -6,7 +6,7 @@
 
 Release notes are the public record of what a release changed for ICDC users. They are read by researchers in the comparative oncology community, by federal leadership, and by the CRDC communications team, so they describe outcomes in plain language rather than tickets or code.
 
-Every line must be traceable to work that actually shipped. The scope comes from the release's Jira Fix Versions, and each claim is checked against the merged code, not only the ticket title: ticket summaries are often thin, and a claim nobody can trace back is a claim that may be wrong.
+Every line must be traceable to work that actually shipped. The scope comes from the release's Jira Fix Version (one per release), and each claim is checked against the merged code, not only the ticket title: ticket summaries are often thin, and a claim nobody can trace back is a claim that may be wrong.
 
 ---
 
@@ -23,15 +23,15 @@ The full release, with its section headings, stays readable on GitHub through th
 
 ## Deriving the scope
 
-1. Confirm the Deployment Package on the Release Dashboard (`ICDC Monthly Release <Month YYYY>.xlsx`): the version of every microservice in the release. These versions fill Build Details.
-2. Pull every shipped ticket with one JQL query across the release's Fix Versions, excluding test artifacts:
+1. Confirm the Deployment Package on the Release Dashboard (`ICDC Monthly Release <Month YYYY>.xlsx`). The version of every microservice comes from `versions.yaml` in `CBIIT/icdc-deployment` at the deployed package's tag; these versions fill Build Details.
+2. Pull every shipped ticket with one JQL query on the release's Fix Version, excluding test artifacts:
 
    ```
-   project = ICDC AND fixVersion in ("<FE version>", "<BE version>", "<Files version>", "<Interop version>", ...) AND issuetype not in ("Test", "Test Set", "Test Execution") ORDER BY key ASC
+   project = ICDC AND fixVersion = "ICDC <Month YYYY>" AND issuetype not in ("Test", "Test Set", "Test Execution") ORDER BY key ASC
    ```
 
 3. For each ticket, confirm what shipped against the merged pull requests on the release branch. When a ticket's description is empty or a pull request changed the scope, the code wins.
-4. Cross-check: a microservice version in Build Details with no tagged tickets is either an infrastructure-only bump (fine, no bullet) or a tagging gap to fix before publishing.
+4. Cross-check: a microservice whose version changed since the last Production package, but whose repository has no pull request from a ticket in the Fix Version, is either an infrastructure-only bump (fine, no bullet) or a tagging gap to fix before publishing. A merged pull request whose ticket lacks the Fix Version is a tagging gap too.
 5. Invicti remediations shipped in the release go under Security, described by the protection gained, never by CVE detail an attacker could use against an unpatched tier.
 6. List open bugs against features in this release; they become Known Limitations.
 
@@ -124,6 +124,7 @@ A Bug Fix that resolves an earlier release's Known Limitation says so: "This res
 
 * Every Build Details version matches the Release Dashboard and `/version` on Production.
 * Every bullet traces to a ticket in the Fix Version query and to merged code.
+* Every Build Details version matches `versions.yaml` at the deployed package's tag.
 * No empty sections, no placeholders, no Jira keys.
 * After publishing, open the ICDC **News** page and confirm the release shows its **Versions** and its full list of changes.
 
@@ -140,4 +141,5 @@ A Bug Fix that resolves an earlier release's Known Limitation says so: "This res
 
 ## Changelog
 
+- **v2 (2026-11-24)**: Scope is one release-level Fix Version (`ICDC <Month YYYY>` or `ICDC <Month YYYY> Patch`) instead of one per microservice; Build Details come from `versions.yaml` in `CBIIT/icdc-deployment` at the deployed package's tag; the cross-check compares changed microservice versions with the pull requests of tickets in the Fix Version. CTDC changed in lockstep (v2).
 - **v1 (2026-10-23)**: Ported from CTDC's Release Notes Template (v1, 2026-10-23). ICDC differences: published on `CBIIT/bento-icdc-frontend` and rendered on the ICDC News page; Build Details written without outer pipes and limited to the service names the News page parser recognizes (no Auth, adds Data Retriever); category named in Security, Bug Fix, and Known Limitation labels; `/version` check; News page render check after publishing.

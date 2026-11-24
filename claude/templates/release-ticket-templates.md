@@ -21,7 +21,7 @@ The release tickets are created by the TPM with their structure and links in pla
 | Item | Owner | Where it lives |
 |---|---|---|
 | Ticket structure, Release Dashboard link, issue links | TPM | Each release ticket (at creation) |
-| Fix Versions | Developers | Their own story, bug, and finding tickets, never the release tickets |
+| Release Fix Version (`ICDC <Month YYYY>`, `ICDC <Month YYYY> Patch`) | TPM creates it; developers apply it | Their own story, bug, and finding tickets, never the release tickets |
 | Microservice versions and Deployment Package Number | Tech lead, through the Deployment Package task | The Release Dashboard, never the tickets |
 | Service Now Cloud One Ticket Link | DevOps engineer | Each deployment task's Tracking table |
 | Deployment dates | TPM | The Release Dashboard, never the tickets |
@@ -56,7 +56,7 @@ h3. 📅 *Cadence*
 * *Patch release*: an out-of-band release with its own deployment tasks when a security finding's SLA due date falls before the next scheduled release.
 
 h3. 📦 *Release Scope*
-Each release's contents are its Jira Fix Versions (BE, FE, Interop, Files as applicable), applied by developers on their own tickets. This epic holds only the release tasks.
+Each release's contents are its one Jira Fix Version (ICDC <Month YYYY> or ICDC <Month YYYY> Patch), applied by developers on their own tickets. This epic holds only the release tasks.
 
 h3. 🗂️ *Release Dashboards*
 * *Location*: [ICDC <YYYY> Monthly Releases|<year folder URL>]
@@ -92,17 +92,17 @@ Identify the version of every microservice shipping in the <Month YYYY> monthly 
 * *Release Dashboard*: [ICDC Monthly Release <Month YYYY>|<Release Dashboard URL>]
 
 h3. 🚦 *Workflow*
-# Confirm the release's Fix Versions are complete for every microservice in the release.
-# Record the version of every microservice in the release (Frontend, Backend, File Service, Interop, Data Retriever) on the Release Dashboard.
+# Confirm every ticket in the release's Fix Version is closed or has been moved to the next release's Fix Version.
+# Record the version of every microservice in the release (Frontend, Backend, File Service, Interop, Data Retriever) on the Release Dashboard, as pinned in the package's versions.yaml.
 # Record the Deployment Package Number on the Release Dashboard.
 
 h3. ✅ *Definition of Done*
 * *Versions*: the version of every microservice in the release is recorded on the Release Dashboard.
-* *Fix Versions*: each recorded version matches that microservice's Fix Version for the release.
+* *Fix Version*: every ticket in the release's Fix Version is closed or moved to the next release.
 * *Deployment Package*: the Deployment Package Number is recorded on the Release Dashboard.
 ```
 
-Keep the microservice list in Workflow step 2 current: add or remove a service here when the release's Fix Version set changes.
+Keep the microservice list in Workflow step 2 current: add or remove a service here when the services in `versions.yaml` change.
 
 ---
 
@@ -159,11 +159,12 @@ h3. ✅ *Definition of Done*
 
 ## Creating each month's tasks
 
-1. Create the Deployment Package task, then the Stage and Production tasks, each with a placeholder body; then `PUT /rest/api/2/issue/<KEY>` each with the body above and labels. Leave Due Date empty.
-2. Set the epic link (`customfield_12350`) and Developer (`customfield_23650`) on each and confirm both with `GET /rest/api/2/issue/<KEY>`.
-3. Swap `<Month YYYY>` and `<Stage | Production>` in the summary and body, resolve the two `[Production only: ...]` phrases (keep the words on Production, delete them on Stage), and paste the month's Release Dashboard link. The Release Dashboard must always be linked; a release task without one is incomplete.
-4. Link the Deployment Package task "Blocks" the Stage task and "Blocks" the Production task; link both deployment tasks to each Invicti scan epic the release remediates ("Related To"); and link Stage "Blocks" Production.
-5. Open all three tickets in the Jira UI and confirm they render.
+1. Create the release's Jira Fix Version (`ICDC <Month YYYY>`, or `ICDC <Month YYYY> Patch` for a patch release) with no dates, if it does not exist yet.
+2. Create the Deployment Package task, then the Stage and Production tasks, each with a placeholder body; then `PUT /rest/api/2/issue/<KEY>` each with the body above and labels. Leave Due Date empty.
+3. Set the epic link (`customfield_12350`) and Developer (`customfield_23650`) on each and confirm both with `GET /rest/api/2/issue/<KEY>`.
+4. Swap `<Month YYYY>` and `<Stage | Production>` in the summary and body, resolve the two `[Production only: ...]` phrases (keep the words on Production, delete them on Stage), and paste the month's Release Dashboard link. The Release Dashboard must always be linked; a release task without one is incomplete.
+5. Link the Deployment Package task "Blocks" the Stage task and "Blocks" the Production task; link both deployment tasks to each Invicti scan epic the release remediates ("Related To"); and link Stage "Blocks" Production.
+6. Open all three tickets in the Jira UI and confirm they render.
 
 At the start of each fiscal year, create the new standing epic before the October tasks. In January, create the new calendar-year dashboards folder and update the epic's Release Dashboards link.
 
@@ -171,6 +172,7 @@ At the start of each fiscal year, create the new standing epic before the Octobe
 
 ## Changelog
 
+* *v1.7 (2026-11-24)*: One release-level Fix Version per release (`ICDC <Month YYYY>`, `ICDC <Month YYYY> Patch`) replaces per-microservice Fix Versions: ownership table, epic Release Scope, Deployment Package Workflow and Definition of Done, and a new first creation step (create the Fix Version, no dates). Microservice versions are recorded from the package's `versions.yaml`. CTDC changed in lockstep (v8.3).
 * *v1.6 (2026-11-02)*: Standing release epic gains a card line (line 1 of the body), matching CTDC.
 * *v1.5 (2026-10-22)*: Dates live on the Release Dashboard only: release tickets carry no Due Date and no date in their body, because deployment dates change and a copied date goes stale. The Invicti SLA rule for the Production date now applies to the date set on the Release Dashboard. Ownership table row renamed to "Deployment dates". CTDC changed in lockstep (v7).
 * *v1.4 (2026-10-22)*: Added the **Deployment Package task**: the Tech Lead identifies every microservice version and records the Deployment Package Number on the Release Dashboard; it blocks both deployment tasks. Canonical ICDC-4296 (October 2026). Ownership table and creation steps updated to match. Stated that tickets are created from this spec, not cloned. CTDC changed in lockstep (v6), and also dropped its Jira clone-source tickets so both projects use the same create-from-spec model.
