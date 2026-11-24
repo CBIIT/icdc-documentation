@@ -65,6 +65,16 @@ A **release-blocker fix** bumps the RC's **patch** number (the 3rd digit), not t
 - **Major (`x`)**: incompatible or breaking change.
 - **Minor (`y`)**: new, backward-compatible functionality.
 - **Patch (`z`)**: backward-compatible bug fix. Release-blocker fixes bump the patch.
+- **Build (the fourth number)**: the Jenkins build counter. It goes up on every build and never marks a release on its own.
+
+**Version rules for every microservice:**
+
+1. **Each monthly release opens the next minor line.** Right after a release ships, `develop` builds move to `x.(y+1).0`. Example: after `4.3.0` ships, the first `develop` build is `4.4.0.1`, and every later build moves only the build number (`4.4.0.2`, `4.4.0.3`, and so on). This holds even for a release that turns out to carry only fixes: SemVer allows a minor release to include fixes.
+2. **Patch numbers on a released line are reserved.** Development builds never use them. They belong only to release-blocker fixes on the Release Candidate and to hotfixes on Production.
+3. **Every Production deployment changes at least the patch number** of each microservice it changes. A build-number-only bump never goes to Production, because the build number cannot tell anyone that Production changed.
+4. **A microservice that a release does not change keeps its version.** It is still listed in the Deployment Package and in the release notes Build Details.
+
+*Why these rules exist*: in August 2026 the ICDC Frontend's `4.3.1` line was already in use by `develop` builds, so the Invicti security hotfix shipped as Frontend `4.3.0.530` and Backend `14.15.1.4`, build-number-only bumps. Under these rules `develop` would have been on `4.4.0`, and the hotfix would have shipped as Frontend `4.3.1` and Backend `14.15.2`.
 
 ---
 
@@ -171,6 +181,7 @@ One linear ladder, no skips: **Dev → QA → Stage → Prod** (`workflow.md`). 
 - **Release Candidate:** cut from `develop` after Feature Freeze; stabilized on the RC branch.
 - **Blocker fixes:** a new branch from the most recent released-version branch, named `x.y.(z+1)`; PR, new build, QA. **Resets the QA clock.**
 - **Close-out merge:** the RC is merged into **`main`** and tagged with the version, merged back into **`develop`**, and the release branch is deleted.
+- **Next cycle:** right after the close-out merge, `develop` moves to the next minor line, `x.(y+1).0` (see Semantic Versioning).
 - **Build naming:** `major.minor.patch.jenkins-build-number`.
 
 ---
@@ -288,8 +299,12 @@ One linear ladder, no skips: **Dev → QA → Stage → Prod** (`workflow.md`). 
 A hotfix patches **production** outside the monthly cycle; a security finding whose SLA due date falls before the next scheduled release is shipped this way as a **patch release**, with its own release tickets.
 
 - The Tech Lead creates a **`hotfix_branch`** from **`main`** (not `develop`).
-- On completion, merge into **both `main` and `develop`**; tag `main` with `x.y.(z+1)`.
+- **Version**: each microservice the hotfix changes takes the next patch number of the version **running in Production**: `x.y.z` becomes `x.y.(z+1)`. Microservices the hotfix does not change keep their versions. Example: with Frontend `4.3.0.528` and Backend `14.15.1.3` in Production, a hotfix to both ships as Frontend `4.3.1.<build>` and Backend `14.15.2.<build>`.
+- **Never ship a hotfix by bumping only the build number.** A build-only bump hides the change: the release notes title collides with the release it patched, and Jira cannot tell the hotfix apart from that release.
+- **Jira Fix Version**: create one for each new hotfix version and stamp the hotfix tickets with it, not with the next scheduled release's version.
+- On completion, merge into **both `main` and `develop`**; tag `main` with `x.y.(z+1)`. `develop` stays on its own minor line, so the merge does not change its version.
 - DevOps deploys up the ladder, fast-tracked, with QA smoke verification at each tier.
+- **Release notes**: a patch release gets its own GitHub release notes from the Release Notes Template (`../templates/release-notes-template.md`), titled `ICDC v.x.y.(z+1)`, published before the next monthly release's notes so the News page shows the newest release.
 - A hotfix is **not** a rollback: it rolls the fix *forward*. Use Rollback & Recovery only when a bad deploy must be reverted.
 
 ---
@@ -351,3 +366,4 @@ A hotfix patches **production** outside the monthly cycle; a security finding wh
 | Version | Change | Author |
 |---|---|---|
 | v1 (2026-10-23) | Ported from the CTDC Software Release Playbook (v10). Same gates (Feature Freeze, Code Freeze, Katalon regression on QA and Stage, Final Design QA), Gitflow, go/no-go, and close-out, confirmed by the TPM. ICDC differences: monthly Invicti-driven cadence with patch releases, ICDC roster and repos, no Auth service, `/version` checks, release notes on `bento-icdc-frontend` rendered on the News page, release tickets linked to Invicti scan epics. | Gina Kuffel |
+| v2 (2026-11-24) | Version rules added to Semantic Versioning (kept in lockstep with CTDC playbook v11): each monthly release opens the next minor line on `develop`; patch numbers on a released line are reserved for release-blocker fixes and hotfixes; every Production deployment changes at least the patch; unchanged microservices keep their version. Hot Fixes now covers per-microservice patch numbering, no build-only bumps, a Fix Version per hotfix version, and release notes for every patch release. Gitflow gains the next-cycle step. Prompted by the August 2026 hotfix shipping as `4.3.0.530` and `14.15.1.4`. | Gina Kuffel |
