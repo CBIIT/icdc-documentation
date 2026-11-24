@@ -40,9 +40,11 @@ The full release, with its section headings, stays readable on GitHub through th
 ## GitHub release fields
 
 * *Repository*: `CBIIT/bento-icdc-frontend`. Data model releases are published separately on `CBIIT/icdc-model-tool`, and the News page shows them as their own card.
-* *Release title*: `ICDC v.<major>.<minor>.<patch>`.
-* *Tag*: the Frontend gamma version, `<major>.<minor>.<patch>.<build>`.
-* *Target*: `main`, after Engineering has merged and tagged the release.
+* *Release title*: the release name, the same as its Jira Fix Version: `ICDC <Month YYYY>` for a monthly release, `ICDC <Month YYYY> Patch` for a patch release (`ICDC <Month YYYY> Patch 2` for a second patch in the same month).
+* *Tag*: a new tag created with the release, from the release name: `release-<yyyy>-<mm>`, `release-<yyyy>-<mm>-patch`, or `release-<yyyy>-<mm>-patch-2`. Example: `release-2026-12` for `ICDC December 2026`.
+* *Target*: the `main` commit that went to Production (the commit carrying the Frontend's gamma tag), after Engineering has merged and tagged the release.
+* *Why the release name, not a version number*: the release is the whole Deployment Package, not the Frontend. A release that does not change the Frontend has no new Frontend version to use as a title or tag, so naming the release after the Frontend collides with the release before it. The release name matches the Jira Fix Version and the Release Dashboard, and every microservice version stays in Build Details.
+* *Earlier releases* keep the titles and tags they were published with.
 
 ---
 
@@ -141,5 +143,6 @@ A Bug Fix that resolves an earlier release's Known Limitation says so: "This res
 
 ## Changelog
 
+- **v2.1 (2026-11-24)**: GitHub releases are titled and tagged by release name (`ICDC <Month YYYY>`, tag `release-<yyyy>-<mm>`; patch releases add `Patch` and `-patch`), matching the Jira Fix Version, instead of by Frontend version. Release notes stay on `CBIIT/bento-icdc-frontend`: the deployment repository is private, and the News page reads releases anonymously from the browser. CTDC changed in lockstep (v2.1).
 - **v2 (2026-11-24)**: Scope is one release-level Fix Version (`ICDC <Month YYYY>` or `ICDC <Month YYYY> Patch`) instead of one per microservice; Build Details come from `versions.yaml` in `CBIIT/icdc-deployment` at the deployed package's tag; the cross-check compares changed microservice versions with the pull requests of tickets in the Fix Version. CTDC changed in lockstep (v2).
 - **v1 (2026-10-23)**: Ported from CTDC's Release Notes Template (v1, 2026-10-23). ICDC differences: published on `CBIIT/bento-icdc-frontend` and rendered on the ICDC News page; Build Details written without outer pipes and limited to the service names the News page parser recognizes (no Auth, adds Data Retriever); category named in Security, Bug Fix, and Known Limitation labels; `/version` check; News page render check after publishing.

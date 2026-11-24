@@ -127,7 +127,7 @@ Not every microservice bumps every release; the Release Dashboard records the ex
 | **Deployments** | `CBIIT/icdc-deployment` | Deployment configurations and `versions.yaml`, which pins every microservice version in each Deployment Package (not a versioned microservice) |
 | **OpenSearch backup** | *(internal)* | Snapshot version when a restore is required; also the rollback point |
 
-**Where release notes live:** GitHub releases on **`CBIIT/bento-icdc-frontend`**, written from the [Release Notes Template](../templates/release-notes-template.md). The ICDC **News** page loads them from GitHub, so publishing the release also publishes it on the site.
+**Where release notes live:** GitHub releases on **`CBIIT/bento-icdc-frontend`**, titled and tagged by release name (`ICDC <Month YYYY>`, `release-<yyyy>-<mm>`), not by Frontend version. They stay in the Frontend repository because the ICDC News page reads releases anonymously from the visitor's browser, and `CBIIT/icdc-deployment` is private. Release notes are written from the [Release Notes Template](../templates/release-notes-template.md). The ICDC **News** page loads them from GitHub, so publishing the release also publishes it on the site.
 
 ---
 
@@ -305,11 +305,11 @@ A hotfix patches **production** outside the monthly cycle; a security finding wh
 
 - The Tech Lead creates a **`hotfix_branch`** from **`main`** (not `develop`).
 - **Version**: each microservice the hotfix changes takes the next patch number of the version **running in Production**: `x.y.z` becomes `x.y.(z+1)`. Microservices the hotfix does not change keep their versions. Example: with Frontend `4.3.0.528` and Backend `14.15.1.3` in Production, a hotfix to both ships as Frontend `4.3.1.<build>` and Backend `14.15.2.<build>`.
-- **Never ship a hotfix by bumping only the build number.** A build-only bump hides the change: the release notes title collides with the release it patched, and `/version` cannot tell the hotfix apart from that release.
+- **Never ship a hotfix by bumping only the build number.** A build-only bump hides the change: `/version` and the Build Details cannot tell the hotfix apart from the release it patched.
 - **Jira Fix Version**: the TPM creates one Fix Version for the patch release, `ICDC <Month YYYY> Patch` (add ` 2` for a second patch in the same month), and the hotfix tickets are stamped with it, not with the next monthly release's Fix Version.
 - On completion, merge into **both `main` and `develop`**; tag `main` with `x.y.(z+1)`. `develop` stays on its own minor line, so the merge does not change its version.
 - DevOps deploys up the ladder, fast-tracked, with QA smoke verification at each tier.
-- **Release notes**: a patch release gets its own GitHub release notes from the Release Notes Template (`../templates/release-notes-template.md`), titled `ICDC v.x.y.(z+1)`, published before the next monthly release's notes so the News page shows the newest release.
+- **Release notes**: a patch release gets its own GitHub release notes from the Release Notes Template (`../templates/release-notes-template.md`), titled `ICDC <Month YYYY> Patch` and tagged `release-<yyyy>-<mm>-patch`, published before the next monthly release's notes so the News page shows the newest release.
 - A hotfix is **not** a rollback: it rolls the fix *forward*. Use Rollback & Recovery only when a bad deploy must be reverted.
 
 ---
@@ -373,3 +373,4 @@ A hotfix patches **production** outside the monthly cycle; a security finding wh
 | v1 (2026-10-23) | Ported from the CTDC Software Release Playbook (v10). Same gates (Feature Freeze, Code Freeze, Katalon regression on QA and Stage, Final Design QA), Gitflow, go/no-go, and close-out, confirmed by the TPM. ICDC differences: monthly Invicti-driven cadence with patch releases, ICDC roster and repos, no Auth service, `/version` checks, release notes on `bento-icdc-frontend` rendered on the News page, release tickets linked to Invicti scan epics. | Gina Kuffel |
 | v2 (2026-11-24) | Version rules added to Semantic Versioning (kept in lockstep with CTDC playbook v11): each monthly release opens the next minor line on `develop`; patch numbers on a released line are reserved for release-blocker fixes and hotfixes; every Production deployment changes at least the patch; unchanged microservices keep their version. Hot Fixes now covers per-microservice patch numbering, no build-only bumps, a Fix Version per hotfix version, and release notes for every patch release. Gitflow gains the next-cycle step. Prompted by the August 2026 hotfix shipping as `4.3.0.530` and `14.15.1.4`. | Gina Kuffel |
 | v3 (2026-11-24) | One Jira Fix Version per Production release (`ICDC <Month YYYY>`, `ICDC <Month YYYY> Patch`), created by the TPM in Phase 0 and marked Released at close-out; replaces per-microservice and per-build Fix Versions and the version merge. Microservice versions live in git tags, `/version`, and the deployment package's `versions.yaml`; the Deployment Package Number is not a Jira version. Phase 0, Gitflow, Phase 8 steps 4 and 5, and Hot Fixes updated; deployment repository name corrected to `CBIIT/icdc-deployment`. Kept in lockstep with CTDC playbook v12. | Gina Kuffel |
+| v3.1 (2026-11-24) | GitHub release notes titled and tagged by release name (`ICDC <Month YYYY>`, `release-<yyyy>-<mm>`; patch releases `ICDC <Month YYYY> Patch`, `release-<yyyy>-<mm>-patch`) instead of by Frontend version; recorded why notes stay on `bento-icdc-frontend`. Kept in lockstep with CTDC playbook v12.1. | Gina Kuffel |
